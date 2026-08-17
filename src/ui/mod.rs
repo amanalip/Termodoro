@@ -412,6 +412,56 @@ mod tests {
 
         let _ = std::fs::remove_dir_all(temp_dir);
     }
+
+    #[test]
+    fn test_render_twenty_four_cycle_dots_timer_view() {
+        let (mut app, temp_dir) = create_test_app();
+        let backend = TestBackend::new(120, 30);
+        let mut terminal = Terminal::new(backend).unwrap();
+
+        app.config.long_break_interval = 24;
+        app.active_tab = ActiveTab::Timer;
+
+        // Cycle 1 of 24
+        app.timer.current_cycle = 1;
+        terminal.draw(|f| render(f, &app)).unwrap();
+
+        // Cycle 12 of 24
+        app.timer.current_cycle = 12;
+        terminal.draw(|f| render(f, &app)).unwrap();
+
+        // Cycle 24 of 24
+        app.timer.current_cycle = 24;
+        terminal.draw(|f| render(f, &app)).unwrap();
+
+        let _ = std::fs::remove_dir_all(temp_dir);
+    }
+
+    #[test]
+    fn test_render_varied_terminal_geometries_stress() {
+        let (mut app, temp_dir) = create_test_app();
+        app.tasks.add("Task 1".to_string(), 2);
+        app.stats.record(crate::timer::PomodoroPhase::Work, 25, None, None);
+
+        let geometries = [
+            (50, 18), (60, 20), (70, 22), (80, 24),
+            (90, 28), (100, 30), (120, 35), (140, 40),
+            (160, 45), (200, 50), (250, 60),
+        ];
+
+        for (w, h) in geometries {
+            let backend = TestBackend::new(w, h);
+            let mut terminal = Terminal::new(backend).unwrap();
+
+            for tab in [ActiveTab::Timer, ActiveTab::Tasks, ActiveTab::Stats, ActiveTab::Settings] {
+                app.active_tab = tab;
+                terminal.draw(|f| render(f, &app)).unwrap();
+            }
+        }
+
+        let _ = std::fs::remove_dir_all(temp_dir);
+    }
 }
+
 
 

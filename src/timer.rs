@@ -499,7 +499,61 @@ mod tests {
         timer.pause();
         assert_eq!(timer.status, TimerStatus::Paused);
     }
+
+    #[test]
+    fn test_twenty_four_cycle_advancement_and_long_break_trigger() {
+        let config = Config {
+            long_break_interval: 24,
+            ..Config::default()
+        };
+        let mut timer = PomodoroTimer::new(&config);
+
+        for cycle in 1..24 {
+            assert_eq!(timer.current_cycle, cycle);
+            assert_eq!(timer.phase, PomodoroPhase::Work);
+            // Work -> ShortBreak
+            let next = timer.advance_phase(&config);
+            assert_eq!(next, PomodoroPhase::ShortBreak);
+            assert_eq!(timer.current_cycle, cycle + 1);
+
+            // ShortBreak -> Work
+            let next = timer.advance_phase(&config);
+            assert_eq!(next, PomodoroPhase::Work);
+        }
+
+        // At cycle 24 Work
+        assert_eq!(timer.current_cycle, 24);
+        assert_eq!(timer.phase, PomodoroPhase::Work);
+        // Advancing from 24th Work phase triggers LongBreak and resets cycle to 1
+        let next = timer.advance_phase(&config);
+        assert_eq!(next, PomodoroPhase::LongBreak);
+        assert_eq!(timer.current_cycle, 1);
+        assert_eq!(timer.completed_pomodoros, 24);
+
+        // Advancing from LongBreak goes back to Work
+        let next = timer.advance_phase(&config);
+        assert_eq!(next, PomodoroPhase::Work);
+        assert_eq!(timer.current_cycle, 1);
+    }
+
+    #[test]
+    fn test_formatted_time_large_values() {
+        let config = Config::default();
+        let mut timer = PomodoroTimer::new(&config);
+        // 120 minutes
+        timer.time_remaining_secs = 120 * 60;
+        assert_eq!(timer.formatted_time(), (120, 0));
+
+        // 90 minutes 45 seconds
+        timer.time_remaining_secs = 90 * 60 + 45;
+        assert_eq!(timer.formatted_time(), (90, 45));
+
+        // 1 second
+        timer.time_remaining_secs = 1;
+        assert_eq!(timer.formatted_time(), (0, 1));
+    }
 }
+
 
 
 

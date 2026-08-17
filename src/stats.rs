@@ -569,7 +569,65 @@ mod tests {
         assert_eq!(stats.longest_streak_days(), 6);
         assert_eq!(stats.total_work_sessions(), 11);
     }
+
+    #[test]
+    fn test_stats_history_default_and_metadata() {
+        let mut stats = StatsHistory::default();
+        assert_eq!(stats.sessions.len(), 0);
+
+        stats.record(
+            PomodoroPhase::Work,
+            25,
+            Some("uuid-123".to_string()),
+            Some("Implement Feature".to_string()),
+        );
+
+        assert_eq!(stats.sessions.len(), 1);
+        assert_eq!(stats.sessions[0].task_id.as_deref(), Some("uuid-123"));
+        assert_eq!(stats.sessions[0].task_title.as_deref(), Some("Implement Feature"));
+        assert_eq!(stats.sessions[0].duration_mins, 25);
+    }
+
+    #[test]
+    fn test_streak_calculation_across_month_and_year_boundaries() {
+        let mut stats = StatsHistory::new();
+        // Construct sessions spanning Dec 30, Dec 31, Jan 1, Jan 2
+        let d1 = NaiveDate::from_ymd_opt(2025, 12, 30).unwrap();
+        let d2 = NaiveDate::from_ymd_opt(2025, 12, 31).unwrap();
+        let d3 = NaiveDate::from_ymd_opt(2026, 1, 1).unwrap();
+        let d4 = NaiveDate::from_ymd_opt(2026, 1, 2).unwrap();
+
+        for date in [d1, d2, d3, d4] {
+            let dt = date.and_hms_opt(12, 0, 0).unwrap().and_utc();
+            stats.sessions.push(CompletedSession {
+                timestamp: dt,
+                phase: PomodoroPhase::Work,
+                duration_mins: 25,
+                task_id: None,
+                task_title: None,
+            });
+        }
+
+        // Longest streak across year boundary should be 4 days
+        assert_eq!(stats.longest_streak_days(), 4);
+    }
+
+    #[test]
+    fn test_distribution_formatting_weekdays() {
+        let stats = StatsHistory::new();
+        let dist = stats.last_days_distribution(7);
+        assert_eq!(dist.len(), 7);
+        for (label, count) in &dist {
+            assert_eq!(*count, 0);
+            // Label format is "Ddd DD" e.g. "Mon 17"
+            let parts: Vec<&str> = label.split_whitespace().collect();
+            assert_eq!(parts.len(), 2);
+            assert!(["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].contains(&parts[0]));
+            assert!(parts[1].parse::<u32>().is_ok());
+        }
+    }
 }
+
 
 
 

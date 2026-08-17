@@ -641,8 +641,8 @@ impl App {
             }
             // Setting 3: Long break interval (sessions count)
             3 => {
-                // New value clamped between 1 and 12 sessions
-                let new_val = (self.config.long_break_interval as i32 + delta).clamp(1, 12) as u32;
+                // New value clamped between 1 and 24 sessions
+                let new_val = (self.config.long_break_interval as i32 + delta).clamp(1, 24) as u32;
                 // Update config
                 self.config.long_break_interval = new_val;
             }
@@ -1230,11 +1230,11 @@ mod tests {
 
         // Clamping for long break interval (row 3)
         app.settings_index = 3;
-        for _ in 0..20 {
+        for _ in 0..30 {
             app.on_key_event(make_key(KeyCode::Char('l')));
         }
-        assert_eq!(app.config.long_break_interval, 12);
-        for _ in 0..20 {
+        assert_eq!(app.config.long_break_interval, 24);
+        for _ in 0..30 {
             app.on_key_event(make_key(KeyCode::Char('h')));
         }
         assert_eq!(app.config.long_break_interval, 1);
@@ -1319,7 +1319,68 @@ mod tests {
 
         let _ = std::fs::remove_dir_all(temp_dir);
     }
+
+    #[test]
+    fn test_notify_phase_completed_sound_and_notification_flags() {
+        let (mut app, temp_dir) = create_test_app();
+        crate::audio::set_audio_muted_for_tests(true);
+
+        // Sound enabled = true, notifications = true
+        app.config.sound_enabled = true;
+        app.config.desktop_notifications = true;
+        app.notify_phase_completed(PomodoroPhase::Work, PomodoroPhase::ShortBreak);
+
+        // Sound enabled = false, notifications = false
+        app.config.sound_enabled = false;
+        app.config.desktop_notifications = false;
+        app.notify_phase_completed(PomodoroPhase::ShortBreak, PomodoroPhase::Work);
+
+        // Long break notification
+        app.config.sound_enabled = true;
+        app.notify_phase_completed(PomodoroPhase::LongBreak, PomodoroPhase::Work);
+
+        crate::audio::set_audio_muted_for_tests(false);
+        let _ = std::fs::remove_dir_all(temp_dir);
+    }
+
+    #[test]
+    fn test_twenty_four_cycle_app_e2e_workflow() {
+        let (mut app, temp_dir) = create_test_app();
+        crate::audio::set_audio_muted_for_tests(true);
+        app.config.long_break_interval = 24;
+        app.config.auto_start_breaks = true;
+        app.config.auto_start_work = true;
+
+        for cycle in 1..=24 {
+            assert_eq!(app.timer.current_cycle, cycle);
+            assert_eq!(app.timer.phase, PomodoroPhase::Work);
+            // Tick work to 0
+            app.timer.time_remaining_secs = 1;
+            app.timer.status = crate::timer::TimerStatus::Running;
+            app.on_tick();
+
+            if cycle < 24 {
+                assert_eq!(app.timer.phase, PomodoroPhase::ShortBreak);
+                assert_eq!(app.timer.current_cycle, cycle + 1);
+                // Tick short break to 0
+                app.timer.time_remaining_secs = 1;
+                app.timer.status = crate::timer::TimerStatus::Running;
+                app.on_tick();
+                assert_eq!(app.timer.phase, PomodoroPhase::Work);
+            } else {
+                // 24th cycle completes into LongBreak and resets cycle to 1
+                assert_eq!(app.timer.phase, PomodoroPhase::LongBreak);
+                assert_eq!(app.timer.current_cycle, 1);
+                assert_eq!(app.timer.completed_pomodoros, 24);
+                assert_eq!(app.stats.total_work_sessions(), 24);
+            }
+        }
+
+        crate::audio::set_audio_muted_for_tests(false);
+        let _ = std::fs::remove_dir_all(temp_dir);
+    }
 }
+
 
 
 

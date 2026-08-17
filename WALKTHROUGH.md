@@ -54,8 +54,9 @@ Termodoro divides the terminal window into three main regions:
 3. **Begin Focus Interval**: Press `Space`. The status changes to `[● RUNNING]`, and the 5-row digital clock begins counting down from `25:00`. The progress gauge fills smoothly as time elapses.
 4. **Pausing When Interrupted**: If you need to step away, press `Space` to pause the countdown (`[❚❚ PAUSED]`). Press `Space` again to resume.
 5. **Phase Completion**: When the timer reaches `00:00`:
+   - An acoustic audio chime sounds in the background (e.g. Zen Tibetan Singing Bowl bell for Focus completion, energizing two-tone alert for Short Break, or celebratory major triad for Long Break).
    - A native desktop notification pops up.
-   - An audio bell alert sounds.
+   - An ASCII terminal bell sounds as fallback.
    - The cycle counter advances.
    - The phase transitions to `☕ SHORT BREAK [■ READY] (5 mins)`.
    - The completed session is automatically recorded in your statistics.
@@ -68,7 +69,7 @@ Termodoro divides the terminal window into three main regions:
 2. **Create a Task**: Press `a` to open the task creation dialog:
    - Type your task description (e.g., `Write unit tests`).
    - Press `Tab` to move to the estimated Pomodoros field.
-   - Use `←` / `→` or `+` / `-` to set an estimated session count (e.g., `3 pomodoros`).
+   - Use `←` / `→`, `h` / `l`, `+` / `-`, or `_` / `=` to set an estimated session count (clamped 1 to 20).
    - Press `Enter` to save.
 3. **Set Active Focus Target**: Highlight the newly created task using `↑` / `k` or `↓` / `j` and press `t`. A `🎯 ACTIVE` badge appears next to the item.
 4. **Work on the Task**: Return to Tab 1 (`1` or `Tab`). Notice the active task card now displays `Active Focus: Write unit tests (🍅 0/3)`.
@@ -92,15 +93,15 @@ Termodoro divides the terminal window into three main regions:
 ### Scenario 4: Customizing Preferences and Color Themes
 
 1. **Open Settings View**: Press `4` to enter the **Settings** tab.
-2. **Customize Durations**:
-   - Highlight **Focus Duration** and press `→` or `+` to increase focus sessions (e.g., to 30 or 50 minutes).
-   - Highlight **Short Break** or **Long Break** to tailor your rest intervals.
-   - Highlight **Long Break Interval** to adjust how many work sessions occur before an extended break.
-3. **Toggle Automation**:
+2. **Customize Durations & Cycles**:
+   - Highlight **Focus Duration** and press `→`, `l`, `+`, or `=` to increase focus sessions (1 - 120 mins).
+   - Highlight **Short Break** (1 - 60 mins) or **Long Break** (1 - 90 mins) to tailor rest intervals.
+   - Highlight **Long Break Interval** to adjust how many work sessions occur before an extended break (**1 - 24 cycles**).
+3. **Toggle Automation & Alerts**:
    - Highlight **Auto-start Breaks** and press `Space` to enable automatic break starts.
-   - Highlight **Desktop Notifications** or **Sound / Bell Alert** to customize alerts.
+   - Highlight **Desktop Notifications** or **Sound / Bell Alert** to customize acoustic and visual alerts.
 4. **Change Color Themes**:
-   - Highlight **Color Theme** and press `←` or `→` to cycle between:
+   - Highlight **Color Theme** and press `←` / `h` or `→` / `l` to cycle between:
      - *Catppuccin Mocha*
      - *Nord*
      - *Gruvbox Dark*
@@ -116,20 +117,21 @@ Termodoro divides the terminal window into three main regions:
 If you are new to Rust or TUI development, here is how the code flows:
 
 1. **`src/main.rs`**: The program entry point. Initializes terminal raw mode, sets up the crash recovery panic hook, creates the `App` instance, and runs the 250ms tick event loop.
-2. **`src/app.rs`**: The central state container. Holds the timer, task manager, stats history, and active settings. Dispatches keystrokes to the active tab.
-3. **`src/timer.rs`**: The Pomodoro state machine. Tracks seconds remaining, handles state changes between Work and Breaks, and computes progress ratios.
-4. **`src/tasks.rs`**: Manages the task vector, active target ID, completion toggles, and filtered views.
-5. **`src/stats.rs`**: Records session history and runs the consecutive calendar day streak algorithm.
-6. **`src/theme.rs`**: Defines all color schemes using 24-bit RGB values.
-7. **`src/storage.rs`**: Handles saving and loading JSON state to the user's standard XDG data directory.
-8. **`src/ui/`**: Contains pure rendering functions that turn state into visual widgets on screen on every frame.
+2. **`src/app.rs`**: The central state container. Holds the timer, task manager, stats history, audio dispatcher, and active settings. Dispatches keystrokes to the active tab.
+3. **`src/timer.rs`**: The Pomodoro state machine. Tracks seconds remaining, handles state changes between Work and Breaks (up to 24 cycles), and computes progress ratios.
+4. **`src/audio.rs`**: In-memory 16-bit PCM RIFF WAV audio synthesizer and non-blocking background sound playback engine.
+5. **`src/tasks.rs`**: Manages the task vector, active target ID, completion toggles, and filtered views.
+6. **`src/stats.rs`**: Records session history and runs the consecutive calendar day streak algorithm.
+7. **`src/theme.rs`**: Defines all color schemes using 24-bit RGB values.
+8. **`src/storage.rs`**: Handles saving and loading JSON state to the user's standard XDG data directory.
+9. **`src/ui/`**: Contains pure rendering functions that turn state into visual widgets on screen on every frame.
 
 ---
 
 ## 4. Verification, Testing & Quality Assurance
 
-### Running the Test Suite
-Termodoro includes a suite of automated unit tests:
+### Running the Test Suite (91 Tests)
+Termodoro includes a comprehensive suite of **91 automated unit, integration, and UI rendering tests**:
 
 ```bash
 cargo test
@@ -137,15 +139,18 @@ cargo test
 
 ### Test Coverage Summary
 
-| Test Function | Location | Purpose |
+| Module | Location | Tested Aspects |
 | :--- | :--- | :--- |
-| `test_timer_initialization` | `src/timer.rs` | Verifies default duration values and initial Stopped state |
-| `test_phase_advancement` | `src/timer.rs` | Verifies cycle progression from Work through Short and Long breaks |
-| `test_progress_ratio` | `src/timer.rs` | Validates percentage calculation precision |
-| `test_pause_and_reset` | `src/timer.rs` | Validates toggle, pause, and reset state transitions |
-| `test_task_lifecycle` | `src/tasks.rs` | Tests adding tasks, effort increments, and completion status |
-| `test_task_filtering` | `src/tasks.rs` | Tests filtering tasks by All, Active, and Completed |
-| `test_stats_recording` | `src/stats.rs` | Tests session recording, daily aggregation, and streak calculation |
+| **Audio Engine** | `src/audio.rs` | 16-bit PCM WAV headers, amplitude bounds, zero-clipping headroom, custom sample rates |
+| **Timer Engine** | `src/timer.rs` | 24-cycle state machine progression, duration formatting up to 120m, pause & reset |
+| **Task Management** | `src/tasks.rs` | 100-task UUID uniqueness, position-based deletion, active task auto-reassignment |
+| **Analytics & Streaks** | `src/stats.rs` | Multi-day streaks across year/month boundaries, session metadata, weekday labels |
+| **Application State** | `src/app.rs` | 24-cycle E2E workflows, sound & desktop notification flags, status expiration, key routing |
+| **Persistence** | `src/storage.rs` | Atomic writes, corrupt JSON resilience, custom nested directory creation |
+| **Configuration** | `src/config.rs` | Default parameters and Serde JSON serialization |
+| **Themes** | `src/theme.rs` | All 6 palettes, color choices, and wrap-around navigation |
+| **Digital Typography** | `src/ui/digits.rs` | 5x3 block font rasterization for all digits, colon, and fallbacks |
+| **Terminal UI Rendering** | `src/ui/mod.rs` | Ratatui `TestBackend` rendering across 11 terminal geometries (50x18 to 250x60) |
 
 ---
 

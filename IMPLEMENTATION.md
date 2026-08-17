@@ -9,15 +9,16 @@ This document provides a comprehensive, beginner-friendly technical specificatio
 1. [Architectural Overview & Terminal Mechanics](#1-architectural-overview--terminal-mechanics)
 2. [Lifecycle & Event Loop Architecture](#2-lifecycle--event-loop-architecture)
 3. [Pomodoro Finite State Machine (FSM)](#3-pomodoro-finite-state-machine-fsm)
-4. [Task Manager & Focus Target Association](#4-task-manager--focus-target-association)
-5. [Analytics Engine & Streak Calculation Algorithm](#5-analytics-engine--streak-calculation-algorithm)
-6. [Design System, Theme Tokens & Palettes](#6-design-system-theme-tokens--palettes)
-7. [Storage Persistence & XDG Directory Resolution](#7-storage-persistence--xdg-directory-resolution)
-8. [Block Digit Rasterization Engine](#8-block-digit-rasterization-engine)
-9. [Error Handling & Terminal Recovery Hooks](#9-error-handling--terminal-recovery-hooks)
-10. [Automated Testing Strategy & Benchmarks](#10-automated-testing-strategy--benchmarks)
-11. [Glossary of Technical Terms](#11-glossary-of-technical-terms)
-12. [References & Citations](#12-references--citations)
+4. [Acoustic Audio Engine & Sound Synthesis](#4-acoustic-audio-engine--sound-synthesis)
+5. [Task Manager & Focus Target Association](#5-task-manager--focus-target-association)
+6. [Analytics Engine & Streak Calculation Algorithm](#6-analytics-engine--streak-calculation-algorithm)
+7. [Design System, Theme Tokens & Palettes](#7-design-system-theme-tokens--palettes)
+8. [Storage Persistence & XDG Directory Resolution](#8-storage-persistence--xdg-directory-resolution)
+9. [Block Digit Rasterization Engine](#9-block-digit-rasterization-engine)
+10. [Error Handling & Terminal Recovery Hooks](#10-error-handling--terminal-recovery-hooks)
+11. [Automated Testing Strategy & Benchmarks](#11-automated-testing-strategy--benchmarks)
+12. [Glossary of Technical Terms](#12-glossary-of-technical-terms)
+13. [References & Citations](#13-references--citations)
 
 ---
 
@@ -145,7 +146,35 @@ pub enum TimerStatus {
 
 ---
 
-## 4. Task Manager & Focus Target Association
+## 4. Acoustic Audio Engine & Sound Synthesis
+
+The audio subsystem (`src/audio.rs`) generates 100% self-contained in-memory audio alerts without relying on external media files, network downloads, or system ringtones:
+
+### Waveform Synthesis & Harmonic Formulas
+Audio is synthesized as 16-bit PCM mono samples at **44,100 Hz**:
+
+1. **Focus Completion (Zen Tibetan Singing Bowl)**:
+   - **Fundamental Frequency**: $f_0 = 528\text{ Hz}$ (harmonic clarity frequency).
+   - **Overtones**: First harmonic $1056\text{ Hz}$ (amplitude $0.4$), second harmonic $1584\text{ Hz}$ (amplitude $0.2$).
+   - **Envelope**: Exponential decay curve:
+     $$s(t) = \left(\sin(2\pi f_0 t) + 0.4\sin(2\pi \cdot 2f_0 t) + 0.2\sin(2\pi \cdot 3f_0 t)\right) \times e^{-1.8 t}$$
+
+2. **Short Break Completion (Ascending Two-Tone Alert)**:
+   - **Tone 1**: $D_5$ ($587.33\text{ Hz}$) for $0.25\text{s}$.
+   - **Tone 2**: $A_5$ ($880.00\text{ Hz}$) with smooth decay for $0.9\text{s}$.
+
+3. **Long Break Completion (Major Triad Chord)**:
+   - **Chords**: $C_5$ ($523.25\text{ Hz}$) $\rightarrow$ $E_5$ ($659.25\text{ Hz}$) $\rightarrow$ $G_5$ ($783.99\text{ Hz}$).
+
+### Playback Architecture & Headroom
+- Synthesizes raw bytes into a fully compliant **44-byte RIFF WAV format**.
+- Dispatches playback in a non-blocking background thread using `rodio`.
+- All generated samples are normalized to $[-28000, 28000]$ ensuring audible clarity with distortion-free headroom below the 16-bit limit ($\pm 32767$).
+- Muting atomic flags (`AUDIO_MUTED_FOR_TESTS`) prevent hardware contention during CI/CD test runs.
+
+---
+
+## 5. Task Manager & Focus Target Association
 
 The task management subsystem (`src/tasks.rs`) provides structured workload tracking.
 
@@ -169,7 +198,7 @@ pub struct Task {
 
 ---
 
-## 5. Analytics Engine & Streak Calculation Algorithm
+## 6. Analytics Engine & Streak Calculation Algorithm
 
 The analytics engine (`src/stats.rs`) stores an append-only log of completed sessions:
 
@@ -212,7 +241,7 @@ for &date in dates.iter().rev() {
 
 ---
 
-## 6. Design System, Theme Tokens & Palettes
+## 7. Design System, Theme Tokens & Palettes
 
 The theme system (`src/theme.rs`) defines a set of semantic color tokens mapped to concrete 24-bit RGB values:
 
@@ -248,7 +277,7 @@ pub struct Theme {
 
 ---
 
-## 7. Storage Persistence & XDG Directory Resolution
+## 8. Storage Persistence & XDG Directory Resolution
 
 Persistence is managed by `src/storage.rs`:
 
@@ -271,7 +300,7 @@ pub struct AppData {
 
 ---
 
-## 8. Block Digit Rasterization Engine
+## 9. Block Digit Rasterization Engine
 
 To display a large countdown clock across varying terminal dimensions, `src/ui/digits.rs` implements a 5-row by 4-column Unicode block rasterizer:
 
@@ -289,7 +318,7 @@ Row 4: ████
 
 ---
 
-## 9. Error Handling & Terminal Recovery Hooks
+## 10. Error Handling & Terminal Recovery Hooks
 
 A major challenge in terminal application development is ensuring the terminal is not left in an unusable state if a panic occurs.
 
@@ -314,26 +343,25 @@ If an unhandled error triggers a panic, this hook executes first:
 
 ---
 
-## 10. Automated Testing Strategy & Benchmarks
+## 11. Automated Testing Strategy & Benchmarks
 
-Termodoro includes comprehensive unit test suites:
+Termodoro includes **91 automated unit, integration, and UI rendering tests** across all 9 modules:
 
-- **`test_timer_initialization`**: Verifies initial phase, durations, and stopped status.
-- **`test_phase_advancement`**: Verifies full cycle progression (Work -> ShortBreak -> ... -> LongBreak) and cycle resetting.
-- **`test_progress_ratio`**: Validates percentage calculation precision.
-- **`test_pause_and_reset`**: Validates pause, toggle, and reset transitions.
-- **`test_task_lifecycle`**: Validates task creation, effort incrementing, and completion.
-- **`test_task_filtering`**: Validates `All`, `Active`, and `Completed` predicate filters.
-- **`test_stats_recording`**: Validates daily minutes calculation, session counts, and streak arithmetic.
+- **Audio Engine (`src/audio.rs`)**: Tests 16-bit PCM RIFF headers, signal clipping bounds ($>10000$, $<32000$), custom sample rates ($8\text{kHz}$ to $96\text{kHz}$), and atomic muting flags.
+- **Timer Engine (`src/timer.rs`)**: Tests 24-cycle state machine progression, large duration formatting (up to 120 mins), pause, toggle, and reset transitions.
+- **Task Management (`src/tasks.rs`)**: Tests UUID generation uniqueness across 100 tasks, boundary deletions, and active task auto-reassignment.
+- **Productivity Analytics (`src/stats.rs`)**: Tests multi-day streaks across year and month boundaries, session metadata retention, and weekday histogram labels.
+- **Application Workflows (`src/app.rs`)**: Tests full 24-cycle E2E workflows, sound & desktop notification flags, status message expiration, and keybinding dispatchers.
+- **UI Terminal Frame Rendering (`src/ui/mod.rs`)**: Uses Ratatui `TestBackend` to render all 4 tabs, modal dialogs, 24-dot cycle views, and 11 distinct terminal geometries from $50\times 18$ to $250\times 60$.
 
-Run the test suite with:
+Run the complete test suite with:
 ```bash
 cargo test
 ```
 
 ---
 
-## 11. Glossary of Technical Terms
+## 12. Glossary of Technical Terms
 
 - **Alternate Screen Buffer**: A secondary screen buffer in terminal emulators used by full-screen applications to prevent overwriting shell scrollback history.
 - **Atomic Write**: A file operation that completes fully or not at all, preventing partially written or corrupted files.
@@ -341,6 +369,7 @@ cargo test
 - **D-Bus**: An inter-process communication mechanism commonly used on Linux desktop environments for sending notifications.
 - **Immediate-Mode GUI**: A user interface architecture where the UI tree is re-evaluated and redrawn on every single frame rather than storing stateful UI component objects.
 - **Panic Hook**: A user-defined callback in Rust executed when a thread panics, allowing cleanup before process termination.
+- **PCM (Pulse-Code Modulation)**: A method used to digitally represent sampled analog audio signals.
 - **RAII (Resource Acquisition Is Initialization)**: A programming idiom where resource lifetime is tied to variable scope, guaranteeing cleanup on destruction.
 - **Raw Mode**: A low-level terminal mode disabling canonical line processing and character echoing.
 - **Timeboxing**: Allocating a fixed, predetermined timeframe to a specific task.
@@ -349,7 +378,7 @@ cargo test
 
 ---
 
-## 12. References & Citations
+## 13. References & Citations
 
 1. **Cirillo, Francesco (2006)**. *The Pomodoro Technique*. FC Garage GmbH. [https://francescocirillo.com/products/the-pomodoro-technique](https://francescocirillo.com/products/the-pomodoro-technique)
 2. **Ratatui Project Developers (2024)**. *Ratatui: A Rust library for cooking up terminal user interfaces*. [https://ratatui.rs/](https://ratatui.rs/)
@@ -357,3 +386,4 @@ cargo test
 4. **Rust Programming Language Documentation**. *Error Handling and Panic Management in Rust*. [https://doc.rust-lang.org/book/ch09-00-error-handling.html](https://doc.rust-lang.org/book/ch09-00-error-handling.html)
 5. **Freedesktop.org Standard Specifications**. *XDG Base Directory Specification (Version 0.8)*. [https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html](https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html)
 6. **IEEE / The Open Group (2018)**. *POSIX.1-2017: General Terminal Interface (termios)*. Standard for Information Technology. [https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/termios.h.html](https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/termios.h.html)
+

@@ -472,7 +472,64 @@ mod tests {
         assert_eq!(manager.tasks[0].pomodoros_estimated, 5);
         assert_eq!(manager.active_task().unwrap().title, unicode_title);
     }
+
+    #[test]
+    fn test_task_uuid_uniqueness_and_timestamps() {
+        let mut ids = std::collections::HashSet::new();
+        for i in 0..100 {
+            let task = Task::new(format!("Task {}", i), 1);
+            assert!(!ids.contains(&task.id));
+            ids.insert(task.id.clone());
+            let diff = Utc::now().signed_duration_since(task.created_at);
+            assert!(diff.num_seconds() >= 0 && diff.num_seconds() < 5);
+        }
+        assert_eq!(ids.len(), 100);
+    }
+
+    #[test]
+    fn test_task_deletion_at_different_positions() {
+        let mut manager = TaskManager::new();
+        manager.add("Task A".to_string(), 1);
+        manager.add("Task B".to_string(), 2);
+        manager.add("Task C".to_string(), 3);
+        manager.add("Task D".to_string(), 4);
+
+        // Delete middle element (Task B at index 1)
+        manager.selected_index = 1;
+        manager.remove_selected();
+        assert_eq!(manager.tasks.len(), 3);
+        assert_eq!(manager.tasks[0].title, "Task A");
+        assert_eq!(manager.tasks[1].title, "Task C");
+        assert_eq!(manager.tasks[2].title, "Task D");
+
+        // Delete first element (Task A at index 0, which is active target)
+        manager.selected_index = 0;
+        manager.remove_selected();
+        assert_eq!(manager.tasks.len(), 2);
+        assert_eq!(manager.tasks[0].title, "Task C");
+        assert_eq!(manager.active_task().unwrap().title, "Task C");
+
+        // Delete last element (Task D at index 1)
+        manager.selected_index = 1;
+        manager.remove_selected();
+        assert_eq!(manager.tasks.len(), 1);
+        assert_eq!(manager.tasks[0].title, "Task C");
+        assert_eq!(manager.selected_index, 0);
+    }
+
+    #[test]
+    fn test_task_manager_default_and_invalid_active_lookup() {
+        let mut manager = TaskManager::default();
+        assert_eq!(manager.tasks.len(), 0);
+        assert_eq!(manager.active_task_id, None);
+        assert_eq!(manager.active_task(), None);
+
+        // Invalid active ID that doesn't exist in task list
+        manager.active_task_id = Some("nonexistent-uuid".to_string());
+        assert_eq!(manager.active_task(), None);
+    }
 }
+
 
 
 

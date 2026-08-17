@@ -44,7 +44,7 @@ pub fn render(f: &mut Frame, app: &App, theme: &Theme, area: Rect) {
         // Long break duration in minutes
         ("Long Break", format!("{} mins", app.config.long_break_mins), "Duration of long break after completing a full cycle (1 - 90 mins)"),
         // Number of focus sessions before long break
-        ("Long Break Interval", format!("{} sessions", app.config.long_break_interval), "Number of focus sessions before a long break (1 - 12)"),
+        ("Long Break Interval", format!("{} sessions", app.config.long_break_interval), "Number of focus sessions before a long break (1 - 24)"),
         // Auto-start breaks toggle
         ("Auto-start Breaks", if app.config.auto_start_breaks { "Enabled" } else { "Disabled" }.to_string(), "Automatically start countdown when entering a break"),
         // Auto-start work sessions toggle

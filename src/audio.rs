@@ -219,4 +219,74 @@ mod tests {
         play_phase_sound(PomodoroPhase::LongBreak);
         set_audio_muted_for_tests(false);
     }
+
+    #[test]
+    fn test_wav_sample_bounds_no_clipping_work_chime() {
+        let wav = generate_work_complete_chime();
+        // Skip 44-byte RIFF header and inspect 16-bit PCM samples
+        let sample_bytes = &wav[44..];
+        assert_eq!(sample_bytes.len() % 2, 0);
+
+        let mut max_abs: i16 = 0;
+        for chunk in sample_bytes.chunks_exact(2) {
+            let sample = i16::from_le_bytes([chunk[0], chunk[1]]);
+            let abs = sample.saturating_abs();
+            if abs > max_abs {
+                max_abs = abs;
+            }
+        }
+        // Verify audio has audible signal (not silent) and has headroom (no hard clipping)
+        assert!(max_abs > 10000, "Signal too quiet");
+        assert!(max_abs < 32000, "Signal clipped");
+    }
+
+    #[test]
+    fn test_wav_sample_bounds_no_clipping_break_chimes() {
+        for (name, wav) in [("break", generate_break_complete_chime()), ("long_break", generate_long_break_chime())] {
+            let sample_bytes = &wav[44..];
+            let mut max_abs: i16 = 0;
+            for chunk in sample_bytes.chunks_exact(2) {
+                let sample = i16::from_le_bytes([chunk[0], chunk[1]]);
+                let abs = sample.saturating_abs();
+                if abs > max_abs {
+                    max_abs = abs;
+                }
+            }
+            assert!(max_abs > 10000, "{} signal too quiet", name);
+            assert!(max_abs < 32000, "{} signal clipped", name);
+        }
+    }
+
+    #[test]
+    fn test_create_riff_wav_empty_samples() {
+        let empty_samples: [i16; 0] = [];
+        let wav = create_riff_wav_pcm16(&empty_samples, 44100);
+        assert_eq!(wav.len(), 44);
+        assert_eq!(&wav[0..4], b"RIFF");
+        assert_eq!(&wav[36..40], b"data");
+        // Subchunk2Size must be 0
+        let data_size = u32::from_le_bytes([wav[40], wav[41], wav[42], wav[43]]);
+        assert_eq!(data_size, 0);
+    }
+
+    #[test]
+    fn test_create_riff_wav_custom_sample_rates() {
+        let samples = vec![100i16, -100, 200, -200];
+        for rate in [8000, 22050, 44100, 48000, 96000] {
+            let wav = create_riff_wav_pcm16(&samples, rate);
+            let sample_rate_in_header = u32::from_le_bytes([wav[24], wav[25], wav[26], wav[27]]);
+            assert_eq!(sample_rate_in_header, rate);
+            let byte_rate = u32::from_le_bytes([wav[28], wav[29], wav[30], wav[31]]);
+            assert_eq!(byte_rate, rate * 2);
+        }
+    }
+
+    #[test]
+    fn test_audio_mute_flag_concurrency() {
+        set_audio_muted_for_tests(true);
+        assert!(AUDIO_MUTED_FOR_TESTS.load(Ordering::SeqCst));
+        set_audio_muted_for_tests(false);
+        assert!(!AUDIO_MUTED_FOR_TESTS.load(Ordering::SeqCst));
+    }
 }
+

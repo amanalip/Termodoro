@@ -55,13 +55,13 @@ Termodoro runs natively in your terminal. It uses negligible memory (less than 1
 
 ## 3. Key Features Overview
 
-- **Customizable Interval Engine**: Configure focus sessions, short breaks, and long breaks to match your personal working rhythm (such as 50/10 ultradian rhythms or classic 25/5 intervals).
+- **Customizable Interval Engine**: Configure focus sessions, short breaks, and long breaks to match your personal working rhythm (such as 50/10 ultradian rhythms or classic 25/5 intervals), supporting up to **24 cycles** per long break interval.
 - **Large Digital Clock**: High-visibility 5-row ASCII block font displaying the remaining time clearly from across the room.
 - **Smooth Visual Gauge Bar**: Real-time progress bar rendering elapsed percentage for the active interval.
 - **Full Task Lifecycle Management**: Create tasks, set estimated Pomodoro counts, mark items complete, and bind a target task to log effort automatically.
 - **Analytics Dashboard & Streak Tracker**: Daily focus summaries, consecutive active calendar day streaks, 7-day visual bar charts, and a historical session log.
 - **Six Built-in Color Themes**: Modern palettes including Catppuccin Mocha, Nord, Gruvbox Dark, Tokyo Night, Dracula, and Solarized Dark.
-- **Native Desktop & Sound Notifications**: Cross-platform desktop popups using OS notification services paired with an audio bell alert.
+- **Acoustic Chimes & Native Notifications**: Pure in-memory synthesized audio chimes (Zen Tibetan singing bowl, two-tone alert, and major triad chord) paired with native desktop notifications and ASCII terminal bell fallback.
 - **Automatic State Persistence**: Automatically saves your tasks, preferences, and session history according to standard XDG data directory guidelines.
 
 ---
@@ -77,10 +77,12 @@ Termodoro/
 ├── README.md              # Main user manual and project overview
 ├── IMPLEMENTATION.md      # In-depth engineering specification and algorithms
 ├── WALKTHROUGH.md         # Operational workflows, code tour, and test benchmarks
+├── test_report.md         # Comprehensive 91-test QA audit & test suite report
 └── src/
     ├── main.rs            # Terminal runtime initialization, event loop, panic hook
     ├── app.rs             # Central application state, keyboard event dispatcher
     ├── timer.rs           # Pomodoro finite state machine, tick calculation logic
+    ├── audio.rs           # Pure 16-bit PCM RIFF WAV synthesis and sound playback
     ├── tasks.rs           # Task model, UUID assignment, filter predicates
     ├── stats.rs           # Data aggregation, streak calculation algorithms
     ├── config.rs          # User preference schema and default parameters
@@ -284,20 +286,21 @@ The Settings view allows you to customize durations, toggles, and visual appeara
 │ ▶ Focus Duration          25 mins            Length of a standard work session│
 │   Short Break             5 mins             Duration of short breaks       │
 │   Long Break              15 mins            Duration of long breaks        │
-│   Long Break Interval     4 sessions         Work sessions before long break│
+│   Long Break Interval     4 sessions         Work sessions before break (1-24)│
 │   Auto-start Breaks       Disabled           Automatically start break timer│
 │   Auto-start Work         Disabled           Automatically start work timer │
 │   Desktop Notifications   Enabled            Send native OS notification    │
-│   Sound / Bell Alert      Enabled            Ring terminal audio bell       │
+│   Sound / Bell Alert      Enabled            Ring audio chimes / bell       │
 │   Color Theme             Catppuccin Mocha   Active TUI color scheme        │
 ├─────────────────────────────────────────────────────────────────────────────┤
-│ [↑/↓] Select Setting   [← / →] or [+/-] Adjust Value / Theme   [Space] Toggle │
+│ [↑/↓] or [j/k] Select   [←/→], [h/l], [+/-] or [_/=] Adjust   [Space] Toggle │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
 #### Controls in Settings View
 - `↑` / `k` and `↓` / `j`: Select configuration option.
-- `←` / `h` and `→` / `l` or `+` / `-`: Increase or decrease numerical values, or cycle through color themes.
+- `←` / `h` or `-` / `_`: Decrease numerical values, or cycle backwards through color themes.
+- `→` / `l` or `+` / `=`: Increase numerical values, or cycle forwards through color themes.
 - `Space` or `Enter`: Toggle boolean flags (Enabled / Disabled).
 
 ---
@@ -361,8 +364,8 @@ Termodoro uses standard XDG base directory specifications for local data persist
 - **Solution**: Set the environment variable `COLORTERM=truecolor` in your shell configuration (`export COLORTERM=truecolor`). Most modern terminals (Alacritty, Kitty, WezTerm, iTerm2) enable this by default.
 
 ### 2. The audio bell does not make any sound.
-- **Cause**: Terminal bell notifications might be muted in your terminal emulator or desktop environment settings.
-- **Solution**: Check your terminal preferences (e.g., Alacritty `bell` configuration or GNOME Terminal sound settings) to ensure audio alerts are enabled.
+- **Cause**: Audio output stream could not be initialized or hardware audio device is muted.
+- **Solution**: Check your system volume, verify that `Sound / Bell Alert` is enabled in Settings (Tab 4), and ensure your terminal emulator or desktop environment allows sound output.
 
 ### 3. Desktop notifications are not appearing on Linux.
 - **Cause**: A desktop notification daemon (such as `dunst`, `mako`, `swaync`, or `xfce4-notifyd`) may not be running.
@@ -376,7 +379,7 @@ Termodoro uses standard XDG base directory specifications for local data persist
 
 ## 9. Development, Testing & Contribution
 
-### Running Automated Unit Tests
+### Running Automated Unit & Integration Tests (91 Tests)
 ```bash
 cargo test
 ```
