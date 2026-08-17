@@ -410,16 +410,16 @@ impl App {
             },
             // Key handling when focused on Estimated Pomodoros (field 1)
             _ if self.task_modal_focus == 1 => match key.code {
-                // Right arrow, '+', or 'l' increments estimated pomodoros
-                KeyCode::Right | KeyCode::Char('+') | KeyCode::Char('l') => {
+                // Right arrow, '+', '=', or 'l' increments estimated pomodoros
+                KeyCode::Right | KeyCode::Char('+') | KeyCode::Char('=') | KeyCode::Char('l') => {
                     // Maximum limit 20 pomodoros
                     if self.task_input_estimated < 20 {
                         // Increment
                         self.task_input_estimated += 1;
                     }
                 }
-                // Left arrow, '-', or 'h' decrements estimated pomodoros
-                KeyCode::Left | KeyCode::Char('-') | KeyCode::Char('h') => {
+                // Left arrow, '-', '_', or 'h' decrements estimated pomodoros
+                KeyCode::Left | KeyCode::Char('-') | KeyCode::Char('_') | KeyCode::Char('h') => {
                     // Minimum limit 1 pomodoro
                     if self.task_input_estimated > 1 {
                         // Decrement
@@ -582,13 +582,13 @@ impl App {
                     self.settings_index = 8;
                 }
             }
-            // Right arrow, '+', or 'l' increments setting value
-            KeyCode::Right | KeyCode::Char('+') | KeyCode::Char('l') => {
+            // Right arrow, '+', '=', or 'l' increments setting value
+            KeyCode::Right | KeyCode::Char('+') | KeyCode::Char('=') | KeyCode::Char('l') => {
                 // Adjust setting positive
                 self.adjust_setting(1);
             }
-            // Left arrow, '-', or 'h' decrements setting value
-            KeyCode::Left | KeyCode::Char('-') | KeyCode::Char('h') => {
+            // Left arrow, '-', '_', or 'h' decrements setting value
+            KeyCode::Left | KeyCode::Char('-') | KeyCode::Char('_') | KeyCode::Char('h') => {
                 // Adjust setting negative
                 self.adjust_setting(-1);
             }
@@ -1193,6 +1193,15 @@ mod tests {
         assert_eq!(app.config.work_duration_mins, 25);
         assert_eq!(app.timer.time_remaining_secs, 25 * 60);
 
+        // Adjust setting with '=' (+) and '_' (-)
+        app.on_key_event(make_key(KeyCode::Char('=')));
+        assert_eq!(app.config.work_duration_mins, 26);
+        assert_eq!(app.timer.time_remaining_secs, 26 * 60);
+
+        app.on_key_event(make_key(KeyCode::Char('_')));
+        assert_eq!(app.config.work_duration_mins, 25);
+        assert_eq!(app.timer.time_remaining_secs, 25 * 60);
+
         // When timer is running, changing work duration does not reset countdown
         app.timer.status = crate::timer::TimerStatus::Running;
         app.timer.time_remaining_secs = 500;
@@ -1296,9 +1305,17 @@ mod tests {
         }
         assert_eq!(app.task_input_estimated, 1);
 
+        // Test '_' to decrement and '=' to increment
+        app.task_input_estimated = 3;
+        app.on_key_event(make_key(KeyCode::Char('_')));
+        assert_eq!(app.task_input_estimated, 2);
+
+        app.on_key_event(make_key(KeyCode::Char('=')));
+        assert_eq!(app.task_input_estimated, 3);
+
         // Digit '0' should not change estimated to 0
         app.on_key_event(make_key(KeyCode::Char('0')));
-        assert_eq!(app.task_input_estimated, 1);
+        assert_eq!(app.task_input_estimated, 3);
 
         let _ = std::fs::remove_dir_all(temp_dir);
     }
