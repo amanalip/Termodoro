@@ -198,3 +198,42 @@ fn char_pattern(ch: char) -> [&'static str; 5] {
         ],
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_render_big_time_structure() {
+        let lines = render_big_time(25, 0);
+        assert_eq!(lines.len(), 5);
+        // All 5 rows should have the exact same character length
+        let len0 = lines[0].chars().count();
+        assert!(len0 > 0);
+        for line in &lines {
+            assert_eq!(line.chars().count(), len0);
+        }
+    }
+
+    #[test]
+    fn test_render_big_time_various_values() {
+        let cases = [(0, 0), (5, 9), (25, 30), (99, 59)];
+        for (m, s) in cases {
+            let lines = render_big_time(m, s);
+            assert_eq!(lines.len(), 5);
+            for row in lines {
+                assert!(!row.is_empty());
+            }
+        }
+    }
+
+    #[test]
+    fn test_char_pattern_all_valid_chars() {
+        let chars = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ':', '?'];
+        for c in chars {
+            let pattern = char_pattern(c);
+            assert_eq!(pattern.len(), 5);
+        }
+    }
+}
+

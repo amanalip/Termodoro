@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 // Represents an individual user task item with title and pomodoro statistics
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Task {
     // Unique identifier for the task
     pub id: String,
@@ -64,7 +64,7 @@ impl Default for TaskFilter {
 }
 
 // Manager structure managing the task list, selections, and active target
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Default)]
 pub struct TaskManager {
     // List of all stored tasks
     pub tasks: Vec<Task>,
@@ -302,5 +302,129 @@ mod tests {
         manager.filter = TaskFilter::Completed;
         assert_eq!(manager.filtered_indices().len(), 1);
     }
+
+    #[test]
+    fn test_empty_and_whitespace_title_rejected() {
+        let mut manager = TaskManager::new();
+        manager.add("".to_string(), 1);
+        manager.add("    ".to_string(), 2);
+        assert_eq!(manager.tasks.len(), 0);
+        assert_eq!(manager.active_task_id, None);
+    }
+
+    #[test]
+    fn test_remove_selected_and_active_reassignment() {
+        let mut manager = TaskManager::new();
+        manager.add("Task 1".to_string(), 1);
+        manager.add("Task 2".to_string(), 2);
+        manager.add("Task 3".to_string(), 3);
+
+        // Task 1 is active
+        assert_eq!(manager.active_task_id, Some(manager.tasks[0].id.clone()));
+
+        // Delete selected (Task 3 at index 2 initially)
+        manager.selected_index = 2;
+        manager.remove_selected();
+        assert_eq!(manager.tasks.len(), 2);
+        assert_eq!(manager.selected_index, 1);
+
+        // Now select Task 1 and delete it (it's the active task)
+        manager.selected_index = 0;
+        manager.remove_selected();
+        assert_eq!(manager.tasks.len(), 1);
+        // Active task must now be Task 2
+        assert_eq!(manager.active_task_id, Some(manager.tasks[0].id.clone()));
+        assert_eq!(manager.tasks[0].title, "Task 2");
+
+        // Delete last remaining task
+        manager.selected_index = 0;
+        manager.remove_selected();
+        assert_eq!(manager.tasks.len(), 0);
+        assert_eq!(manager.active_task_id, None);
+
+        // Calling remove_selected on empty list does not panic
+        manager.remove_selected();
+        assert_eq!(manager.tasks.len(), 0);
+    }
+
+    #[test]
+    fn test_toggle_selected_active_task_reassignment() {
+        let mut manager = TaskManager::new();
+        manager.add("Task 1".to_string(), 1);
+        manager.add("Task 2".to_string(), 2);
+
+        // Initially Task 1 is active
+        assert_eq!(manager.active_task().unwrap().title, "Task 1");
+
+        // Mark Task 1 as completed
+        manager.selected_index = 0;
+        manager.toggle_selected();
+        assert!(manager.tasks[0].completed);
+
+        // Active task automatically switches to Task 2
+        assert_eq!(manager.active_task().unwrap().title, "Task 2");
+
+        // Mark Task 2 as completed
+        manager.selected_index = 1;
+        manager.toggle_selected();
+        assert!(manager.tasks[1].completed);
+
+        // No more incomplete tasks, active_task_id becomes None
+        assert_eq!(manager.active_task_id, None);
+
+        // Uncomplete Task 1
+        manager.selected_index = 0;
+        manager.toggle_selected();
+        assert!(!manager.tasks[0].completed);
+    }
+
+    #[test]
+    fn test_set_selected_active() {
+        let mut manager = TaskManager::new();
+        manager.add("Task 1".to_string(), 1);
+        manager.add("Task 2".to_string(), 2);
+
+        // Select Task 2
+        manager.selected_index = 1;
+        manager.set_selected_active();
+        assert_eq!(manager.active_task().unwrap().title, "Task 2");
+    }
+
+    #[test]
+    fn test_navigation_next_previous_wrapping() {
+        let mut manager = TaskManager::new();
+        // Empty list navigation does nothing
+        manager.next();
+        assert_eq!(manager.selected_index, 0);
+        manager.previous();
+        assert_eq!(manager.selected_index, 0);
+
+        manager.add("Task 1".to_string(), 1);
+        manager.add("Task 2".to_string(), 2);
+        manager.add("Task 3".to_string(), 3);
+
+        manager.selected_index = 0;
+        manager.next();
+        assert_eq!(manager.selected_index, 1);
+        manager.next();
+        assert_eq!(manager.selected_index, 2);
+        // Wraps to 0
+        manager.next();
+        assert_eq!(manager.selected_index, 0);
+
+        // Wraps backwards to 2
+        manager.previous();
+        assert_eq!(manager.selected_index, 2);
+        manager.previous();
+        assert_eq!(manager.selected_index, 1);
+    }
+
+    #[test]
+    fn test_increment_active_spent_no_active_task() {
+        let mut manager = TaskManager::new();
+        manager.increment_active_spent(); // should not panic
+        assert_eq!(manager.tasks.len(), 0);
+    }
 }
+
 

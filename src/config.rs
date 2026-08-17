@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use crate::theme::ThemeChoice;
 
 // Configuration structure representing all user-customizable preferences
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Config {
     // Duration in minutes for standard work focus sessions (default: 25)
     pub work_duration_mins: u32,
@@ -53,3 +53,42 @@ impl Default for Config {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_default_config_values() {
+        let config = Config::default();
+        assert_eq!(config.work_duration_mins, 25);
+        assert_eq!(config.short_break_mins, 5);
+        assert_eq!(config.long_break_mins, 15);
+        assert_eq!(config.long_break_interval, 4);
+        assert!(!config.auto_start_breaks);
+        assert!(!config.auto_start_work);
+        assert!(config.sound_enabled);
+        assert!(config.desktop_notifications);
+        assert_eq!(config.theme, ThemeChoice::CatppuccinMocha);
+    }
+
+    #[test]
+    fn test_config_serde_roundtrip() {
+        let config = Config {
+            work_duration_mins: 50,
+            short_break_mins: 10,
+            long_break_mins: 30,
+            long_break_interval: 2,
+            auto_start_breaks: true,
+            auto_start_work: true,
+            sound_enabled: false,
+            desktop_notifications: false,
+            theme: ThemeChoice::Nord,
+        };
+
+        let serialized = serde_json::to_string(&config).expect("Serialization failed");
+        let deserialized: Config = serde_json::from_str(&serialized).expect("Deserialization failed");
+        assert_eq!(config, deserialized);
+    }
+}
+

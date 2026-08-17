@@ -8,7 +8,7 @@ use std::collections::BTreeMap;
 use crate::timer::PomodoroPhase;
 
 // Represents an individual completed timer session entry recorded in historical stats
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct CompletedSession {
     // Exact UTC timestamp when the session finished
     pub timestamp: DateTime<Utc>,
@@ -23,7 +23,7 @@ pub struct CompletedSession {
 }
 
 // Storage structure for all historical session records and aggregated productivity analytics
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Default)]
 pub struct StatsHistory {
     // Ordered log of all completed sessions
     pub sessions: Vec<CompletedSession>,
@@ -313,5 +313,135 @@ mod tests {
         // Verify current streak is 1 day
         assert_eq!(stats.current_streak_days(), 1);
     }
+
+    #[test]
+    fn test_empty_stats_streak() {
+        let stats = StatsHistory::new();
+        assert_eq!(stats.current_streak_days(), 0);
+        assert_eq!(stats.longest_streak_days(), 0);
+        assert_eq!(stats.today_work_sessions(), 0);
+        assert_eq!(stats.today_focus_minutes(), 0);
+        assert_eq!(stats.total_work_sessions(), 0);
+        assert_eq!(stats.total_focus_minutes(), 0);
+    }
+
+    #[test]
+    fn test_break_sessions_do_not_count_towards_work_stats() {
+        let mut stats = StatsHistory::new();
+        stats.record(PomodoroPhase::ShortBreak, 5, None, None);
+        stats.record(PomodoroPhase::LongBreak, 15, None, None);
+
+        assert_eq!(stats.today_work_sessions(), 0);
+        assert_eq!(stats.today_focus_minutes(), 0);
+        assert_eq!(stats.total_work_sessions(), 0);
+        assert_eq!(stats.total_focus_minutes(), 0);
+        assert_eq!(stats.current_streak_days(), 0);
+        assert_eq!(stats.longest_streak_days(), 0);
+    }
+
+    #[test]
+    fn test_streak_yesterday_preserved() {
+        let mut stats = StatsHistory::new();
+        let yesterday_utc = (Utc::now() - chrono::Duration::days(1)).date_naive().and_hms_opt(12, 0, 0).unwrap().and_utc();
+        stats.sessions.push(CompletedSession {
+            timestamp: yesterday_utc,
+            phase: PomodoroPhase::Work,
+            duration_mins: 25,
+            task_id: None,
+            task_title: None,
+        });
+
+        // Even though no sessions today, streak from yesterday should be 1
+        assert_eq!(stats.current_streak_days(), 1);
+        assert_eq!(stats.longest_streak_days(), 1);
+    }
+
+    #[test]
+    fn test_streak_broken_two_days_ago() {
+        let mut stats = StatsHistory::new();
+        let two_days_ago_utc = (Utc::now() - chrono::Duration::days(2)).date_naive().and_hms_opt(12, 0, 0).unwrap().and_utc();
+        stats.sessions.push(CompletedSession {
+            timestamp: two_days_ago_utc,
+            phase: PomodoroPhase::Work,
+            duration_mins: 25,
+            task_id: None,
+            task_title: None,
+        });
+
+        assert_eq!(stats.current_streak_days(), 0);
+        // But longest streak historically is still 1
+        assert_eq!(stats.longest_streak_days(), 1);
+    }
+
+    #[test]
+    fn test_consecutive_multi_day_streaks_and_longest() {
+        let mut stats = StatsHistory::new();
+        let today = Local::now().date_naive();
+
+        // Simulate 4-day streak ending 5 days ago: today-8, today-7, today-6, today-5
+        for offset in (5..=8).rev() {
+            let date = today - chrono::Duration::days(offset);
+            let dt = date.and_hms_opt(10, 0, 0).unwrap().and_local_timezone(Local).unwrap().with_timezone(&Utc);
+            stats.sessions.push(CompletedSession {
+                timestamp: dt,
+                phase: PomodoroPhase::Work,
+                duration_mins: 25,
+                task_id: None,
+                task_title: None,
+            });
+        }
+
+        // Gap on today-4, today-3
+
+        // Simulate 3-day current streak: today-2, today-1, today
+        for offset in (0..=2).rev() {
+            let date = today - chrono::Duration::days(offset);
+            let dt = date.and_hms_opt(10, 0, 0).unwrap().and_local_timezone(Local).unwrap().with_timezone(&Utc);
+            stats.sessions.push(CompletedSession {
+                timestamp: dt,
+                phase: PomodoroPhase::Work,
+                duration_mins: 25,
+                task_id: None,
+                task_title: None,
+            });
+        }
+
+        // Current active streak is 3 days
+        assert_eq!(stats.current_streak_days(), 3);
+        // Longest streak was the 4-day streak
+        assert_eq!(stats.longest_streak_days(), 4);
+    }
+
+    #[test]
+    fn test_same_day_multiple_sessions_dedup() {
+        let mut stats = StatsHistory::new();
+        // Record 5 work sessions today
+        for _ in 0..5 {
+            stats.record(PomodoroPhase::Work, 25, None, None);
+        }
+
+        assert_eq!(stats.today_work_sessions(), 5);
+        assert_eq!(stats.today_focus_minutes(), 125);
+        // Streak is still 1 day, not 5 days
+        assert_eq!(stats.current_streak_days(), 1);
+        assert_eq!(stats.longest_streak_days(), 1);
+        assert_eq!(stats.distinct_work_dates().len(), 1);
+    }
+
+    #[test]
+    fn test_last_days_distribution() {
+        let mut stats = StatsHistory::new();
+        // Record 2 sessions today
+        stats.record(PomodoroPhase::Work, 25, None, None);
+        stats.record(PomodoroPhase::Work, 25, None, None);
+
+        let dist = stats.last_days_distribution(7);
+        assert_eq!(dist.len(), 7);
+        // Last item corresponds to today
+        let (today_label, count) = &dist[6];
+        assert_eq!(*count, 2);
+        assert!(!today_label.is_empty());
+    }
 }
+
 

@@ -68,6 +68,12 @@ impl App {
     pub fn new() -> Self {
         // Create storage handle
         let storage = Storage::new();
+        Self::new_with_storage(storage)
+    }
+
+    // Constructs application state using custom storage instance
+    #[allow(dead_code)]
+    pub fn new_with_storage(storage: Storage) -> Self {
         // Load persisted state from storage file
         let app_data = storage.load();
         // Initialize Pomodoro timer with loaded configuration
@@ -688,3 +694,304 @@ impl App {
         self.adjust_setting(1);
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crossterm::event::{KeyEventKind, KeyEventState};
+
+    fn make_key(code: KeyCode) -> KeyEvent {
+        KeyEvent {
+            code,
+            modifiers: KeyModifiers::empty(),
+            kind: KeyEventKind::Press,
+            state: KeyEventState::empty(),
+        }
+    }
+
+    fn make_key_with_mod(code: KeyCode, modifiers: KeyModifiers) -> KeyEvent {
+        KeyEvent {
+            code,
+            modifiers,
+            kind: KeyEventKind::Press,
+            state: KeyEventState::empty(),
+        }
+    }
+
+    fn create_test_app() -> (App, std::path::PathBuf) {
+        let temp_dir = std::env::temp_dir().join(format!("termodoro_app_test_{}", uuid::Uuid::new_v4()));
+        let file_path = temp_dir.join("data.json");
+        let storage = Storage::with_path(file_path.clone());
+        let app = App::new_with_storage(storage);
+        (app, temp_dir)
+    }
+
+    #[test]
+    fn test_tab_navigation_methods() {
+        let (mut app, temp_dir) = create_test_app();
+        assert_eq!(app.active_tab, ActiveTab::Timer);
+
+        app.next_tab();
+        assert_eq!(app.active_tab, ActiveTab::Tasks);
+
+        app.next_tab();
+        assert_eq!(app.active_tab, ActiveTab::Stats);
+
+        app.next_tab();
+        assert_eq!(app.active_tab, ActiveTab::Settings);
+
+        app.next_tab();
+        assert_eq!(app.active_tab, ActiveTab::Timer);
+
+        app.previous_tab();
+        assert_eq!(app.active_tab, ActiveTab::Settings);
+
+        app.previous_tab();
+        assert_eq!(app.active_tab, ActiveTab::Stats);
+
+        let _ = std::fs::remove_dir_all(temp_dir);
+    }
+
+    #[test]
+    fn test_global_keys_tab_navigation() {
+        let (mut app, temp_dir) = create_test_app();
+
+        // Jump to Tasks with '2'
+        app.on_key_event(make_key(KeyCode::Char('2')));
+        assert_eq!(app.active_tab, ActiveTab::Tasks);
+
+        // From Tasks tab, jumping with '4' (Settings)
+        app.on_key_event(make_key(KeyCode::Char('4')));
+        assert_eq!(app.active_tab, ActiveTab::Settings);
+
+        // Jump to Stats with '3'
+        app.on_key_event(make_key(KeyCode::Char('3')));
+        assert_eq!(app.active_tab, ActiveTab::Stats);
+
+        // Jump to Timer with '1'
+        app.on_key_event(make_key(KeyCode::Char('1')));
+        assert_eq!(app.active_tab, ActiveTab::Timer);
+
+        // Tab switches to next tab
+        app.on_key_event(make_key(KeyCode::Tab));
+        assert_eq!(app.active_tab, ActiveTab::Tasks);
+
+        // Shift+Tab switches to previous tab
+        app.on_key_event(make_key_with_mod(KeyCode::Tab, KeyModifiers::SHIFT));
+        assert_eq!(app.active_tab, ActiveTab::Timer);
+
+        // BackTab switches to previous tab
+        app.on_key_event(make_key(KeyCode::BackTab));
+        assert_eq!(app.active_tab, ActiveTab::Settings);
+
+        // 'q' quits
+        app.on_key_event(make_key(KeyCode::Char('q')));
+        assert!(app.should_quit);
+
+        let _ = std::fs::remove_dir_all(temp_dir);
+    }
+
+    #[test]
+    fn test_tasks_tab_filter_keys_do_not_switch_tabs() {
+        let (mut app, temp_dir) = create_test_app();
+        app.active_tab = ActiveTab::Tasks;
+
+        // Press '2' on Tasks tab -> switches filter to Active
+        app.on_key_event(make_key(KeyCode::Char('2')));
+        assert_eq!(app.active_tab, ActiveTab::Tasks);
+        assert_eq!(app.tasks.filter, TaskFilter::Active);
+
+        // Press '3' on Tasks tab -> switches filter to Completed
+        app.on_key_event(make_key(KeyCode::Char('3')));
+        assert_eq!(app.active_tab, ActiveTab::Tasks);
+        assert_eq!(app.tasks.filter, TaskFilter::Completed);
+
+        // Press '1' on Tasks tab -> switches filter to All
+        app.on_key_event(make_key(KeyCode::Char('1')));
+        assert_eq!(app.active_tab, ActiveTab::Tasks);
+        assert_eq!(app.tasks.filter, TaskFilter::All);
+
+        let _ = std::fs::remove_dir_all(temp_dir);
+    }
+
+    #[test]
+    fn test_task_modal_key_interactions() {
+        let (mut app, temp_dir) = create_test_app();
+
+        // Open modal with 'a'
+        app.on_key_event(make_key(KeyCode::Char('a')));
+        assert!(app.show_task_modal);
+        assert_eq!(app.task_modal_focus, 0);
+
+        // Type "Test"
+        for c in "Test".chars() {
+            app.on_key_event(make_key(KeyCode::Char(c)));
+        }
+        assert_eq!(app.task_input_title, "Test");
+
+        // Backspace
+        app.on_key_event(make_key(KeyCode::Backspace));
+        assert_eq!(app.task_input_title, "Tes");
+        app.on_key_event(make_key(KeyCode::Char('t')));
+        assert_eq!(app.task_input_title, "Test");
+
+        // Switch focus to estimated pomodoros
+        app.on_key_event(make_key(KeyCode::Down));
+        assert_eq!(app.task_modal_focus, 1);
+
+        // Increment with '+'
+        app.on_key_event(make_key(KeyCode::Char('+')));
+        assert_eq!(app.task_input_estimated, 2);
+
+        // Direct digit key '4'
+        app.on_key_event(make_key(KeyCode::Char('4')));
+        assert_eq!(app.task_input_estimated, 4);
+
+        // Decrement with '-'
+        app.on_key_event(make_key(KeyCode::Char('-')));
+        assert_eq!(app.task_input_estimated, 3);
+
+        // Submit with Enter
+        app.on_key_event(make_key(KeyCode::Enter));
+        assert!(!app.show_task_modal);
+        assert_eq!(app.tasks.tasks.len(), 1);
+        assert_eq!(app.tasks.tasks[0].title, "Test");
+        assert_eq!(app.tasks.tasks[0].pomodoros_estimated, 3);
+        assert!(app.status_message.is_some());
+
+        // Cancel modal with Esc
+        app.on_key_event(make_key(KeyCode::Char('a')));
+        assert!(app.show_task_modal);
+        app.on_key_event(make_key(KeyCode::Esc));
+        assert!(!app.show_task_modal);
+        assert_eq!(app.tasks.tasks.len(), 1);
+
+        let _ = std::fs::remove_dir_all(temp_dir);
+    }
+
+    #[test]
+    fn test_help_modal_workflow() {
+        let (mut app, temp_dir) = create_test_app();
+        app.on_key_event(make_key(KeyCode::Char('?')));
+        assert!(app.show_help);
+
+        app.on_key_event(make_key(KeyCode::Esc));
+        assert!(!app.show_help);
+
+        app.on_key_event(make_key(KeyCode::Char('?')));
+        assert!(app.show_help);
+        app.on_key_event(make_key(KeyCode::Char('q')));
+        assert!(!app.show_help);
+        // Quitting from inside help modal should not quit the app
+        assert!(!app.should_quit);
+
+        let _ = std::fs::remove_dir_all(temp_dir);
+    }
+
+    #[test]
+    fn test_settings_adjustments_and_clamping() {
+        let (mut app, temp_dir) = create_test_app();
+        app.active_tab = ActiveTab::Settings;
+
+        // Row 0: Work duration (default 25)
+        app.settings_index = 0;
+        app.on_key_event(make_key(KeyCode::Char('+')));
+        assert_eq!(app.config.work_duration_mins, 26);
+        // Underflow clamp test
+        for _ in 0..50 {
+            app.on_key_event(make_key(KeyCode::Char('-')));
+        }
+        assert_eq!(app.config.work_duration_mins, 1);
+
+        // Row 1: Short break (default 5, clamped 1..=60)
+        app.settings_index = 1;
+        app.on_key_event(make_key(KeyCode::Char('+')));
+        assert_eq!(app.config.short_break_mins, 6);
+
+        // Row 2: Long break (default 15, clamped 1..=90)
+        app.settings_index = 2;
+        app.on_key_event(make_key(KeyCode::Char('+')));
+        assert_eq!(app.config.long_break_mins, 16);
+
+        // Row 3: Long break interval (default 4, clamped 1..=12)
+        app.settings_index = 3;
+        app.on_key_event(make_key(KeyCode::Char('+')));
+        assert_eq!(app.config.long_break_interval, 5);
+
+        // Row 4: Auto start breaks (toggle)
+        app.settings_index = 4;
+        let initial_auto_breaks = app.config.auto_start_breaks;
+        app.on_key_event(make_key(KeyCode::Char(' ')));
+        assert_eq!(app.config.auto_start_breaks, !initial_auto_breaks);
+
+        // Row 5: Auto start work (toggle)
+        app.settings_index = 5;
+        let initial_auto_work = app.config.auto_start_work;
+        app.on_key_event(make_key(KeyCode::Enter));
+        assert_eq!(app.config.auto_start_work, !initial_auto_work);
+
+        // Row 6: Desktop notifications (toggle)
+        app.settings_index = 6;
+        let initial_notifs = app.config.desktop_notifications;
+        app.on_key_event(make_key(KeyCode::Char(' ')));
+        assert_eq!(app.config.desktop_notifications, !initial_notifs);
+
+        // Row 7: Sound enabled (toggle)
+        app.settings_index = 7;
+        let initial_sound = app.config.sound_enabled;
+        app.on_key_event(make_key(KeyCode::Char(' ')));
+        assert_eq!(app.config.sound_enabled, !initial_sound);
+
+        // Row 8: Theme cycling
+        app.settings_index = 8;
+        app.config.theme = ThemeChoice::CatppuccinMocha;
+        app.on_key_event(make_key(KeyCode::Char('+')));
+        assert_eq!(app.config.theme, ThemeChoice::Nord);
+        app.on_key_event(make_key(KeyCode::Char('-')));
+        assert_eq!(app.config.theme, ThemeChoice::CatppuccinMocha);
+
+        // Settings navigation wrapping
+        app.settings_index = 8;
+        app.on_key_event(make_key(KeyCode::Down));
+        assert_eq!(app.settings_index, 0);
+        app.on_key_event(make_key(KeyCode::Up));
+        assert_eq!(app.settings_index, 8);
+
+        let _ = std::fs::remove_dir_all(temp_dir);
+    }
+
+    #[test]
+    fn test_timer_keys_and_on_tick_flow() {
+        let (mut app, temp_dir) = create_test_app();
+        app.active_tab = ActiveTab::Timer;
+
+        // Toggle timer with Space
+        app.on_key_event(make_key(KeyCode::Char(' ')));
+        assert_eq!(app.timer.status, crate::timer::TimerStatus::Running);
+
+        // Skip timer with 's'
+        app.on_key_event(make_key(KeyCode::Char('s')));
+        assert_eq!(app.timer.phase, PomodoroPhase::ShortBreak);
+
+        // Reset timer with 'r'
+        app.on_key_event(make_key(KeyCode::Char('r')));
+        assert_eq!(app.timer.status, crate::timer::TimerStatus::Stopped);
+        assert_eq!(app.timer.time_remaining_secs, 5 * 60);
+
+        // Add task and test on_tick completion
+        app.tasks.add("Focus Task".to_string(), 2);
+        app.timer.phase = PomodoroPhase::Work;
+        app.timer.status = crate::timer::TimerStatus::Running;
+        app.timer.time_remaining_secs = 1;
+
+        // Tick to complete phase
+        app.on_tick();
+        assert_eq!(app.tasks.tasks[0].pomodoros_spent, 1);
+        assert_eq!(app.stats.sessions.len(), 1);
+        assert_eq!(app.stats.sessions[0].phase, PomodoroPhase::Work);
+        assert!(app.status_message.is_some());
+
+        let _ = std::fs::remove_dir_all(temp_dir);
+    }
+}
+

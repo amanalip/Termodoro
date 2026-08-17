@@ -17,7 +17,7 @@ use crate::stats::StatsHistory;
 use crate::tasks::TaskManager;
 
 // Unified struct representing all serializable application state saved to disk
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct AppData {
     // Persisted user preferences and theme
     pub config: Config,
@@ -38,6 +38,12 @@ impl Storage {
     pub fn new() -> Self {
         // Return instance with no custom path override
         Self { custom_path: None }
+    }
+
+    // Constructor creating a storage instance targeting a custom filepath (useful for testing)
+    #[allow(dead_code)]
+    pub fn with_path(path: PathBuf) -> Self {
+        Self { custom_path: Some(path) }
     }
 
     // Resolves standard XDG/system data directory for termodoro (e.g. ~/.local/share/termodoro)
@@ -129,3 +135,72 @@ impl Storage {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::fs;
+
+    #[test]
+    fn test_appdata_roundtrip_serde() {
+        let app_data = AppData {
+            config: Config::default(),
+            tasks: TaskManager::new(),
+            stats: StatsHistory::new(),
+        };
+
+        let json = serde_json::to_string(&app_data).expect("Serialization failed");
+        let deserialized: AppData = serde_json::from_str(&json).expect("Deserialization failed");
+        assert_eq!(app_data.config, deserialized.config);
+        assert_eq!(app_data.tasks, deserialized.tasks);
+        assert_eq!(app_data.stats, deserialized.stats);
+    }
+
+    #[test]
+    fn test_storage_save_and_load_roundtrip() {
+        let temp_dir = std::env::temp_dir().join(format!("termodoro_test_{}", uuid::Uuid::new_v4()));
+        let file_path = temp_dir.join("test_data.json");
+        let storage = Storage::with_path(file_path.clone());
+
+        let mut tasks = TaskManager::new();
+        tasks.add("Test persistence".to_string(), 3);
+        let config = Config::default();
+        let mut stats = StatsHistory::new();
+        stats.record(crate::timer::PomodoroPhase::Work, 25, None, None);
+
+        storage.save(&config, &tasks, &stats);
+        assert!(file_path.exists());
+
+        let loaded = storage.load();
+        assert_eq!(loaded.config, config);
+        assert_eq!(loaded.tasks.tasks.len(), 1);
+        assert_eq!(loaded.tasks.tasks[0].title, "Test persistence");
+        assert_eq!(loaded.stats.sessions.len(), 1);
+
+        // Cleanup
+        let _ = fs::remove_dir_all(temp_dir);
+    }
+
+    #[test]
+    fn test_storage_fallback_on_nonexistent_or_corrupt_file() {
+        let temp_dir = std::env::temp_dir().join(format!("termodoro_test_{}", uuid::Uuid::new_v4()));
+        let file_path = temp_dir.join("nonexistent.json");
+        let storage = Storage::with_path(file_path.clone());
+
+        let loaded = storage.load();
+        assert_eq!(loaded.config, Config::default());
+        assert_eq!(loaded.tasks.tasks.len(), 0);
+        assert_eq!(loaded.stats.sessions.len(), 0);
+
+        // Corrupt file content
+        let _ = create_dir_all(&temp_dir);
+        let _ = fs::write(&file_path, "{ broken json content");
+        let loaded_corrupt = storage.load();
+        assert_eq!(loaded_corrupt.config, Config::default());
+        assert_eq!(loaded_corrupt.tasks.tasks.len(), 0);
+
+        // Cleanup
+        let _ = fs::remove_dir_all(temp_dir);
+    }
+}
+

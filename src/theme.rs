@@ -296,3 +296,41 @@ impl Theme {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_all_theme_choices() {
+        let all = ThemeChoice::all();
+        assert_eq!(all.len(), 6);
+        assert!(all.contains(&ThemeChoice::CatppuccinMocha));
+        assert!(all.contains(&ThemeChoice::Nord));
+        assert!(all.contains(&ThemeChoice::GruvboxDark));
+        assert!(all.contains(&ThemeChoice::TokyoNight));
+        assert!(all.contains(&ThemeChoice::Dracula));
+        assert!(all.contains(&ThemeChoice::SolarizedDark));
+    }
+
+    #[test]
+    fn test_theme_names() {
+        assert_eq!(ThemeChoice::CatppuccinMocha.name(), "Catppuccin Mocha");
+        assert_eq!(ThemeChoice::Nord.name(), "Nord");
+        assert_eq!(ThemeChoice::GruvboxDark.name(), "Gruvbox Dark");
+        assert_eq!(ThemeChoice::TokyoNight.name(), "Tokyo Night");
+        assert_eq!(ThemeChoice::Dracula.name(), "Dracula");
+        assert_eq!(ThemeChoice::SolarizedDark.name(), "Solarized Dark");
+    }
+
+    #[test]
+    fn test_theme_from_choice_all_variants() {
+        for choice in ThemeChoice::all() {
+            let theme = Theme::from_choice(*choice);
+            assert_eq!(theme.choice, *choice);
+            // Verify that all colors are valid non-empty values
+            assert_ne!(theme.bg, theme.fg);
+        }
+    }
+}
+

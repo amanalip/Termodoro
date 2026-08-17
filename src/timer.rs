@@ -339,6 +339,10 @@ mod tests {
         timer.total_duration_secs = 1500;
         // Ratio should be 0.5
         assert!((timer.progress_ratio() - 0.5).abs() < f64::EPSILON);
+
+        // Total 0 edge case
+        timer.total_duration_secs = 0;
+        assert_eq!(timer.progress_ratio(), 0.0);
     }
 
     // Test pause and reset functions
@@ -361,6 +365,101 @@ mod tests {
         // Verify stopped
         assert_eq!(timer.status, TimerStatus::Stopped);
     }
+
+    #[test]
+    fn test_formatted_time() {
+        let config = Config::default();
+        let mut timer = PomodoroTimer::new(&config);
+        timer.time_remaining_secs = 1500;
+        assert_eq!(timer.formatted_time(), (25, 0));
+
+        timer.time_remaining_secs = 65;
+        assert_eq!(timer.formatted_time(), (1, 5));
+
+        timer.time_remaining_secs = 0;
+        assert_eq!(timer.formatted_time(), (0, 0));
+    }
+
+    #[test]
+    fn test_tick_when_running_and_completion_event() {
+        let config = Config::default();
+        let mut timer = PomodoroTimer::new(&config);
+        timer.status = TimerStatus::Running;
+        timer.time_remaining_secs = 2;
+
+        // First tick: 2 -> 1, no event
+        let event1 = timer.tick(&config);
+        assert_eq!(event1, None);
+        assert_eq!(timer.time_remaining_secs, 1);
+
+        // Second tick: 1 -> 0, triggers PhaseCompleted event
+        let event2 = timer.tick(&config);
+        assert_eq!(
+            event2,
+            Some(TimerEvent::PhaseCompleted {
+                finished_phase: PomodoroPhase::Work,
+                next_phase: PomodoroPhase::ShortBreak,
+            })
+        );
+        // Should have transitioned to ShortBreak (5 minutes = 300s)
+        assert_eq!(timer.phase, PomodoroPhase::ShortBreak);
+        assert_eq!(timer.time_remaining_secs, 5 * 60);
+        // Default auto_start_breaks is false, so status is Stopped
+        assert_eq!(timer.status, TimerStatus::Stopped);
+    }
+
+    #[test]
+    fn test_tick_when_paused_or_stopped_does_nothing() {
+        let config = Config::default();
+        let mut timer = PomodoroTimer::new(&config);
+        timer.status = TimerStatus::Paused;
+        timer.time_remaining_secs = 100;
+        assert_eq!(timer.tick(&config), None);
+        assert_eq!(timer.time_remaining_secs, 100);
+
+        timer.status = TimerStatus::Stopped;
+        assert_eq!(timer.tick(&config), None);
+        assert_eq!(timer.time_remaining_secs, 100);
+    }
+
+    #[test]
+    fn test_auto_start_settings_on_transition() {
+        let mut config = Config::default();
+        config.auto_start_breaks = true;
+        config.auto_start_work = false;
+
+        let mut timer = PomodoroTimer::new(&config);
+        // Work -> ShortBreak: auto_start_breaks is true, so should be Running
+        timer.advance_phase(&config);
+        assert_eq!(timer.phase, PomodoroPhase::ShortBreak);
+        assert_eq!(timer.status, TimerStatus::Running);
+
+        // ShortBreak -> Work: auto_start_work is false, so should be Stopped
+        timer.advance_phase(&config);
+        assert_eq!(timer.phase, PomodoroPhase::Work);
+        assert_eq!(timer.status, TimerStatus::Stopped);
+    }
+
+    #[test]
+    fn test_skip_to_next() {
+        let config = Config::default();
+        let mut timer = PomodoroTimer::new(&config);
+        let next = timer.skip_to_next(&config);
+        assert_eq!(next, PomodoroPhase::ShortBreak);
+        assert_eq!(timer.phase, PomodoroPhase::ShortBreak);
+        assert_eq!(timer.time_remaining_secs, 5 * 60);
+    }
+
+    #[test]
+    fn test_phase_titles_and_emojis() {
+        assert_eq!(PomodoroPhase::Work.title(), "FOCUS SESSION");
+        assert_eq!(PomodoroPhase::Work.emoji(), "🍅");
+        assert_eq!(PomodoroPhase::ShortBreak.title(), "SHORT BREAK");
+        assert_eq!(PomodoroPhase::ShortBreak.emoji(), "☕");
+        assert_eq!(PomodoroPhase::LongBreak.title(), "LONG BREAK");
+        assert_eq!(PomodoroPhase::LongBreak.emoji(), "🌴");
+    }
 }
+
 
 
