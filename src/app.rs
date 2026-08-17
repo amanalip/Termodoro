@@ -993,5 +993,126 @@ mod tests {
 
         let _ = std::fs::remove_dir_all(temp_dir);
     }
+
+    #[test]
+    fn test_full_pomodoro_cycle_e2e() {
+        let (mut app, temp_dir) = create_test_app();
+        app.config.auto_start_breaks = true;
+        app.config.auto_start_work = true;
+
+        // User adds Task A (estimate 3) and Task B (estimate 1)
+        app.tasks.add("Task A".to_string(), 3);
+        app.tasks.add("Task B".to_string(), 1);
+
+        // Cycle 1: Work (Task A active)
+        assert_eq!(app.timer.current_cycle, 1);
+        assert_eq!(app.timer.phase, PomodoroPhase::Work);
+        app.timer.status = crate::timer::TimerStatus::Running;
+        app.timer.time_remaining_secs = 1;
+        app.on_tick(); // Completes Work 1 -> ShortBreak 1 (cycle 2)
+        assert_eq!(app.timer.phase, PomodoroPhase::ShortBreak);
+        assert_eq!(app.timer.current_cycle, 2);
+        assert_eq!(app.tasks.tasks[0].pomodoros_spent, 1);
+
+        // Complete ShortBreak 1
+        app.timer.time_remaining_secs = 1;
+        app.on_tick(); // Completes ShortBreak 1 -> Work 2
+        assert_eq!(app.timer.phase, PomodoroPhase::Work);
+
+        // Switch target to Task B
+        app.tasks.selected_index = 1;
+        app.tasks.set_selected_active();
+        assert_eq!(app.tasks.active_task().unwrap().title, "Task B");
+
+        // Cycle 2: Work (Task B active)
+        app.timer.time_remaining_secs = 1;
+        app.on_tick(); // Completes Work 2 -> ShortBreak 2 (cycle 3)
+        assert_eq!(app.timer.phase, PomodoroPhase::ShortBreak);
+        assert_eq!(app.timer.current_cycle, 3);
+        assert_eq!(app.tasks.tasks[1].pomodoros_spent, 1);
+
+        // Complete ShortBreak 2
+        app.timer.time_remaining_secs = 1;
+        app.on_tick(); // Completes ShortBreak 2 -> Work 3
+        assert_eq!(app.timer.phase, PomodoroPhase::Work);
+
+        // Cycle 3: Work
+        app.timer.time_remaining_secs = 1;
+        app.on_tick(); // Completes Work 3 -> ShortBreak 3 (cycle 4)
+        assert_eq!(app.timer.phase, PomodoroPhase::ShortBreak);
+        assert_eq!(app.timer.current_cycle, 4);
+
+        // Complete ShortBreak 3
+        app.timer.time_remaining_secs = 1;
+        app.on_tick(); // Completes ShortBreak 3 -> Work 4
+        assert_eq!(app.timer.phase, PomodoroPhase::Work);
+
+        // Cycle 4: Work (at cycle 4)
+        app.timer.time_remaining_secs = 1;
+        app.on_tick(); // Completes Work 4 -> LongBreak! Cycle resets to 1
+        assert_eq!(app.timer.phase, PomodoroPhase::LongBreak);
+        assert_eq!(app.timer.current_cycle, 1);
+        assert_eq!(app.timer.completed_pomodoros, 4);
+
+        // Verify aggregated stats
+        assert_eq!(app.stats.total_work_sessions(), 4);
+        assert_eq!(app.stats.today_work_sessions(), 4);
+        assert_eq!(app.stats.today_focus_minutes(), 100); // 4 * 25m
+
+        let _ = std::fs::remove_dir_all(temp_dir);
+    }
+
+    #[test]
+    fn test_app_restart_and_state_recovery_e2e() {
+        let temp_dir = std::env::temp_dir().join(format!("termodoro_recovery_test_{}", uuid::Uuid::new_v4()));
+        let file_path = temp_dir.join("data.json");
+
+        // Session 1: Launch app, modify settings, add tasks, record stats, save state
+        {
+            let storage1 = Storage::with_path(file_path.clone());
+            let mut app1 = App::new_with_storage(storage1);
+
+            // Customize settings
+            app1.config.work_duration_mins = 45;
+            app1.config.short_break_mins = 10;
+            app1.config.theme = ThemeChoice::Dracula;
+
+            // Add tasks
+            app1.tasks.add("Persistent Task 1".to_string(), 4);
+            app1.tasks.add("Persistent Task 2".to_string(), 2);
+            app1.tasks.toggle_selected(); // Mark Task 2 completed
+
+            // Record some stats
+            app1.stats.record(PomodoroPhase::Work, 45, Some("Persistent Task 1".to_string()), Some("Persistent Task 1".to_string()));
+
+            app1.save_state();
+        }
+
+        // Session 2: Launch fresh app from same storage path and verify state
+        {
+            let storage2 = Storage::with_path(file_path.clone());
+            let app2 = App::new_with_storage(storage2);
+
+            // Verify configuration recovery
+            assert_eq!(app2.config.work_duration_mins, 45);
+            assert_eq!(app2.config.short_break_mins, 10);
+            assert_eq!(app2.config.theme, ThemeChoice::Dracula);
+
+            // Verify tasks recovery
+            assert_eq!(app2.tasks.tasks.len(), 2);
+            assert_eq!(app2.tasks.tasks[0].title, "Persistent Task 1");
+            assert_eq!(app2.tasks.tasks[0].pomodoros_estimated, 4);
+            assert!(!app2.tasks.tasks[0].completed);
+            assert_eq!(app2.tasks.tasks[1].title, "Persistent Task 2");
+            assert!(app2.tasks.tasks[1].completed);
+
+            // Verify stats recovery
+            assert_eq!(app2.stats.total_work_sessions(), 1);
+            assert_eq!(app2.stats.total_focus_minutes(), 45);
+        }
+
+        let _ = std::fs::remove_dir_all(temp_dir);
+    }
 }
+
 

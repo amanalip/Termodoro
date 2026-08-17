@@ -210,3 +210,99 @@ fn render_footer(f: &mut Frame, app: &App, theme: &Theme, area: Rect) {
     // Render footer widget
     f.render_widget(footer_widget, area);
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use ratatui::backend::TestBackend;
+    use ratatui::Terminal;
+    use crate::storage::Storage;
+
+    fn create_test_app() -> (App, std::path::PathBuf) {
+        let temp_dir = std::env::temp_dir().join(format!("termodoro_ui_test_{}", uuid::Uuid::new_v4()));
+        let file_path = temp_dir.join("data.json");
+        let storage = Storage::with_path(file_path.clone());
+        let app = App::new_with_storage(storage);
+        (app, temp_dir)
+    }
+
+    #[test]
+    fn test_render_all_tabs_without_panic() {
+        let (mut app, temp_dir) = create_test_app();
+        let backend = TestBackend::new(100, 30);
+        let mut terminal = Terminal::new(backend).unwrap();
+
+        // Render Timer tab
+        app.active_tab = ActiveTab::Timer;
+        terminal.draw(|f| render(f, &app)).unwrap();
+
+        // Render Tasks tab with tasks
+        app.active_tab = ActiveTab::Tasks;
+        app.tasks.add("Design Architecture".to_string(), 3);
+        app.tasks.add("Implement Core".to_string(), 2);
+        terminal.draw(|f| render(f, &app)).unwrap();
+
+        // Render Stats tab with sessions
+        app.active_tab = ActiveTab::Stats;
+        app.stats.record(crate::timer::PomodoroPhase::Work, 25, None, None);
+        terminal.draw(|f| render(f, &app)).unwrap();
+
+        // Render Settings tab
+        app.active_tab = ActiveTab::Settings;
+        terminal.draw(|f| render(f, &app)).unwrap();
+
+        let _ = std::fs::remove_dir_all(temp_dir);
+    }
+
+    #[test]
+    fn test_render_modals_and_status_message() {
+        let (mut app, temp_dir) = create_test_app();
+        let backend = TestBackend::new(80, 24);
+        let mut terminal = Terminal::new(backend).unwrap();
+
+        // Status banner
+        app.set_status_message("Phase Completed!".to_string());
+        terminal.draw(|f| render(f, &app)).unwrap();
+
+        // Help Modal overlay
+        app.show_help = true;
+        terminal.draw(|f| render(f, &app)).unwrap();
+        app.show_help = false;
+
+        // Add Task Modal overlay
+        app.open_task_modal();
+        app.task_input_title = "New Task Name".to_string();
+        terminal.draw(|f| render(f, &app)).unwrap();
+
+        let _ = std::fs::remove_dir_all(temp_dir);
+    }
+
+    #[test]
+    fn test_render_all_terminal_dimensions() {
+        let (app, temp_dir) = create_test_app();
+        let dimensions = [(60, 20), (80, 24), (100, 30), (140, 45), (200, 60)];
+
+        for (width, height) in dimensions {
+            let backend = TestBackend::new(width, height);
+            let mut terminal = Terminal::new(backend).unwrap();
+            terminal.draw(|f| render(f, &app)).unwrap();
+        }
+
+        let _ = std::fs::remove_dir_all(temp_dir);
+    }
+
+    #[test]
+    fn test_render_all_color_themes() {
+        let (mut app, temp_dir) = create_test_app();
+        let backend = TestBackend::new(80, 24);
+        let mut terminal = Terminal::new(backend).unwrap();
+
+        for choice in crate::theme::ThemeChoice::all() {
+            app.config.theme = *choice;
+            terminal.draw(|f| render(f, &app)).unwrap();
+        }
+
+        let _ = std::fs::remove_dir_all(temp_dir);
+    }
+}
+
