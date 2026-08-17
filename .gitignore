@@ -1,0 +1,17 @@
+# Ignore Rust Cargo build artifacts and compilation cache directory
+/target/
+
+# Ignore Cargo lock file overrides (if any local backup exists)
+*.lock.bak
+
+# Ignore local temporary files and backups
+*.swp
+*.swo
+*~
+
+# Ignore IDE configuration folders
+.vscode/
+.idea/
+
+# Ignore macOS metadata files
+.DS_Store
