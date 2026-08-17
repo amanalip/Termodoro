@@ -130,13 +130,13 @@ impl App {
 
     // Dispatches desktop notifications and audio bells when a timer phase completes
     pub fn notify_phase_completed(&self, finished_phase: PomodoroPhase, next_phase: PomodoroPhase) {
-        // Ring audio / terminal bell if enabled in configuration
+        // Play acoustic chime and ring terminal bell if sound is enabled in configuration
         if self.config.sound_enabled {
-            // Write ASCII bell character (\x07) to standard output
+            // Play acoustic chime for the finished phase
+            crate::audio::play_phase_sound(finished_phase);
+            // Write ASCII bell character (\x07) to standard output as additional fallback
             let mut out = stdout();
-            // Write bell byte
             let _ = out.write_all(b"\x07");
-            // Flush standard output buffer
             let _ = out.flush();
         }
 

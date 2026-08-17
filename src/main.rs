@@ -1,5 +1,7 @@
 // Declare application state module
 mod app;
+// Declare audio chime playback module
+pub mod audio;
 // Declare configuration module
 mod config;
 // Declare analytics and stats module
