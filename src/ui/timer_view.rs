@@ -68,9 +68,13 @@ pub fn render(f: &mut Frame, app: &App, theme: &Theme, area: Rect) {
     // Determine text style for current status
     let status_style = match app.timer.status {
         // Green bold text when running
-        TimerStatus::Running => Style::default().fg(theme.success).add_modifier(Modifier::BOLD),
+        TimerStatus::Running => Style::default()
+            .fg(theme.success)
+            .add_modifier(Modifier::BOLD),
         // Yellow bold text when paused
-        TimerStatus::Paused => Style::default().fg(theme.warning).add_modifier(Modifier::BOLD),
+        TimerStatus::Paused => Style::default()
+            .fg(theme.warning)
+            .add_modifier(Modifier::BOLD),
         // Muted text when stopped/ready
         TimerStatus::Stopped => Style::default().fg(theme.muted),
     };
@@ -104,13 +108,18 @@ pub fn render(f: &mut Frame, app: &App, theme: &Theme, area: Rect) {
             // Phase emoji and title
             Span::styled(
                 format!("{} {}  ", app.timer.phase.emoji(), app.timer.phase.title()),
-                Style::default().fg(phase_color).add_modifier(Modifier::BOLD),
+                Style::default()
+                    .fg(phase_color)
+                    .add_modifier(Modifier::BOLD),
             ),
             // Status text badge
             Span::styled(format!("[{}]  ", status_str), status_style),
             // Cycle counter and dots
             Span::styled(
-                format!("Cycle {}/{} [{}]", app.timer.current_cycle, app.config.long_break_interval, cycle_dots),
+                format!(
+                    "Cycle {}/{} [{}]",
+                    app.timer.current_cycle, app.config.long_break_interval, cycle_dots
+                ),
                 Style::default().fg(theme.fg),
             ),
         ]),
@@ -132,7 +141,9 @@ pub fn render(f: &mut Frame, app: &App, theme: &Theme, area: Rect) {
             // Construct styled line
             Line::from(Span::styled(
                 line,
-                Style::default().fg(phase_color).add_modifier(Modifier::BOLD),
+                Style::default()
+                    .fg(phase_color)
+                    .add_modifier(Modifier::BOLD),
             ))
         })
         // Collect into vector
@@ -179,37 +190,38 @@ pub fn render(f: &mut Frame, app: &App, theme: &Theme, area: Rect) {
             format!("{}", task.pomodoros_spent)
         };
         // Construct styled text line for active task
-        vec![
-            Line::from(vec![
-                // Label prefix
-                Span::styled("  Active Focus: ", Style::default().fg(theme.muted)),
-                // Task title in bold text
-                Span::styled(
-                    &task.title,
-                    Style::default().fg(theme.fg).add_modifier(Modifier::BOLD),
-                ),
-                // Tomato count badge
-                Span::styled(
-                    format!("  (🍅 {})", est_str),
-                    Style::default().fg(theme.secondary),
-                ),
-            ]),
-        ]
-    } else {
-        // Placeholder message when no task is selected
         vec![Line::from(vec![
+            // Label prefix
+            Span::styled("  Active Focus: ", Style::default().fg(theme.muted)),
+            // Task title in bold text
             Span::styled(
-                "  No active task selected. Press [Tab] to view Tasks, or [a] to quickly add one.",
-                Style::default().fg(theme.muted).add_modifier(Modifier::ITALIC),
+                &task.title,
+                Style::default().fg(theme.fg).add_modifier(Modifier::BOLD),
+            ),
+            // Tomato count badge
+            Span::styled(
+                format!("  (🍅 {})", est_str),
+                Style::default().fg(theme.secondary),
             ),
         ])]
+    } else {
+        // Placeholder message when no task is selected
+        vec![Line::from(vec![Span::styled(
+            "  No active task selected. Press [Tab] to view Tasks, or [a] to quickly add one.",
+            Style::default()
+                .fg(theme.muted)
+                .add_modifier(Modifier::ITALIC),
+        )])]
     };
 
     // Create target box panel
     let active_task_box = Paragraph::new(active_task_content).block(
         Block::default()
             // Panel title
-            .title(Span::styled(" 🎯 Current Target ", Style::default().fg(theme.primary)))
+            .title(Span::styled(
+                " 🎯 Current Target ",
+                Style::default().fg(theme.primary),
+            ))
             // All borders
             .borders(Borders::ALL)
             // Rounded corners
@@ -232,24 +244,56 @@ pub fn render(f: &mut Frame, app: &App, theme: &Theme, area: Rect) {
         // First line: Today's productivity and streak
         Line::from(vec![
             Span::styled("  Today's Sessions: ", Style::default().fg(theme.muted)),
-            Span::styled(format!("{} pomodoros ({} mins)", today_done, today_mins), Style::default().fg(theme.fg).add_modifier(Modifier::BOLD)),
+            Span::styled(
+                format!("{} pomodoros ({} mins)", today_done, today_mins),
+                Style::default().fg(theme.fg).add_modifier(Modifier::BOLD),
+            ),
             Span::styled("   │   Streak: ", Style::default().fg(theme.muted)),
-            Span::styled(format!("🔥 {} days", streak), Style::default().fg(theme.warning).add_modifier(Modifier::BOLD)),
+            Span::styled(
+                format!("🔥 {} days", streak),
+                Style::default()
+                    .fg(theme.warning)
+                    .add_modifier(Modifier::BOLD),
+            ),
         ]),
         // Blank separator line
         Line::from(""),
         // Second line: Keybinding quick reference
         Line::from(vec![
-            Span::styled("  [Space] ", Style::default().fg(theme.primary).add_modifier(Modifier::BOLD)),
             Span::styled(
-                if app.timer.status == TimerStatus::Running { "Pause" } else { "Start" },
+                "  [Space] ",
+                Style::default()
+                    .fg(theme.primary)
+                    .add_modifier(Modifier::BOLD),
+            ),
+            Span::styled(
+                if app.timer.status == TimerStatus::Running {
+                    "Pause"
+                } else {
+                    "Start"
+                },
                 Style::default().fg(theme.fg),
             ),
-            Span::styled("   [r] ", Style::default().fg(theme.primary).add_modifier(Modifier::BOLD)),
+            Span::styled(
+                "   [r] ",
+                Style::default()
+                    .fg(theme.primary)
+                    .add_modifier(Modifier::BOLD),
+            ),
             Span::styled("Reset", Style::default().fg(theme.fg)),
-            Span::styled("   [s] ", Style::default().fg(theme.primary).add_modifier(Modifier::BOLD)),
+            Span::styled(
+                "   [s] ",
+                Style::default()
+                    .fg(theme.primary)
+                    .add_modifier(Modifier::BOLD),
+            ),
             Span::styled("Skip Phase", Style::default().fg(theme.fg)),
-            Span::styled("   [a] ", Style::default().fg(theme.primary).add_modifier(Modifier::BOLD)),
+            Span::styled(
+                "   [a] ",
+                Style::default()
+                    .fg(theme.primary)
+                    .add_modifier(Modifier::BOLD),
+            ),
             Span::styled("Quick Add Task", Style::default().fg(theme.fg)),
         ]),
     ];

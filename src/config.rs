@@ -87,8 +87,8 @@ mod tests {
         };
 
         let serialized = serde_json::to_string(&config).expect("Serialization failed");
-        let deserialized: Config = serde_json::from_str(&serialized).expect("Deserialization failed");
+        let deserialized: Config =
+            serde_json::from_str(&serialized).expect("Deserialization failed");
         assert_eq!(config, deserialized);
     }
 }
-

@@ -56,14 +56,10 @@ fn char_pattern(ch: char) -> [&'static str; 5] {
         // Digit 1 pattern
         '1' => [
             // Row 0
-            "  ██",
-            // Row 1
-            "  ██",
-            // Row 2
-            "  ██",
-            // Row 3
-            "  ██",
-            // Row 4
+            "  ██", // Row 1
+            "  ██", // Row 2
+            "  ██", // Row 3
+            "  ██", // Row 4
             "  ██",
         ],
         // Digit 2 pattern
@@ -173,27 +169,19 @@ fn char_pattern(ch: char) -> [&'static str; 5] {
         // Colon ':' separator pattern
         ':' => [
             // Row 0 (empty)
-            " ",
-            // Row 1 (top dot)
-            "█",
-            // Row 2 (middle space)
-            " ",
-            // Row 3 (bottom dot)
-            "█",
-            // Row 4 (empty)
+            " ", // Row 1 (top dot)
+            "█", // Row 2 (middle space)
+            " ", // Row 3 (bottom dot)
+            "█", // Row 4 (empty)
             " ",
         ],
         // Fallback for unexpected characters
         _ => [
             // Row 0
-            "    ",
-            // Row 1
-            "    ",
-            // Row 2
-            "    ",
-            // Row 3
-            "    ",
-            // Row 4
+            "    ", // Row 1
+            "    ", // Row 2
+            "    ", // Row 3
+            "    ", // Row 4
             "    ",
         ],
     }
@@ -236,4 +224,3 @@ mod tests {
         }
     }
 }
-

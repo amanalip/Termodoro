@@ -158,7 +158,9 @@ impl PomodoroTimer {
             return 0.0;
         }
         // Calculate number of seconds elapsed
-        let elapsed = self.total_duration_secs.saturating_sub(self.time_remaining_secs);
+        let elapsed = self
+            .total_duration_secs
+            .saturating_sub(self.time_remaining_secs);
         // Return ratio of elapsed over total
         (elapsed as f64) / (self.total_duration_secs as f64)
     }
@@ -469,9 +471,18 @@ mod tests {
             ..Config::default()
         };
         let timer = PomodoroTimer::new(&config);
-        assert_eq!(timer.target_duration_secs(PomodoroPhase::Work, &config), 40 * 60);
-        assert_eq!(timer.target_duration_secs(PomodoroPhase::ShortBreak, &config), 8 * 60);
-        assert_eq!(timer.target_duration_secs(PomodoroPhase::LongBreak, &config), 20 * 60);
+        assert_eq!(
+            timer.target_duration_secs(PomodoroPhase::Work, &config),
+            40 * 60
+        );
+        assert_eq!(
+            timer.target_duration_secs(PomodoroPhase::ShortBreak, &config),
+            8 * 60
+        );
+        assert_eq!(
+            timer.target_duration_secs(PomodoroPhase::LongBreak, &config),
+            20 * 60
+        );
     }
 
     #[test]
@@ -553,8 +564,3 @@ mod tests {
         assert_eq!(timer.formatted_time(), (0, 1));
     }
 }
-
-
-
-
-

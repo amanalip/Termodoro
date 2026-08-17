@@ -76,7 +76,10 @@ pub fn render(f: &mut Frame, app: &App, theme: &Theme, area: Rect) {
     .block(
         Block::default()
             // Title
-            .title(Span::styled(" 📅 Today's Focus ", Style::default().fg(theme.primary)))
+            .title(Span::styled(
+                " 📅 Today's Focus ",
+                Style::default().fg(theme.primary),
+            ))
             // Borders
             .borders(Borders::ALL)
             // Rounded corners
@@ -96,7 +99,9 @@ pub fn render(f: &mut Frame, app: &App, theme: &Theme, area: Rect) {
         // Line showing current streak with flame emoji
         Line::from(Span::styled(
             format!("🔥 {} Days", cur_streak),
-            Style::default().fg(theme.warning).add_modifier(Modifier::BOLD),
+            Style::default()
+                .fg(theme.warning)
+                .add_modifier(Modifier::BOLD),
         )),
         // Line showing personal best record
         Line::from(Span::styled(
@@ -108,7 +113,10 @@ pub fn render(f: &mut Frame, app: &App, theme: &Theme, area: Rect) {
     .block(
         Block::default()
             // Title
-            .title(Span::styled(" ⚡ Current Streak ", Style::default().fg(theme.primary)))
+            .title(Span::styled(
+                " ⚡ Current Streak ",
+                Style::default().fg(theme.primary),
+            ))
             // Borders
             .borders(Borders::ALL)
             // Rounded corners
@@ -130,7 +138,9 @@ pub fn render(f: &mut Frame, app: &App, theme: &Theme, area: Rect) {
         // Line showing total sessions
         Line::from(Span::styled(
             format!("{} Sessions", total_sessions),
-            Style::default().fg(theme.secondary).add_modifier(Modifier::BOLD),
+            Style::default()
+                .fg(theme.secondary)
+                .add_modifier(Modifier::BOLD),
         )),
         // Line showing total hours focused
         Line::from(Span::styled(
@@ -142,7 +152,10 @@ pub fn render(f: &mut Frame, app: &App, theme: &Theme, area: Rect) {
     .block(
         Block::default()
             // Title
-            .title(Span::styled(" 🏆 All-Time Focus ", Style::default().fg(theme.primary)))
+            .title(Span::styled(
+                " 🏆 All-Time Focus ",
+                Style::default().fg(theme.primary),
+            ))
             // Borders
             .borders(Borders::ALL)
             // Rounded corners
@@ -185,7 +198,10 @@ pub fn render(f: &mut Frame, app: &App, theme: &Theme, area: Rect) {
         .block(
             Block::default()
                 // Chart title
-                .title(Span::styled(" 📊 Daily Activity (Past 7 Days) ", Style::default().fg(theme.primary)))
+                .title(Span::styled(
+                    " 📊 Daily Activity (Past 7 Days) ",
+                    Style::default().fg(theme.primary),
+                ))
                 // All borders
                 .borders(Borders::ALL)
                 // Rounded corners
@@ -208,19 +224,30 @@ pub fn render(f: &mut Frame, app: &App, theme: &Theme, area: Rect) {
     let header_cells = ["Time", "Phase", "Duration", "Task Assigned"]
         .iter()
         // Map header cells to styled text
-        .map(|h| Cell::from(*h).style(Style::default().fg(theme.primary).add_modifier(Modifier::BOLD)));
+        .map(|h| {
+            Cell::from(*h).style(
+                Style::default()
+                    .fg(theme.primary)
+                    .add_modifier(Modifier::BOLD),
+            )
+        });
     // Build table header row
     let header = Row::new(header_cells).height(1).bottom_margin(1);
 
     // Get up to 6 most recent completed sessions in reverse chronological order
-    let recent: Vec<&crate::stats::CompletedSession> = app.stats.sessions.iter().rev().take(6).collect();
+    let recent: Vec<&crate::stats::CompletedSession> =
+        app.stats.sessions.iter().rev().take(6).collect();
     // Map sessions to table rows
     let rows: Vec<Row> = recent
         .iter()
         // Convert session struct to styled table Row
         .map(|s| {
             // Format local timestamp string
-            let time_str = s.timestamp.with_timezone(&Local).format("%Y-%m-%d %H:%M").to_string();
+            let time_str = s
+                .timestamp
+                .with_timezone(&Local)
+                .format("%Y-%m-%d %H:%M")
+                .to_string();
             // Format phase string with emoji
             let phase_str = format!("{} {}", s.phase.emoji(), s.phase.title());
             // Format duration string
@@ -274,7 +301,10 @@ pub fn render(f: &mut Frame, app: &App, theme: &Theme, area: Rect) {
     .block(
         Block::default()
             // Panel title
-            .title(Span::styled(" 🕒 Recent Completed Sessions ", Style::default().fg(theme.primary)))
+            .title(Span::styled(
+                " 🕒 Recent Completed Sessions ",
+                Style::default().fg(theme.primary),
+            ))
             // All borders
             .borders(Borders::ALL)
             // Rounded corners

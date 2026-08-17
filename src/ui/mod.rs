@@ -109,7 +109,12 @@ fn render_header(f: &mut Frame, app: &App, theme: &Theme, area: Rect) {
         // Tomato emoji
         Span::styled(" 🍅 ", Style::default()),
         // App name in bold primary color
-        Span::styled("Termodoro", Style::default().fg(theme.primary).add_modifier(Modifier::BOLD)),
+        Span::styled(
+            "Termodoro",
+            Style::default()
+                .fg(theme.primary)
+                .add_modifier(Modifier::BOLD),
+        ),
     ]);
     // Build title paragraph
     let title_widget = Paragraph::new(title_line).block(
@@ -127,13 +132,25 @@ fn render_header(f: &mut Frame, app: &App, theme: &Theme, area: Rect) {
     // Tab titles
     let tab_titles = vec![
         // Tab 1: Timer
-        Line::from(vec![Span::styled("[1] ", Style::default().fg(theme.primary)), Span::raw("Timer")]),
+        Line::from(vec![
+            Span::styled("[1] ", Style::default().fg(theme.primary)),
+            Span::raw("Timer"),
+        ]),
         // Tab 2: Tasks
-        Line::from(vec![Span::styled("[2] ", Style::default().fg(theme.primary)), Span::raw("Tasks")]),
+        Line::from(vec![
+            Span::styled("[2] ", Style::default().fg(theme.primary)),
+            Span::raw("Tasks"),
+        ]),
         // Tab 3: Stats
-        Line::from(vec![Span::styled("[3] ", Style::default().fg(theme.primary)), Span::raw("Stats")]),
+        Line::from(vec![
+            Span::styled("[3] ", Style::default().fg(theme.primary)),
+            Span::raw("Stats"),
+        ]),
         // Tab 4: Settings
-        Line::from(vec![Span::styled("[4] ", Style::default().fg(theme.primary)), Span::raw("Settings")]),
+        Line::from(vec![
+            Span::styled("[4] ", Style::default().fg(theme.primary)),
+            Span::raw("Settings"),
+        ]),
     ];
 
     // Determine numerical index of active tab
@@ -181,16 +198,36 @@ fn render_footer(f: &mut Frame, app: &App, theme: &Theme, area: Rect) {
         // Display active notification message with accent styling
         Line::from(vec![
             Span::styled(" 📢 ", Style::default()),
-            Span::styled(msg, Style::default().fg(theme.warning).add_modifier(Modifier::BOLD)),
+            Span::styled(
+                msg,
+                Style::default()
+                    .fg(theme.warning)
+                    .add_modifier(Modifier::BOLD),
+            ),
         ])
     } else {
         // Display standard global keybinding shortcuts
         Line::from(vec![
-            Span::styled(" [Tab] ", Style::default().fg(theme.primary).add_modifier(Modifier::BOLD)),
+            Span::styled(
+                " [Tab] ",
+                Style::default()
+                    .fg(theme.primary)
+                    .add_modifier(Modifier::BOLD),
+            ),
             Span::styled("Switch Tab  ", Style::default().fg(theme.fg)),
-            Span::styled("[?] ", Style::default().fg(theme.primary).add_modifier(Modifier::BOLD)),
+            Span::styled(
+                "[?] ",
+                Style::default()
+                    .fg(theme.primary)
+                    .add_modifier(Modifier::BOLD),
+            ),
             Span::styled("Help Modal  ", Style::default().fg(theme.fg)),
-            Span::styled("[q] ", Style::default().fg(theme.primary).add_modifier(Modifier::BOLD)),
+            Span::styled(
+                "[q] ",
+                Style::default()
+                    .fg(theme.primary)
+                    .add_modifier(Modifier::BOLD),
+            ),
             Span::styled("Quit  ", Style::default().fg(theme.fg)),
             Span::styled("│ Theme: ", Style::default().fg(theme.muted)),
             Span::styled(theme.choice.name(), Style::default().fg(theme.secondary)),
@@ -214,12 +251,13 @@ fn render_footer(f: &mut Frame, app: &App, theme: &Theme, area: Rect) {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::storage::Storage;
     use ratatui::backend::TestBackend;
     use ratatui::Terminal;
-    use crate::storage::Storage;
 
     fn create_test_app() -> (App, std::path::PathBuf) {
-        let temp_dir = std::env::temp_dir().join(format!("termodoro_ui_test_{}", uuid::Uuid::new_v4()));
+        let temp_dir =
+            std::env::temp_dir().join(format!("termodoro_ui_test_{}", uuid::Uuid::new_v4()));
         let file_path = temp_dir.join("data.json");
         let storage = Storage::with_path(file_path.clone());
         let app = App::new_with_storage(storage);
@@ -244,7 +282,8 @@ mod tests {
 
         // Render Stats tab with sessions
         app.active_tab = ActiveTab::Stats;
-        app.stats.record(crate::timer::PomodoroPhase::Work, 25, None, None);
+        app.stats
+            .record(crate::timer::PomodoroPhase::Work, 25, None, None);
         terminal.draw(|f| render(f, &app)).unwrap();
 
         // Render Settings tab
@@ -441,19 +480,33 @@ mod tests {
     fn test_render_varied_terminal_geometries_stress() {
         let (mut app, temp_dir) = create_test_app();
         app.tasks.add("Task 1".to_string(), 2);
-        app.stats.record(crate::timer::PomodoroPhase::Work, 25, None, None);
+        app.stats
+            .record(crate::timer::PomodoroPhase::Work, 25, None, None);
 
         let geometries = [
-            (50, 18), (60, 20), (70, 22), (80, 24),
-            (90, 28), (100, 30), (120, 35), (140, 40),
-            (160, 45), (200, 50), (250, 60),
+            (50, 18),
+            (60, 20),
+            (70, 22),
+            (80, 24),
+            (90, 28),
+            (100, 30),
+            (120, 35),
+            (140, 40),
+            (160, 45),
+            (200, 50),
+            (250, 60),
         ];
 
         for (w, h) in geometries {
             let backend = TestBackend::new(w, h);
             let mut terminal = Terminal::new(backend).unwrap();
 
-            for tab in [ActiveTab::Timer, ActiveTab::Tasks, ActiveTab::Stats, ActiveTab::Settings] {
+            for tab in [
+                ActiveTab::Timer,
+                ActiveTab::Tasks,
+                ActiveTab::Stats,
+                ActiveTab::Settings,
+            ] {
                 app.active_tab = tab;
                 terminal.draw(|f| render(f, &app)).unwrap();
             }
@@ -462,6 +515,3 @@ mod tests {
         let _ = std::fs::remove_dir_all(temp_dir);
     }
 }
-
-
-

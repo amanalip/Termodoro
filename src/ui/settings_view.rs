@@ -38,30 +38,92 @@ pub fn render(f: &mut Frame, app: &App, theme: &Theme, area: Rect) {
     // List of configurable settings items with their current values and descriptions
     let setting_items = [
         // Work focus duration in minutes
-        ("Focus Duration", format!("{} mins", app.config.work_duration_mins), "Length of a standard work pomodoro (1 - 120 mins)"),
+        (
+            "Focus Duration",
+            format!("{} mins", app.config.work_duration_mins),
+            "Length of a standard work pomodoro (1 - 120 mins)",
+        ),
         // Short break duration in minutes
-        ("Short Break", format!("{} mins", app.config.short_break_mins), "Duration of short breaks between sessions (1 - 60 mins)"),
+        (
+            "Short Break",
+            format!("{} mins", app.config.short_break_mins),
+            "Duration of short breaks between sessions (1 - 60 mins)",
+        ),
         // Long break duration in minutes
-        ("Long Break", format!("{} mins", app.config.long_break_mins), "Duration of long break after completing a full cycle (1 - 90 mins)"),
+        (
+            "Long Break",
+            format!("{} mins", app.config.long_break_mins),
+            "Duration of long break after completing a full cycle (1 - 90 mins)",
+        ),
         // Number of focus sessions before long break
-        ("Long Break Interval", format!("{} sessions", app.config.long_break_interval), "Number of focus sessions before a long break (1 - 24)"),
+        (
+            "Long Break Interval",
+            format!("{} sessions", app.config.long_break_interval),
+            "Number of focus sessions before a long break (1 - 24)",
+        ),
         // Auto-start breaks toggle
-        ("Auto-start Breaks", if app.config.auto_start_breaks { "Enabled" } else { "Disabled" }.to_string(), "Automatically start countdown when entering a break"),
+        (
+            "Auto-start Breaks",
+            if app.config.auto_start_breaks {
+                "Enabled"
+            } else {
+                "Disabled"
+            }
+            .to_string(),
+            "Automatically start countdown when entering a break",
+        ),
         // Auto-start work sessions toggle
-        ("Auto-start Work", if app.config.auto_start_work { "Enabled" } else { "Disabled" }.to_string(), "Automatically start countdown after break finishes"),
+        (
+            "Auto-start Work",
+            if app.config.auto_start_work {
+                "Enabled"
+            } else {
+                "Disabled"
+            }
+            .to_string(),
+            "Automatically start countdown after break finishes",
+        ),
         // Desktop notification toggle
-        ("Desktop Notifications", if app.config.desktop_notifications { "Enabled" } else { "Disabled" }.to_string(), "Send native OS desktop notification on phase completion"),
+        (
+            "Desktop Notifications",
+            if app.config.desktop_notifications {
+                "Enabled"
+            } else {
+                "Disabled"
+            }
+            .to_string(),
+            "Send native OS desktop notification on phase completion",
+        ),
         // Sound / terminal bell alert toggle
-        ("Sound / Bell Alert", if app.config.sound_enabled { "Enabled" } else { "Disabled" }.to_string(), "Ring audio / terminal bell when a session finishes"),
+        (
+            "Sound / Bell Alert",
+            if app.config.sound_enabled {
+                "Enabled"
+            } else {
+                "Disabled"
+            }
+            .to_string(),
+            "Ring audio / terminal bell when a session finishes",
+        ),
         // Active visual color theme selection
-        ("Color Theme", app.config.theme.name().to_string(), "Select your favorite TUI visual color scheme"),
+        (
+            "Color Theme",
+            app.config.theme.name().to_string(),
+            "Select your favorite TUI visual color scheme",
+        ),
     ];
 
     // Define table header columns
     let header_cells = ["", "Setting", "Current Value", "Description"]
         .iter()
         // Map header labels to styled cells
-        .map(|h| Cell::from(*h).style(Style::default().fg(theme.primary).add_modifier(Modifier::BOLD)));
+        .map(|h| {
+            Cell::from(*h).style(
+                Style::default()
+                    .fg(theme.primary)
+                    .add_modifier(Modifier::BOLD),
+            )
+        });
     // Build table header row
     let header = Row::new(header_cells).height(1).bottom_margin(1);
 
@@ -79,7 +141,9 @@ pub fn render(f: &mut Frame, app: &App, theme: &Theme, area: Rect) {
             // Style for value cell
             let val_style = if is_selected {
                 // Highlighted value
-                Style::default().fg(theme.primary).add_modifier(Modifier::BOLD)
+                Style::default()
+                    .fg(theme.primary)
+                    .add_modifier(Modifier::BOLD)
             } else {
                 // Normal value
                 Style::default().fg(theme.fg)
@@ -134,7 +198,10 @@ pub fn render(f: &mut Frame, app: &App, theme: &Theme, area: Rect) {
     .block(
         Block::default()
             // Panel title
-            .title(Span::styled(" ⚙️ Preferences & Settings ", Style::default().fg(theme.primary)))
+            .title(Span::styled(
+                " ⚙️ Preferences & Settings ",
+                Style::default().fg(theme.primary),
+            ))
             // All borders
             .borders(Borders::ALL)
             // Rounded corners
@@ -148,13 +215,31 @@ pub fn render(f: &mut Frame, app: &App, theme: &Theme, area: Rect) {
     // Bottom navigation helper
     let helper = Paragraph::new(Line::from(vec![
         // Up/down keys
-        Span::styled(" [↑/↓] ", Style::default().fg(theme.primary).add_modifier(Modifier::BOLD)),
+        Span::styled(
+            " [↑/↓] ",
+            Style::default()
+                .fg(theme.primary)
+                .add_modifier(Modifier::BOLD),
+        ),
         Span::styled("Select Setting  ", Style::default().fg(theme.fg)),
         // Left/Right or +/- keys
-        Span::styled("[← / →] or [+/-] ", Style::default().fg(theme.primary).add_modifier(Modifier::BOLD)),
-        Span::styled("Adjust Value / Change Theme  ", Style::default().fg(theme.fg)),
+        Span::styled(
+            "[← / →] or [+/-] ",
+            Style::default()
+                .fg(theme.primary)
+                .add_modifier(Modifier::BOLD),
+        ),
+        Span::styled(
+            "Adjust Value / Change Theme  ",
+            Style::default().fg(theme.fg),
+        ),
         // Space / Enter keys
-        Span::styled("[Space/Enter] ", Style::default().fg(theme.primary).add_modifier(Modifier::BOLD)),
+        Span::styled(
+            "[Space/Enter] ",
+            Style::default()
+                .fg(theme.primary)
+                .add_modifier(Modifier::BOLD),
+        ),
         Span::styled("Toggle", Style::default().fg(theme.fg)),
     ]))
     // Attach styled block

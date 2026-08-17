@@ -43,7 +43,9 @@ impl Storage {
     // Constructor creating a storage instance targeting a custom filepath (useful for testing)
     #[allow(dead_code)]
     pub fn with_path(path: PathBuf) -> Self {
-        Self { custom_path: Some(path) }
+        Self {
+            custom_path: Some(path),
+        }
     }
 
     // Resolves standard XDG/system data directory for termodoro (e.g. ~/.local/share/termodoro)
@@ -158,7 +160,8 @@ mod tests {
 
     #[test]
     fn test_storage_save_and_load_roundtrip() {
-        let temp_dir = std::env::temp_dir().join(format!("termodoro_test_{}", uuid::Uuid::new_v4()));
+        let temp_dir =
+            std::env::temp_dir().join(format!("termodoro_test_{}", uuid::Uuid::new_v4()));
         let file_path = temp_dir.join("test_data.json");
         let storage = Storage::with_path(file_path.clone());
 
@@ -183,7 +186,8 @@ mod tests {
 
     #[test]
     fn test_storage_fallback_on_nonexistent_or_corrupt_file() {
-        let temp_dir = std::env::temp_dir().join(format!("termodoro_test_{}", uuid::Uuid::new_v4()));
+        let temp_dir =
+            std::env::temp_dir().join(format!("termodoro_test_{}", uuid::Uuid::new_v4()));
         let file_path = temp_dir.join("nonexistent.json");
         let storage = Storage::with_path(file_path.clone());
 
@@ -205,7 +209,8 @@ mod tests {
 
     #[test]
     fn test_storage_custom_deep_path_creation() {
-        let temp_dir = std::env::temp_dir().join(format!("termodoro_deep_{}", uuid::Uuid::new_v4()));
+        let temp_dir =
+            std::env::temp_dir().join(format!("termodoro_deep_{}", uuid::Uuid::new_v4()));
         let deep_file_path = temp_dir.join("sub1").join("sub2").join("deep_data.json");
         let storage = Storage::with_path(deep_file_path.clone());
 
@@ -223,5 +228,3 @@ mod tests {
         let _ = fs::remove_dir_all(temp_dir);
     }
 }
-
-

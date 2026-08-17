@@ -1,7 +1,7 @@
 // Audio playback and acoustic synthesis module for Termodoro
+use crate::timer::PomodoroPhase;
 use std::io::Cursor;
 use std::sync::atomic::{AtomicBool, Ordering};
-use crate::timer::PomodoroPhase;
 
 // Flag to disable audio hardware playback in unit testing environments
 static AUDIO_MUTED_FOR_TESTS: AtomicBool = AtomicBool::new(false);
@@ -29,8 +29,8 @@ pub fn create_riff_wav_pcm16(samples: &[i16], sample_rate: u32) -> Vec<u8> {
     // "fmt " sub-chunk
     buffer.extend_from_slice(b"fmt ");
     buffer.extend_from_slice(&16u32.to_le_bytes()); // Subchunk1Size for PCM = 16
-    buffer.extend_from_slice(&1u16.to_le_bytes());  // AudioFormat = 1 (PCM)
-    buffer.extend_from_slice(&1u16.to_le_bytes());  // NumChannels = 1 (Mono)
+    buffer.extend_from_slice(&1u16.to_le_bytes()); // AudioFormat = 1 (PCM)
+    buffer.extend_from_slice(&1u16.to_le_bytes()); // NumChannels = 1 (Mono)
     buffer.extend_from_slice(&sample_rate.to_le_bytes());
     buffer.extend_from_slice(&byte_rate.to_le_bytes());
     buffer.extend_from_slice(&block_align.to_le_bytes());
@@ -242,7 +242,10 @@ mod tests {
 
     #[test]
     fn test_wav_sample_bounds_no_clipping_break_chimes() {
-        for (name, wav) in [("break", generate_break_complete_chime()), ("long_break", generate_long_break_chime())] {
+        for (name, wav) in [
+            ("break", generate_break_complete_chime()),
+            ("long_break", generate_long_break_chime()),
+        ] {
             let sample_bytes = &wav[44..];
             let mut max_abs: i16 = 0;
             for chunk in sample_bytes.chunks_exact(2) {
@@ -289,4 +292,3 @@ mod tests {
         assert!(!AUDIO_MUTED_FOR_TESTS.load(Ordering::SeqCst));
     }
 }
-

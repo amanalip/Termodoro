@@ -4,9 +4,10 @@ use ratatui::style::Color;
 use serde::{Deserialize, Serialize};
 
 // Enum representing the selectable visual color themes in the application
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]
 pub enum ThemeChoice {
     // Catppuccin Mocha theme (modern pastel dark palette)
+    #[default]
     CatppuccinMocha,
     // Nord theme (arctic, north-bluish palette)
     Nord,
@@ -57,15 +58,6 @@ impl ThemeChoice {
             // Display string for Solarized Dark
             ThemeChoice::SolarizedDark => "Solarized Dark",
         }
-    }
-}
-
-// Implement Default trait for ThemeChoice to provide a sensible fallback
-impl Default for ThemeChoice {
-    // Default theme is Catppuccin Mocha
-    fn default() -> Self {
-        // Return CatppuccinMocha variant
-        ThemeChoice::CatppuccinMocha
     }
 }
 
@@ -333,4 +325,3 @@ mod tests {
         }
     }
 }
-

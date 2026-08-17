@@ -170,7 +170,10 @@ impl App {
             // Handle timer completion event
             match event {
                 // Phase completed
-                TimerEvent::PhaseCompleted { finished_phase, next_phase } => {
+                TimerEvent::PhaseCompleted {
+                    finished_phase,
+                    next_phase,
+                } => {
                     // Calculate duration in minutes for finished phase
                     let dur_mins = match finished_phase {
                         PomodoroPhase::Work => self.config.work_duration_mins,
@@ -193,11 +196,16 @@ impl App {
                     };
 
                     // Record completed session in historical analytics
-                    self.stats.record(finished_phase, dur_mins, task_id, task_title);
+                    self.stats
+                        .record(finished_phase, dur_mins, task_id, task_title);
                     // Trigger audio bell and desktop notification
                     self.notify_phase_completed(finished_phase, next_phase);
                     // Update status banner
-                    self.set_status_message(format!("{} completed! Next: {}", finished_phase.title(), next_phase.title()));
+                    self.set_status_message(format!(
+                        "{} completed! Next: {}",
+                        finished_phase.title(),
+                        next_phase.title()
+                    ));
                     // Automatically persist state to disk
                     self.save_state();
                 }
@@ -384,7 +392,8 @@ impl App {
                 // Check if title is not blank
                 if !self.task_input_title.trim().is_empty() {
                     // Add task to task manager
-                    self.tasks.add(self.task_input_title.clone(), self.task_input_estimated);
+                    self.tasks
+                        .add(self.task_input_title.clone(), self.task_input_estimated);
                     // Close task modal
                     self.show_task_modal = false;
                     // Show confirmation notification
@@ -613,7 +622,9 @@ impl App {
                 // Update config
                 self.config.work_duration_mins = new_val;
                 // Reset timer if currently stopped
-                if self.timer.status == crate::timer::TimerStatus::Stopped && self.timer.phase == PomodoroPhase::Work {
+                if self.timer.status == crate::timer::TimerStatus::Stopped
+                    && self.timer.phase == PomodoroPhase::Work
+                {
                     self.timer.reset(&self.config);
                 }
             }
@@ -624,7 +635,9 @@ impl App {
                 // Update config
                 self.config.short_break_mins = new_val;
                 // Reset timer if in ShortBreak and stopped
-                if self.timer.status == crate::timer::TimerStatus::Stopped && self.timer.phase == PomodoroPhase::ShortBreak {
+                if self.timer.status == crate::timer::TimerStatus::Stopped
+                    && self.timer.phase == PomodoroPhase::ShortBreak
+                {
                     self.timer.reset(&self.config);
                 }
             }
@@ -635,7 +648,9 @@ impl App {
                 // Update config
                 self.config.long_break_mins = new_val;
                 // Reset timer if in LongBreak and stopped
-                if self.timer.status == crate::timer::TimerStatus::Stopped && self.timer.phase == PomodoroPhase::LongBreak {
+                if self.timer.status == crate::timer::TimerStatus::Stopped
+                    && self.timer.phase == PomodoroPhase::LongBreak
+                {
                     self.timer.reset(&self.config);
                 }
             }
@@ -671,7 +686,10 @@ impl App {
                 // Get all theme choices
                 let all_themes = ThemeChoice::all();
                 // Find current theme index
-                let cur_idx = all_themes.iter().position(|&t| t == self.config.theme).unwrap_or(0);
+                let cur_idx = all_themes
+                    .iter()
+                    .position(|&t| t == self.config.theme)
+                    .unwrap_or(0);
                 // Calculate next theme index with wrapping
                 let next_idx = if delta > 0 {
                     (cur_idx + 1) % all_themes.len()
@@ -719,7 +737,8 @@ mod tests {
     }
 
     fn create_test_app() -> (App, std::path::PathBuf) {
-        let temp_dir = std::env::temp_dir().join(format!("termodoro_app_test_{}", uuid::Uuid::new_v4()));
+        let temp_dir =
+            std::env::temp_dir().join(format!("termodoro_app_test_{}", uuid::Uuid::new_v4()));
         let file_path = temp_dir.join("data.json");
         let storage = Storage::with_path(file_path.clone());
         let app = App::new_with_storage(storage);
@@ -1064,7 +1083,8 @@ mod tests {
 
     #[test]
     fn test_app_restart_and_state_recovery_e2e() {
-        let temp_dir = std::env::temp_dir().join(format!("termodoro_recovery_test_{}", uuid::Uuid::new_v4()));
+        let temp_dir =
+            std::env::temp_dir().join(format!("termodoro_recovery_test_{}", uuid::Uuid::new_v4()));
         let file_path = temp_dir.join("data.json");
 
         // Session 1: Launch app, modify settings, add tasks, record stats, save state
@@ -1083,7 +1103,12 @@ mod tests {
             app1.tasks.toggle_selected(); // Mark Task 2 completed
 
             // Record some stats
-            app1.stats.record(PomodoroPhase::Work, 45, Some("Persistent Task 1".to_string()), Some("Persistent Task 1".to_string()));
+            app1.stats.record(
+                PomodoroPhase::Work,
+                45,
+                Some("Persistent Task 1".to_string()),
+                Some("Persistent Task 1".to_string()),
+            );
 
             app1.save_state();
         }
@@ -1154,7 +1179,11 @@ mod tests {
         app.tasks.selected_index = 2;
         app.on_key_event(make_key(KeyCode::Char('t')));
         assert_eq!(app.tasks.active_task().unwrap().title, "Task 3");
-        assert!(app.status_message.as_ref().unwrap().contains("Target set to: Task 3"));
+        assert!(app
+            .status_message
+            .as_ref()
+            .unwrap()
+            .contains("Target set to: Task 3"));
 
         // Delete with 'd'
         app.tasks.selected_index = 1;
@@ -1252,7 +1281,10 @@ mod tests {
     fn test_status_message_expiration_on_ticks() {
         let (mut app, temp_dir) = create_test_app();
         app.set_status_message("Temporary Notification".to_string());
-        assert_eq!(app.status_message.as_deref(), Some("Temporary Notification"));
+        assert_eq!(
+            app.status_message.as_deref(),
+            Some("Temporary Notification")
+        );
         assert_eq!(app.status_message_ticks, 40);
 
         // Tick 39 times
@@ -1380,7 +1412,3 @@ mod tests {
         let _ = std::fs::remove_dir_all(temp_dir);
     }
 }
-
-
-
-

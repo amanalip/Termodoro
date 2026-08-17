@@ -96,7 +96,12 @@ pub fn render(f: &mut Frame, theme: &Theme, area: Rect) {
         .block(
             Block::default()
                 // Title
-                .title(Span::styled(" ❓ Termodoro Keybindings & Help ", Style::default().fg(theme.primary).add_modifier(Modifier::BOLD)))
+                .title(Span::styled(
+                    " ❓ Termodoro Keybindings & Help ",
+                    Style::default()
+                        .fg(theme.primary)
+                        .add_modifier(Modifier::BOLD),
+                ))
                 // All borders
                 .borders(Borders::ALL)
                 // Rounded corners

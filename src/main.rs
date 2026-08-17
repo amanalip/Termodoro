@@ -77,7 +77,11 @@ fn main() -> Result<(), Box<dyn Error>> {
     // Restore terminal: disable raw mode
     disable_raw_mode()?;
     // Leave alternate screen and restore cursor visibility
-    execute!(terminal.backend_mut(), LeaveAlternateScreen, crossterm::cursor::Show)?;
+    execute!(
+        terminal.backend_mut(),
+        LeaveAlternateScreen,
+        crossterm::cursor::Show
+    )?;
     // Restore clear terminal screen
     terminal.show_cursor()?;
 

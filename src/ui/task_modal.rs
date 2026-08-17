@@ -47,7 +47,12 @@ pub fn render(f: &mut Frame, app: &App, theme: &Theme, area: Rect) {
     // Render outer modal frame
     let modal_block = Block::default()
         // Modal title
-        .title(Span::styled(" 📝 Add New Task ", Style::default().fg(theme.primary).add_modifier(Modifier::BOLD)))
+        .title(Span::styled(
+            " 📝 Add New Task ",
+            Style::default()
+                .fg(theme.primary)
+                .add_modifier(Modifier::BOLD),
+        ))
         // All borders
         .borders(Borders::ALL)
         // Rounded corners
@@ -71,10 +76,18 @@ pub fn render(f: &mut Frame, app: &App, theme: &Theme, area: Rect) {
     // Build title display text with cursor
     let title_text = if app.task_input_title.is_empty() && app.task_modal_focus != 0 {
         // Placeholder text
-        Span::styled("Enter task description...", Style::default().fg(theme.muted).add_modifier(Modifier::ITALIC))
+        Span::styled(
+            "Enter task description...",
+            Style::default()
+                .fg(theme.muted)
+                .add_modifier(Modifier::ITALIC),
+        )
     } else if app.task_modal_focus == 0 {
         // Show entered text with blinking cursor block
-        Span::styled(format!("{}█", app.task_input_title), Style::default().fg(theme.fg))
+        Span::styled(
+            format!("{}█", app.task_input_title),
+            Style::default().fg(theme.fg),
+        )
     } else {
         // Show entered text without cursor
         Span::styled(&app.task_input_title, Style::default().fg(theme.fg))
@@ -84,7 +97,10 @@ pub fn render(f: &mut Frame, app: &App, theme: &Theme, area: Rect) {
     let title_widget = Paragraph::new(Line::from(title_text)).block(
         Block::default()
             // Title field label
-            .title(Span::styled(" Task Description ", Style::default().fg(title_border_color)))
+            .title(Span::styled(
+                " Task Description ",
+                Style::default().fg(title_border_color),
+            ))
             // Borders
             .borders(Borders::ALL)
             // Rounded corners
@@ -105,12 +121,22 @@ pub fn render(f: &mut Frame, app: &App, theme: &Theme, area: Rect) {
     };
 
     // Estimated pomodoros display
-    let est_text = format!("🍅 {} pomodoros (Use ← / → or +/- to adjust)", app.task_input_estimated);
+    let est_text = format!(
+        "🍅 {} pomodoros (Use ← / → or +/- to adjust)",
+        app.task_input_estimated
+    );
     // Build estimated pomodoros paragraph widget
-    let est_widget = Paragraph::new(Line::from(Span::styled(est_text, Style::default().fg(theme.fg)))).block(
+    let est_widget = Paragraph::new(Line::from(Span::styled(
+        est_text,
+        Style::default().fg(theme.fg),
+    )))
+    .block(
         Block::default()
             // Estimated field label
-            .title(Span::styled(" Estimated Focus Sessions ", Style::default().fg(est_border_color)))
+            .title(Span::styled(
+                " Estimated Focus Sessions ",
+                Style::default().fg(est_border_color),
+            ))
             // Borders
             .borders(Borders::ALL)
             // Rounded corners
@@ -124,13 +150,26 @@ pub fn render(f: &mut Frame, app: &App, theme: &Theme, area: Rect) {
     // 3. Bottom Button Controls
     let help_line = Line::from(vec![
         // Tab key
-        Span::styled("[Tab] ", Style::default().fg(theme.primary).add_modifier(Modifier::BOLD)),
+        Span::styled(
+            "[Tab] ",
+            Style::default()
+                .fg(theme.primary)
+                .add_modifier(Modifier::BOLD),
+        ),
         Span::styled("Next Field  ", Style::default().fg(theme.fg)),
         // Enter key
-        Span::styled("[Enter] ", Style::default().fg(theme.success).add_modifier(Modifier::BOLD)),
+        Span::styled(
+            "[Enter] ",
+            Style::default()
+                .fg(theme.success)
+                .add_modifier(Modifier::BOLD),
+        ),
         Span::styled("Save Task  ", Style::default().fg(theme.fg)),
         // Esc key
-        Span::styled("[Esc] ", Style::default().fg(theme.work).add_modifier(Modifier::BOLD)),
+        Span::styled(
+            "[Esc] ",
+            Style::default().fg(theme.work).add_modifier(Modifier::BOLD),
+        ),
         Span::styled("Cancel", Style::default().fg(theme.fg)),
     ]);
     // Build help paragraph widget

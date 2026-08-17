@@ -1,4 +1,5 @@
 # Ignore Rust Cargo build artifacts and compilation cache directory
+target/
 /target/
 
 # Ignore Cargo lock file overrides (if any local backup exists)

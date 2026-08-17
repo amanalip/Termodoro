@@ -42,21 +42,27 @@ pub fn render(f: &mut Frame, app: &App, theme: &Theme, area: Rect) {
     // 1. Filter Bar Header
     let all_style = if app.tasks.filter == TaskFilter::All {
         // Highlight active filter with primary theme color
-        Style::default().fg(theme.primary).add_modifier(Modifier::BOLD)
+        Style::default()
+            .fg(theme.primary)
+            .add_modifier(Modifier::BOLD)
     } else {
         // Muted color for inactive filters
         Style::default().fg(theme.muted)
     };
     let act_style = if app.tasks.filter == TaskFilter::Active {
         // Highlight active filter
-        Style::default().fg(theme.primary).add_modifier(Modifier::BOLD)
+        Style::default()
+            .fg(theme.primary)
+            .add_modifier(Modifier::BOLD)
     } else {
         // Muted color
         Style::default().fg(theme.muted)
     };
     let comp_style = if app.tasks.filter == TaskFilter::Completed {
         // Highlight completed filter
-        Style::default().fg(theme.primary).add_modifier(Modifier::BOLD)
+        Style::default()
+            .fg(theme.primary)
+            .add_modifier(Modifier::BOLD)
     } else {
         // Muted color
         Style::default().fg(theme.muted)
@@ -76,15 +82,24 @@ pub fn render(f: &mut Frame, app: &App, theme: &Theme, area: Rect) {
         // All filter button
         Span::styled("[1] All ", all_style),
         // All count
-        Span::styled(format!("({}) ", total_tasks), Style::default().fg(theme.muted)),
+        Span::styled(
+            format!("({}) ", total_tasks),
+            Style::default().fg(theme.muted),
+        ),
         // Active filter button
         Span::styled(" [2] Active ", act_style),
         // Active count
-        Span::styled(format!("({}) ", pending_tasks), Style::default().fg(theme.muted)),
+        Span::styled(
+            format!("({}) ", pending_tasks),
+            Style::default().fg(theme.muted),
+        ),
         // Completed filter button
         Span::styled(" [3] Completed ", comp_style),
         // Completed count
-        Span::styled(format!("({})", completed_tasks), Style::default().fg(theme.muted)),
+        Span::styled(
+            format!("({})", completed_tasks),
+            Style::default().fg(theme.muted),
+        ),
     ]);
     // Create filter paragraph widget
     let filter_widget = Paragraph::new(filter_line).block(
@@ -103,10 +118,22 @@ pub fn render(f: &mut Frame, app: &App, theme: &Theme, area: Rect) {
     let indices = app.tasks.filtered_indices();
 
     // Define table header columns
-    let header_cells = ["", "Status", "Task Title", "Est. Pomodoros", "Active Target"]
-        .iter()
-        // Map header column strings to styled cells
-        .map(|h| Cell::from(*h).style(Style::default().fg(theme.primary).add_modifier(Modifier::BOLD)));
+    let header_cells = [
+        "",
+        "Status",
+        "Task Title",
+        "Est. Pomodoros",
+        "Active Target",
+    ]
+    .iter()
+    // Map header column strings to styled cells
+    .map(|h| {
+        Cell::from(*h).style(
+            Style::default()
+                .fg(theme.primary)
+                .add_modifier(Modifier::BOLD),
+        )
+    });
     // Build table header row
     let header = Row::new(header_cells).height(1).bottom_margin(1);
 
@@ -138,7 +165,9 @@ pub fn render(f: &mut Frame, app: &App, theme: &Theme, area: Rect) {
             // Style task title text
             let title_style = if task.completed {
                 // Strike-through and muted for finished tasks
-                Style::default().fg(theme.muted).add_modifier(Modifier::CROSSED_OUT)
+                Style::default()
+                    .fg(theme.muted)
+                    .add_modifier(Modifier::CROSSED_OUT)
             } else if is_selected {
                 // Bold text for selected row
                 Style::default().fg(theme.fg).add_modifier(Modifier::BOLD)
@@ -213,7 +242,10 @@ pub fn render(f: &mut Frame, app: &App, theme: &Theme, area: Rect) {
     .block(
         Block::default()
             // Panel title
-            .title(Span::styled(" 📋 Tasks ", Style::default().fg(theme.primary)))
+            .title(Span::styled(
+                " 📋 Tasks ",
+                Style::default().fg(theme.primary),
+            ))
             // All borders
             .borders(Borders::ALL)
             // Rounded corners
@@ -226,15 +258,40 @@ pub fn render(f: &mut Frame, app: &App, theme: &Theme, area: Rect) {
 
     // 3. Bottom Action Hints
     let action_spans = vec![
-        Span::styled(" [a] ", Style::default().fg(theme.primary).add_modifier(Modifier::BOLD)),
+        Span::styled(
+            " [a] ",
+            Style::default()
+                .fg(theme.primary)
+                .add_modifier(Modifier::BOLD),
+        ),
         Span::styled("Add Task  ", Style::default().fg(theme.fg)),
-        Span::styled("[Space] ", Style::default().fg(theme.primary).add_modifier(Modifier::BOLD)),
+        Span::styled(
+            "[Space] ",
+            Style::default()
+                .fg(theme.primary)
+                .add_modifier(Modifier::BOLD),
+        ),
         Span::styled("Toggle Done  ", Style::default().fg(theme.fg)),
-        Span::styled("[t] ", Style::default().fg(theme.primary).add_modifier(Modifier::BOLD)),
+        Span::styled(
+            "[t] ",
+            Style::default()
+                .fg(theme.primary)
+                .add_modifier(Modifier::BOLD),
+        ),
         Span::styled("Set Target  ", Style::default().fg(theme.fg)),
-        Span::styled("[d] ", Style::default().fg(theme.primary).add_modifier(Modifier::BOLD)),
+        Span::styled(
+            "[d] ",
+            Style::default()
+                .fg(theme.primary)
+                .add_modifier(Modifier::BOLD),
+        ),
         Span::styled("Delete  ", Style::default().fg(theme.fg)),
-        Span::styled("[↑/↓] ", Style::default().fg(theme.primary).add_modifier(Modifier::BOLD)),
+        Span::styled(
+            "[↑/↓] ",
+            Style::default()
+                .fg(theme.primary)
+                .add_modifier(Modifier::BOLD),
+        ),
         Span::styled("Navigate", Style::default().fg(theme.fg)),
     ];
     // Build action helper paragraph

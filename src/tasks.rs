@@ -44,23 +44,15 @@ impl Task {
 }
 
 // Filter enumeration for filtering tasks in the task view
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum TaskFilter {
     // Display all tasks regardless of status
+    #[default]
     All,
     // Display only active (uncompleted) tasks
     Active,
     // Display only completed tasks
     Completed,
-}
-
-// Default filter is to show All tasks
-impl Default for TaskFilter {
-    // Return All filter as default
-    fn default() -> Self {
-        // Return TaskFilter::All variant
-        TaskFilter::All
-    }
 }
 
 // Manager structure managing the task list, selections, and active target
@@ -144,7 +136,11 @@ impl TaskManager {
             // If the deleted task was the active timer target, reassign target to next incomplete task
             if self.active_task_id.as_deref() == Some(&removed.id) {
                 // Find first uncompleted task
-                self.active_task_id = self.tasks.iter().find(|t| !t.completed).map(|t| t.id.clone());
+                self.active_task_id = self
+                    .tasks
+                    .iter()
+                    .find(|t| !t.completed)
+                    .map(|t| t.id.clone());
             }
             // Get new length of filtered tasks
             let new_indices_len = self.filtered_indices().len();
@@ -169,7 +165,11 @@ impl TaskManager {
                 // If newly marked completed was active timer target, switch active target
                 if task.completed && self.active_task_id.as_deref() == Some(&task.id) {
                     // Reassign to another incomplete task if available
-                    self.active_task_id = self.tasks.iter().find(|t| !t.completed).map(|t| t.id.clone());
+                    self.active_task_id = self
+                        .tasks
+                        .iter()
+                        .find(|t| !t.completed)
+                        .map(|t| t.id.clone());
                 }
             }
         }
@@ -264,7 +264,10 @@ mod tests {
         // Verify estimated pomodoros
         assert_eq!(manager.tasks[0].pomodoros_estimated, 3);
         // Verify it was set as active target automatically
-        assert_eq!(manager.active_task().map(|t| t.title.as_str()), Some("Write unit tests"));
+        assert_eq!(
+            manager.active_task().map(|t| t.title.as_str()),
+            Some("Write unit tests")
+        );
 
         // Increment active spent pomodoro
         manager.increment_active_spent();
@@ -529,7 +532,3 @@ mod tests {
         assert_eq!(manager.active_task(), None);
     }
 }
-
-
-
-
