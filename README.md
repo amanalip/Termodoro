@@ -305,15 +305,30 @@ The Settings view allows you to customize durations, toggles, and visual appeara
 
 ---
 
-## 7. Configuration Schema and Data Storage
+## 7. Local Database, Persistence & Restart Recovery
 
-Termodoro uses standard XDG base directory specifications for local data persistence:
+Termodoro features built-in, offline-first local persistence. **No information is lost upon closing or restarting the application.**
 
-- **Linux / BSD**: `~/.local/share/termodoro/data.json`
-- **macOS**: `~/Library/Application Support/com.termodoro.termodoro/data.json`
-- **Windows**: `C:\Users\<User>\AppData\Roaming\termodoro\termodoro\data.json`
+### How Data Persistence Works
 
-### Annotated `data.json` Example
+1. **Automatic Loading on Launch**: When `termodoro` boots up, it automatically locates and loads your `data.json` database. If launching for the first time, it initializes the database with clean default settings.
+2. **Real-Time & Exit Synchronization**: Whenever you create or complete a task, adjust preferences, change a theme, finish a focus interval, or quit (`q` / `Esc`), the application automatically serializes and writes the state to disk using atomic file writing.
+3. **What is Persisted**:
+   - 📋 **Interactive Tasks**: Task titles, completion marks (`✔` / `○`), spent Pomodoro counts, estimated Pomodoro counts, creation timestamps, and designated active target IDs.
+   - ⚙️ **User Configuration**: Focus durations, break durations, long break intervals (1 to 24 cycles), automation toggles, alert preferences, and active color themes.
+   - 📊 **Productivity Statistics & Streaks**: Complete chronological history of focus sessions, used to calculate daily focus minutes, current daily streaks, personal best streaks, and weekly activity distribution charts.
+
+### Database File Location by Operating System
+
+Termodoro follows the standard XDG base directory conventions on Unix and platform-native storage paths:
+
+| Platform | Database File Path |
+| :--- | :--- |
+| **Linux / BSD** | `~/.local/share/termodoro/data.json` |
+| **macOS** | `~/Library/Application Support/com.termodoro.termodoro/data.json` |
+| **Windows** | `%APPDATA%\termodoro\termodoro\data.json` |
+
+### Annotated `data.json` Schema
 
 ```json
 {
@@ -354,6 +369,9 @@ Termodoro uses standard XDG base directory specifications for local data persist
   }
 }
 ```
+
+### Backing Up & Transferring Your Data
+Because the database is standard JSON, you can easily back up, version-control, or migrate your Pomodoro history between computers simply by copying the `data.json` file.
 
 ---
 
