@@ -11,10 +11,18 @@ Termodoro is a keyboard-driven, lightweight productivity suite built specificall
 3. [Key Features Overview](#3-key-features-overview)
 4. [System Architecture](#4-system-architecture)
 5. [Installation & Beginner Setup Guide](#5-installation--beginner-setup-guide)
-   - [Prerequisites](#prerequisites)
-   - [Installing Rust and Cargo](#installing-rust-and-cargo)
-   - [Cloning and Building the Repository](#cloning-and-building-the-repository)
-   - [Creating a Convenient Terminal Shortcut (Alias)](#creating-a-convenient-terminal-shortcut-alias)
+   - [System Prerequisites & Requirements](#system-prerequisites--requirements)
+   - [Step 1: Installing Rust and Cargo Toolchain](#step-1-installing-rust-and-cargo-toolchain)
+   - [Step 2: Installing OS Build Dependencies (Optional / Platform-Specific)](#step-2-installing-os-build-dependencies-optional--platform-specific)
+   - [Step 3: Building and Installing Termodoro](#step-3-building-and-installing-termodoro)
+     - [Option A: Global Installation via Cargo (Recommended)](#option-a-global-installation-via-cargo-recommended)
+     - [Option B: Running Directly from Source](#option-b-running-directly-from-source)
+     - [Option C: Manual Release Binary Installation](#option-c-manual-release-binary-installation)
+   - [Step 4: Ensuring `~/.cargo/bin` is in Your PATH](#step-4-ensuring-cargobin-is-in-your-path)
+   - [Step 5: Shell Aliases, Shortcuts & Autostart](#step-5-shell-aliases-shortcuts--autostart)
+   - [Step 6: Terminal Multiplexer Integration (tmux & Zellij)](#step-6-terminal-multiplexer-integration-tmux--zellij)
+   - [Step 7: Verification & First Launch Checklist](#step-7-verification--first-launch-checklist)
+   - [Updating & Uninstalling Termodoro](#updating--uninstalling-termodoro)
 6. [User Interface and Navigation Guide](#6-user-interface-and-navigation-guide)
    - [Global Navigation Controls](#global-navigation-controls)
    - [Tab 1: Pomodoro Countdown Timer](#tab-1-pomodoro-countdown-timer)
@@ -103,65 +111,254 @@ Termodoro/
 
 ## 5. Installation & Beginner Setup Guide
 
-### Prerequisites
-To build and run Termodoro, you will need:
-1. **Rust and Cargo**: Version 1.74.0 or newer.
-2. **A Modern Terminal Emulator**: Supporting TrueColor (24-bit RGB) and UTF-8 encoding (e.g., Alacritty, Kitty, WezTerm, iTerm2, Windows Terminal, GNOME Terminal).
+Termodoro is distributed as an open-source Rust application. It can be compiled and installed on any platform supported by Rust, including **Linux**, **macOS**, and **Windows (WSL & native)**.
 
-### Installing Rust and Cargo
+---
 
-If you do not have Rust installed on your computer, you can install it using `rustup`, the official Rust toolchain installer:
+### System Prerequisites & Requirements
 
-- **Linux and macOS**:
-  ```bash
-  curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-  ```
-  Follow the on-screen prompts (option 1 is recommended). Afterward, reload your shell:
-  ```bash
-  source "$HOME/.cargo/env"
-  ```
+Before installing Termodoro, ensure your system meets the following requirements:
 
-- **Windows**:
-  Download and run `rustup-init.exe` from the official website ([https://rustup.rs](https://rustup.rs)).
+| Requirement | Minimum Version | Recommended / Details |
+| :--- | :--- | :--- |
+| **Rust & Cargo** | `1.74.0` or higher | Installed via official `rustup` toolchain manager |
+| **Terminal Emulator** | 24-bit TrueColor (`COLORTERM=truecolor`) | [Alacritty](https://alacritty.org), [Kitty](https://sw.kovidgoyal.net/kitty/), [WezTerm](https://wezfurlong.org/wezterm/), [iTerm2](https://iterm2.com), or [Windows Terminal](https://github.com/microsoft/terminal) |
+| **Unicode Font** | UTF-8 compatible | Any [Nerd Font](https://www.nerdfonts.com) (e.g., JetBrains Mono, FiraCode, Hack) |
+| **Notification Daemon** *(Linux only)* | Any standard desktop daemon | `dunst`, `mako`, `swaync`, `xfce4-notifyd`, or GNOME Notification Center |
 
-Verify your installation by running:
+---
+
+### Step 1: Installing Rust and Cargo Toolchain
+
+If you do not already have the Rust compiler (`rustc`) and package manager (`cargo`) installed, install them using `rustup`:
+
+#### Linux and macOS
+Open your terminal and run:
 ```bash
-rustc --version
-cargo --version
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+```
+When prompted during installation, choose **Option 1 (Proceed with standard installation)**.
+
+Once installation finishes, initialize the Cargo environment variables in your current shell:
+```bash
+source "$HOME/.cargo/env"
 ```
 
-### Cloning and Building the Repository
+#### Windows
+1. Download the official installer: [`rustup-init.exe`](https://rustup.rs).
+2. Run the executable and follow the on-screen instructions (MSVC build tools recommended).
+3. Restart your PowerShell or Windows Terminal session.
 
-1. Clone the Termodoro repository from GitHub to your local machine:
-   ```bash
-   git clone https://github.com/amanalip/Termodoro.git
-   cd Termodoro
-   ```
+#### Verify Your Rust Installation
+Confirm that Rust and Cargo are installed and available on your PATH:
+```bash
+rustc --version    # Expected: rustc 1.74.0 or newer
+cargo --version    # Expected: cargo 1.74.0 or newer
+```
 
-2. Build and run the project in release mode:
-   ```bash
-   cargo run --release
-   ```
+---
 
-3. If you want to install the binary globally into your Cargo bin path (`~/.cargo/bin`):
-   ```bash
-   cargo install --path .
-   ```
-   Once installed, you can launch Termodoro from any directory simply by typing:
+### Step 2: Installing OS Build Dependencies (Optional / Platform-Specific)
+
+Termodoro uses purely synthesized in-memory PCM audio without requiring heavy external media libraries. However, standard build tools are required to compile Rust dependencies:
+
+- **Ubuntu / Debian / Linux Mint / Pop!_OS**:
+  ```bash
+  sudo apt update && sudo apt install -y build-essential git libasound2-dev pkg-config libdbus-1-dev
+  ```
+
+- **Arch Linux / Manjaro / EndeavourOS**:
+  ```bash
+  sudo pacman -S --needed base-devel git alsa-lib pkgconf
+  ```
+
+- **Fedora / RHEL / CentOS**:
+  ```bash
+  sudo dnf groupinstall "Development Tools" && sudo dnf install -y git alsa-lib-devel pkgconf-pkg-config
+  ```
+
+- **macOS (Apple Silicon & Intel)**:
+  Make sure Xcode Command Line Tools are installed:
+  ```bash
+  xcode-select --install
+  ```
+
+---
+
+### Step 3: Building and Installing Termodoro
+
+First, clone the repository from GitHub:
+```bash
+git clone https://github.com/amanalip/Termodoro.git
+cd Termodoro
+```
+
+Choose one of the following installation methods:
+
+#### Option A: Global Installation via Cargo (Recommended)
+This compiles the project with full compiler optimizations (`--release`) and places the executable directly into your user's global Cargo binary directory (`~/.cargo/bin/termodoro`):
+
+```bash
+cargo install --path .
+```
+
+After installation completes, you can run Termodoro from **any directory** on your machine:
+```bash
+termodoro
+```
+
+#### Option B: Running Directly from Source
+If you want to test Termodoro quickly without installing it to your system PATH:
+
+```bash
+# Debug build (faster compilation, larger binary)
+cargo run
+
+# Optimized release build (maximum frame rate and lowest CPU usage)
+cargo run --release
+```
+
+#### Option C: Manual Release Binary Installation
+If you prefer placing standalone binaries in standard Unix filesystem locations (such as `~/.local/bin` or `/usr/local/bin`):
+
+```bash
+# 1. Compile the optimized release artifact
+cargo build --release
+
+# 2. Copy the binary to your user local binary folder
+mkdir -p ~/.local/bin
+cp target/release/termodoro ~/.local/bin/
+
+# 3. Ensure proper executable permissions
+chmod +x ~/.local/bin/termodoro
+```
+
+---
+
+### Step 4: Ensuring `~/.cargo/bin` is in Your PATH
+
+If you ran `cargo install --path .` and your terminal displays `command not found: termodoro`, you need to ensure `~/.cargo/bin` is added to your shell's search PATH.
+
+#### For Bash (`~/.bashrc`)
+```bash
+echo 'export PATH="$HOME/.cargo/bin:$HOME/.local/bin:$PATH"' >> ~/.bashrc
+source ~/.bashrc
+```
+
+#### For Zsh (`~/.zshrc` on macOS and Linux)
+```bash
+echo 'export PATH="$HOME/.cargo/bin:$HOME/.local/bin:$PATH"' >> ~/.zshrc
+source ~/.zshrc
+```
+
+#### For Fish (`~/.config/fish/config.fish`)
+```fish
+fish_add_path $HOME/.cargo/bin
+fish_add_path $HOME/.local/bin
+```
+
+#### For Windows PowerShell
+```powershell
+[Environment]::SetEnvironmentVariable("Path", $env:Path + ";$env:USERPROFILE\.cargo\bin", "User")
+```
+
+---
+
+### Step 5: Shell Aliases, Shortcuts & Autostart
+
+For the fastest workflow, create short aliases in your shell profile:
+
+```bash
+# Add to ~/.bashrc or ~/.zshrc
+alias pomo="termodoro"
+alias td="termodoro"
+alias focus="termodoro"
+```
+
+#### Linux Desktop Application Launcher (`.desktop` entry)
+To launch Termodoro directly from application menus or app switchers (Rofi, Wofi, GNOME, KDE, dmenu, Raycast):
+
+Create a desktop file at `~/.local/share/applications/termodoro.desktop`:
+```ini
+[Desktop Entry]
+Name=Termodoro
+Comment=Terminal Pomodoro & Focus Manager
+Exec=alacritty -e termodoro
+Icon=alarm
+Terminal=false
+Type=Application
+Categories=Utility;Office;
+Keywords=pomodoro;timer;focus;productivity;
+```
+*(Replace `alacritty` with your preferred terminal emulator if using Kitty, WezTerm, or Foot).*
+
+---
+
+### Step 6: Terminal Multiplexer Integration (tmux & Zellij)
+
+Termodoro works seamlessly in split panes and dedicated popups inside terminal multiplexers:
+
+#### tmux Dedicated Window or Floating Popup
+Add these keybindings to your `~/.tmux.conf`:
+
+```tmux
+# Open Termodoro in a floating center popup (tmux 3.2+)
+bind-key P display-popup -w 85% -h 80% -E "termodoro"
+
+# Or spawn Termodoro in a new dedicated background window
+bind-key T new-window -n "🍅 Termodoro" "termodoro"
+```
+
+#### Zellij Floating Pane
+Launch Termodoro as a floating modal pane in [Zellij](https://zellij.dev):
+```bash
+zellij run --floating --width 80% --height 80% -- termodoro
+```
+
+---
+
+### Step 7: Verification & First Launch Checklist
+
+To verify your installation and environment configuration:
+
+1. **Launch the Application**:
    ```bash
    termodoro
    ```
+2. **Verify Display Resolution**: Ensure the large 5-row digital block clock renders without character overlapping or clipping. If needed, resize your terminal window (recommended: at least 80 columns by 24 rows).
+3. **Verify Color Rendering**: Press `4` to enter Settings, navigate to **Color Theme**, and press `l` or `→` to cycle themes (e.g. Catppuccin, Nord, Dracula). Confirm vibrant contrast.
+4. **Test Audio Chimes**: Press `1` to return to the Timer, press `Space` to start, then press `s` to skip phase and confirm acoustic chimes play upon interval completion.
+5. **Verify Persistence**: Press `q` to quit, then restart `termodoro`. Confirm that your settings and active state were safely restored.
 
-### Creating a Convenient Terminal Shortcut (Alias)
+---
 
-You can create an alias in your shell configuration file (`~/.bashrc`, `~/.zshrc`, or `~/.config/fish/config.fish`):
+### Updating & Uninstalling Termodoro
 
+#### Updating to the Latest Version
+When new features or updates are pushed to the repository:
 ```bash
-# Add this line to your ~/.bashrc or ~/.zshrc
-alias pomo="termodoro"
+cd Termodoro
+git pull origin main
+cargo install --path . --force
 ```
 
-Then reload your shell (`source ~/.bashrc` or `source ~/.zshrc`) and run `pomo` to start.
+#### Clean Uninstallation
+If you ever wish to remove Termodoro from your system:
+
+```bash
+# 1. Remove the installed binary
+cargo uninstall termodoro
+
+# 2. (Optional) Remove local database, task records, and configuration
+# Linux / BSD:
+rm -rf ~/.local/share/termodoro ~/.config/termodoro
+
+# macOS:
+rm -rf ~/Library/Application\ Support/com.termodoro.termodoro
+
+# Windows:
+Remove-Item -Recurse -Force "$env:APPDATA\termodoro"
+```
 
 ---
 
