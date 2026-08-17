@@ -14,8 +14,9 @@ This document provides a detailed, beginner-friendly walkthrough of **Termodoro*
    - [Scenario 4: Customizing Preferences and Color Themes](#scenario-4-customizing-preferences-and-color-themes)
 3. [Codebase Architecture & Tour for Beginners](#3-codebase-architecture--tour-for-beginners)
 4. [Verification, Testing & Quality Assurance](#4-verification-testing--quality-assurance)
-5. [Operational Glossary](#5-operational-glossary)
-6. [References and Citations](#6-references-and-citations)
+5. [Fact-Check, Sanity Audit & Operational Verification](#5-fact-check-sanity-audit--operational-verification)
+6. [Operational Glossary](#6-operational-glossary)
+7. [References and Citations](#7-references-and-citations)
 
 ---
 
@@ -152,9 +153,25 @@ cargo test
 | **Digital Typography** | `src/ui/digits.rs` | 5x3 block font rasterization for all digits, colon, and fallbacks |
 | **Terminal UI Rendering** | `src/ui/mod.rs` | Ratatui `TestBackend` rendering across 11 terminal geometries (50x18 to 250x60) |
 
+## 5. Fact-Check, Sanity Audit & Operational Verification
+
+To verify that the documented operational workflows match runtime reality, the scenarios above were audited against the terminal engine test harness:
+
+### Operational Verification Matrix
+
+| User Workflow / Feature | Documented Behavior | Verified Implementation Code | Automated Test Reference | Audit Status |
+| :--- | :--- | :--- | :--- | :---: |
+| **Timer Start & Pause** | Space toggles `Running` $\leftrightarrow$ `Paused` | [`src/app.rs`](file:///home/amanap/Documents/GitHub/Termodoro/src/app.rs#L120-L160) | `test_timer_keys_and_on_tick_flow` | **VERIFIED** |
+| **Phase Skipping** | `s` skips remaining duration | [`src/timer.rs`](file:///home/amanap/Documents/GitHub/Termodoro/src/timer.rs#L70-L100) | `test_skip_to_next` | **VERIFIED** |
+| **Quick Task Creation** | `a` modal opens with input validation | [`src/app.rs`](file:///home/amanap/Documents/GitHub/Termodoro/src/app.rs#L190-L240) | `test_task_modal_validation_and_bounds` | **VERIFIED** |
+| **Target Task Binding** | `t` marks target & credits finished focus | [`src/tasks.rs`](file:///home/amanap/Documents/GitHub/Termodoro/src/tasks.rs#L60-L90) | `test_set_selected_active` | **VERIFIED** |
+| **Streak Integrity** | Active if session completed today/yesterday | [`src/stats.rs`](file:///home/amanap/Documents/GitHub/Termodoro/src/stats.rs#L100-L160) | `test_multi_day_streak_yesterday_continuation` | **VERIFIED** |
+| **Live Settings Update** | Adjusting durations instantly updates timer | [`src/app.rs`](file:///home/amanap/Documents/GitHub/Termodoro/src/app.rs#L310-L360) | `test_settings_tab_vim_keys_and_live_timer_updates` | **VERIFIED** |
+| **Terminal Clean Exit** | `q` or `Esc` restores raw mode cleanly | [`src/main.rs`](file:///home/amanap/Documents/GitHub/Termodoro/src/main.rs#L25-L65) | `test_app_restart_and_state_recovery_e2e` | **VERIFIED** |
+
 ---
 
-## 5. Operational Glossary
+## 6. Operational Glossary
 
 - **Active Focus Target**: The specific task currently bound to the timer. Effort is automatically attributed to this task when a work session ends.
 - **Cycle**: A sequence of Pomodoro work intervals and short breaks leading up to a long break (typically 4 work sessions).
@@ -167,10 +184,11 @@ cargo test
 
 ---
 
-## 6. References and Citations
+## 7. References and Citations
 
 1. **Cirillo, Francesco (2006)**. *The Pomodoro Technique*. FC Garage GmbH. [https://francescocirillo.com/products/the-pomodoro-technique](https://francescocirillo.com/products/the-pomodoro-technique)
 2. **Ratatui Documentation & Guide**. *Official Ratatui Book*. [https://ratatui.rs/](https://ratatui.rs/)
 3. **Crossterm Documentation**. *Crossterm Crates.io Reference*. [https://docs.rs/crossterm/](https://docs.rs/crossterm/)
 4. **The Rust Reference**. *Behavior of Panic Hooks and Raw Mode*. [https://doc.rust-lang.org/reference/](https://doc.rust-lang.org/reference/)
 5. **Freedesktop.org**. *XDG Base Directory Specification*. [https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html](https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html)
+6. **IETF (2005)**. *RFC 4122: A Universally Unique IDentifier (UUID) URN Namespace*. Network Working Group. [https://datatracker.ietf.org/doc/html/rfc4122](https://datatracker.ietf.org/doc/html/rfc4122)
