@@ -1,0 +1,17 @@
+[package]
+name = "termodoro"
+version = "0.1.0"
+edition = "2026"
+authors = ["Aman <pamanalionline@gmail.com>"]
+description = "A sleek, feature-rich Pomodoro timer and task manager for the terminal."
+license = "GPL-3.0"
+
+[dependencies]
+ratatui = "0.29"
+crossterm = { version = "0.28", features = ["event-stream"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+chrono = { version = "0.4", features = ["serde"] }
+notify-rust = "4.11"
+directories = "5.0"
+uuid = { version = "1.10", features = ["v4", "serde"] }

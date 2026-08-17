@@ -1,0 +1,690 @@
+// Import crossterm key event codes and modifiers
+use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
+// Import standard I/O stdout and Write trait for emitting terminal bell sound
+use std::io::{stdout, Write};
+
+// Import Config struct from config module
+use crate::config::Config;
+// Import StatsHistory from stats module
+use crate::stats::StatsHistory;
+// Import Storage from storage module
+use crate::storage::Storage;
+// Import TaskFilter and TaskManager from tasks module
+use crate::tasks::{TaskFilter, TaskManager};
+// Import ThemeChoice from theme module
+use crate::theme::ThemeChoice;
+// Import PomodoroPhase, PomodoroTimer, and TimerEvent from timer module
+use crate::timer::{PomodoroPhase, PomodoroTimer, TimerEvent};
+
+// Enum representing the four primary navigation tabs of the application
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ActiveTab {
+    // Main Pomodoro countdown timer tab
+    Timer,
+    // Task management and todo list tab
+    Tasks,
+    // Daily statistics, streaks, and charts tab
+    Stats,
+    // User preferences and color theme settings tab
+    Settings,
+}
+
+// Core application state holding data, active tab, timer, tasks, stats, and modals
+pub struct App {
+    // User configuration settings
+    pub config: Config,
+    // Active Pomodoro timer engine
+    pub timer: PomodoroTimer,
+    // Task list and active target manager
+    pub tasks: TaskManager,
+    // Productivity analytics and history
+    pub stats: StatsHistory,
+    // Storage persistence engine
+    pub storage: Storage,
+    // Currently focused navigation tab
+    pub active_tab: ActiveTab,
+    // Flag indicating whether the application should exit
+    pub should_quit: bool,
+    // Flag indicating whether the Help keybinding modal is open
+    pub show_help: bool,
+    // Flag indicating whether the Add Task modal is open
+    pub show_task_modal: bool,
+    // Text buffer for new task title in Add Task modal
+    pub task_input_title: String,
+    // Estimated pomodoros for new task in Add Task modal
+    pub task_input_estimated: u32,
+    // Focus index inside Add Task modal (0: Title input, 1: Estimated Pomodoros)
+    pub task_modal_focus: usize,
+    // Currently highlighted row index in Settings tab
+    pub settings_index: usize,
+    // Optional temporary notification message shown in footer
+    pub status_message: Option<String>,
+    // Tick counter for expiring status message
+    pub status_message_ticks: usize,
+}
+
+impl App {
+    // Constructs and initializes the application state by loading saved data from disk
+    pub fn new() -> Self {
+        // Create storage handle
+        let storage = Storage::new();
+        // Load persisted state from storage file
+        let app_data = storage.load();
+        // Initialize Pomodoro timer with loaded configuration
+        let timer = PomodoroTimer::new(&app_data.config);
+
+        // Build App instance
+        Self {
+            // Loaded config
+            config: app_data.config,
+            // Initialized timer
+            timer,
+            // Loaded tasks
+            tasks: app_data.tasks,
+            // Loaded statistics
+            stats: app_data.stats,
+            // Storage manager
+            storage,
+            // Default to Timer tab on launch
+            active_tab: ActiveTab::Timer,
+            // Application is running
+            should_quit: false,
+            // Help modal is closed
+            show_help: false,
+            // Task modal is closed
+            show_task_modal: false,
+            // Empty initial task title
+            task_input_title: String::new(),
+            // Default estimated pomodoros for new task is 1
+            task_input_estimated: 1,
+            // Focus on title input initially
+            task_modal_focus: 0,
+            // First settings item highlighted
+            settings_index: 0,
+            // No status message on launch
+            status_message: None,
+            // 0 ticks elapsed for message
+            status_message_ticks: 0,
+        }
+    }
+
+    // Persists current application state (config, tasks, stats) to disk
+    pub fn save_state(&self) {
+        // Invoke storage save method
+        self.storage.save(&self.config, &self.tasks, &self.stats);
+    }
+
+    // Sets a temporary notification banner message shown in the footer
+    pub fn set_status_message(&mut self, message: String) {
+        // Set message string
+        self.status_message = Some(message);
+        // Reset message expiration counter (lasts approx 10-15 seconds)
+        self.status_message_ticks = 40;
+    }
+
+    // Dispatches desktop notifications and audio bells when a timer phase completes
+    pub fn notify_phase_completed(&self, finished_phase: PomodoroPhase, next_phase: PomodoroPhase) {
+        // Ring audio / terminal bell if enabled in configuration
+        if self.config.sound_enabled {
+            // Write ASCII bell character (\x07) to standard output
+            let mut out = stdout();
+            // Write bell byte
+            let _ = out.write_all(b"\x07");
+            // Flush standard output buffer
+            let _ = out.flush();
+        }
+
+        // Send OS native desktop notification if enabled
+        if self.config.desktop_notifications {
+            // Format notification summary title
+            let summary = format!("Termodoro - {} Finished!", finished_phase.title());
+            // Format notification body message
+            let body = format!("Time for {}! Let's go.", next_phase.title());
+
+            // Build and send desktop notification in background thread
+            std::thread::spawn(move || {
+                // Use notify_rust Notification builder
+                let _ = notify_rust::Notification::new()
+                    // Notification summary
+                    .summary(&summary)
+                    // Notification body
+                    .body(&body)
+                    // App icon or name
+                    .appname("Termodoro")
+                    // Dispatch notification
+                    .show();
+            });
+        }
+    }
+
+    // Periodic tick method invoked on every timer interval (~250ms)
+    pub fn on_tick(&mut self) {
+        // Tick countdown timer
+        if let Some(event) = self.timer.tick(&self.config) {
+            // Handle timer completion event
+            match event {
+                // Phase completed
+                TimerEvent::PhaseCompleted { finished_phase, next_phase } => {
+                    // Calculate duration in minutes for finished phase
+                    let dur_mins = match finished_phase {
+                        PomodoroPhase::Work => self.config.work_duration_mins,
+                        PomodoroPhase::ShortBreak => self.config.short_break_mins,
+                        PomodoroPhase::LongBreak => self.config.long_break_mins,
+                    };
+
+                    // Extract active task information if session was Work
+                    let (task_id, task_title) = if finished_phase == PomodoroPhase::Work {
+                        // Increment active task pomodoro counter
+                        self.tasks.increment_active_spent();
+                        // Retrieve task metadata
+                        if let Some(task) = self.tasks.active_task() {
+                            (Some(task.id.clone()), Some(task.title.clone()))
+                        } else {
+                            (None, None)
+                        }
+                    } else {
+                        (None, None)
+                    };
+
+                    // Record completed session in historical analytics
+                    self.stats.record(finished_phase, dur_mins, task_id, task_title);
+                    // Trigger audio bell and desktop notification
+                    self.notify_phase_completed(finished_phase, next_phase);
+                    // Update status banner
+                    self.set_status_message(format!("{} completed! Next: {}", finished_phase.title(), next_phase.title()));
+                    // Automatically persist state to disk
+                    self.save_state();
+                }
+            }
+        }
+
+        // Decrement status message counter if active
+        if self.status_message_ticks > 0 {
+            // Decrement ticks
+            self.status_message_ticks -= 1;
+            // Clear message once expired
+            if self.status_message_ticks == 0 {
+                // Reset status message
+                self.status_message = None;
+            }
+        }
+    }
+
+    // Main key event routing dispatcher
+    pub fn on_key_event(&mut self, key: KeyEvent) {
+        // If Help modal is open, forward key events to help handler
+        if self.show_help {
+            // Handle help key
+            self.handle_help_key(key);
+            // Return early
+            return;
+        }
+
+        // If Add Task modal is open, forward key events to task modal handler
+        if self.show_task_modal {
+            // Handle task modal key
+            self.handle_task_modal_key(key);
+            // Return early
+            return;
+        }
+
+        // Global keybindings available across all tabs
+        match key.code {
+            // 'q' key quits the application
+            KeyCode::Char('q') => {
+                // Set should_quit flag to true
+                self.should_quit = true;
+                // Return
+                return;
+            }
+            // '?' key toggles Help modal
+            KeyCode::Char('?') => {
+                // Open help dialog
+                self.show_help = true;
+                // Return
+                return;
+            }
+            // Tab key switches to next tab
+            KeyCode::Tab => {
+                // Check if Shift modifier was pressed (backward tab)
+                if key.modifiers.contains(KeyModifiers::SHIFT) {
+                    // Switch to previous tab
+                    self.previous_tab();
+                } else {
+                    // Switch to next tab
+                    self.next_tab();
+                }
+                // Return
+                return;
+            }
+            // BackTab key (Shift+Tab on some terminals) switches to previous tab
+            KeyCode::BackTab => {
+                // Switch to previous tab
+                self.previous_tab();
+                // Return
+                return;
+            }
+            // Number keys 1-4 jump directly to specific tab
+            KeyCode::Char('1') if self.active_tab != ActiveTab::Tasks => {
+                // Jump to Timer tab
+                self.active_tab = ActiveTab::Timer;
+                // Return
+                return;
+            }
+            KeyCode::Char('2') if self.active_tab != ActiveTab::Tasks => {
+                // Jump to Tasks tab
+                self.active_tab = ActiveTab::Tasks;
+                // Return
+                return;
+            }
+            KeyCode::Char('3') if self.active_tab != ActiveTab::Tasks => {
+                // Jump to Stats tab
+                self.active_tab = ActiveTab::Stats;
+                // Return
+                return;
+            }
+            KeyCode::Char('4') => {
+                // Jump to Settings tab
+                self.active_tab = ActiveTab::Settings;
+                // Return
+                return;
+            }
+            // Other keys dispatched to active tab handler
+            _ => {}
+        }
+
+        // Dispatch key event to the active tab's dedicated input handler
+        match self.active_tab {
+            // Dispatch to Timer tab handler
+            ActiveTab::Timer => self.handle_timer_key(key),
+            // Dispatch to Tasks tab handler
+            ActiveTab::Tasks => self.handle_tasks_key(key),
+            // Dispatch to Stats tab handler
+            ActiveTab::Stats => self.handle_stats_key(key),
+            // Dispatch to Settings tab handler
+            ActiveTab::Settings => self.handle_settings_key(key),
+        }
+    }
+
+    // Switches active tab to the next sequential tab
+    pub fn next_tab(&mut self) {
+        // Match current tab
+        self.active_tab = match self.active_tab {
+            ActiveTab::Timer => ActiveTab::Tasks,
+            ActiveTab::Tasks => ActiveTab::Stats,
+            ActiveTab::Stats => ActiveTab::Settings,
+            ActiveTab::Settings => ActiveTab::Timer,
+        };
+    }
+
+    // Switches active tab to the previous sequential tab
+    pub fn previous_tab(&mut self) {
+        // Match current tab
+        self.active_tab = match self.active_tab {
+            ActiveTab::Timer => ActiveTab::Settings,
+            ActiveTab::Tasks => ActiveTab::Timer,
+            ActiveTab::Stats => ActiveTab::Tasks,
+            ActiveTab::Settings => ActiveTab::Stats,
+        };
+    }
+
+    // Handles key events inside the Help popup modal
+    fn handle_help_key(&mut self, key: KeyEvent) {
+        // Match key code
+        match key.code {
+            // Esc, 'q', or '?' closes the Help dialog
+            KeyCode::Esc | KeyCode::Char('q') | KeyCode::Char('?') | KeyCode::Enter => {
+                // Close help modal
+                self.show_help = false;
+            }
+            // Ignore other keys
+            _ => {}
+        }
+    }
+
+    // Opens the Add Task creation modal dialog
+    pub fn open_task_modal(&mut self) {
+        // Clear title input
+        self.task_input_title.clear();
+        // Default estimated pomodoros
+        self.task_input_estimated = 1;
+        // Focus on title input
+        self.task_modal_focus = 0;
+        // Show modal flag
+        self.show_task_modal = true;
+    }
+
+    // Handles key events inside the Add Task modal dialog
+    fn handle_task_modal_key(&mut self, key: KeyEvent) {
+        // Match key code
+        match key.code {
+            // Esc closes the modal without saving
+            KeyCode::Esc => {
+                // Close modal
+                self.show_task_modal = false;
+            }
+            // Tab or Down switches focus between Title and Estimated Pomodoros
+            KeyCode::Tab | KeyCode::Down => {
+                // Cycle focus index between 0 and 1
+                self.task_modal_focus = (self.task_modal_focus + 1) % 2;
+            }
+            // BackTab or Up switches focus upward
+            KeyCode::BackTab | KeyCode::Up => {
+                // Invert focus index
+                self.task_modal_focus = if self.task_modal_focus == 0 { 1 } else { 0 };
+            }
+            // Enter key saves the task if title is valid
+            KeyCode::Enter => {
+                // Check if title is not blank
+                if !self.task_input_title.trim().is_empty() {
+                    // Add task to task manager
+                    self.tasks.add(self.task_input_title.clone(), self.task_input_estimated);
+                    // Close task modal
+                    self.show_task_modal = false;
+                    // Show confirmation notification
+                    self.set_status_message(format!("Task added: {}", self.task_input_title));
+                    // Persist state to disk
+                    self.save_state();
+                }
+            }
+            // Key handling when focused on Title input (field 0)
+            _ if self.task_modal_focus == 0 => match key.code {
+                // Append character to title buffer
+                KeyCode::Char(c) => {
+                    // Push character
+                    self.task_input_title.push(c);
+                }
+                // Backspace removes last character
+                KeyCode::Backspace => {
+                    // Pop character
+                    self.task_input_title.pop();
+                }
+                // Ignore other keys
+                _ => {}
+            },
+            // Key handling when focused on Estimated Pomodoros (field 1)
+            _ if self.task_modal_focus == 1 => match key.code {
+                // Right arrow, '+', or 'l' increments estimated pomodoros
+                KeyCode::Right | KeyCode::Char('+') | KeyCode::Char('l') => {
+                    // Maximum limit 20 pomodoros
+                    if self.task_input_estimated < 20 {
+                        // Increment
+                        self.task_input_estimated += 1;
+                    }
+                }
+                // Left arrow, '-', or 'h' decrements estimated pomodoros
+                KeyCode::Left | KeyCode::Char('-') | KeyCode::Char('h') => {
+                    // Minimum limit 1 pomodoro
+                    if self.task_input_estimated > 1 {
+                        // Decrement
+                        self.task_input_estimated -= 1;
+                    }
+                }
+                // Digit keys directly set estimated value
+                KeyCode::Char(c) if c.is_ascii_digit() => {
+                    // Parse digit
+                    if let Some(digit) = c.to_digit(10) {
+                        // Update if greater than 0
+                        if digit > 0 {
+                            // Set estimated
+                            self.task_input_estimated = digit;
+                        }
+                    }
+                }
+                // Ignore other keys
+                _ => {}
+            },
+            // Fallback
+            _ => {}
+        }
+    }
+
+    // Handles key events when viewing the Pomodoro Timer tab
+    fn handle_timer_key(&mut self, key: KeyEvent) {
+        // Match key code
+        match key.code {
+            // Space toggles start / pause
+            KeyCode::Char(' ') => {
+                // Toggle timer
+                self.timer.toggle();
+            }
+            // 'r' resets the current timer countdown
+            KeyCode::Char('r') => {
+                // Reset timer
+                self.timer.reset(&self.config);
+                // Set notification message
+                self.set_status_message("Timer reset.".to_string());
+            }
+            // 's' skips to the next Pomodoro phase
+            KeyCode::Char('s') => {
+                // Skip to next phase
+                let next = self.timer.skip_to_next(&self.config);
+                // Set notification message
+                self.set_status_message(format!("Skipped to {}", next.title()));
+            }
+            // 'a' opens Add Task creation dialog
+            KeyCode::Char('a') => {
+                // Open task modal
+                self.open_task_modal();
+            }
+            // Ignore other keys
+            _ => {}
+        }
+    }
+
+    // Handles key events when viewing the Tasks tab
+    fn handle_tasks_key(&mut self, key: KeyEvent) {
+        // Match key code
+        match key.code {
+            // 'a' opens Add Task creation dialog
+            KeyCode::Char('a') => {
+                // Open task modal
+                self.open_task_modal();
+            }
+            // Space or Enter toggles completed status of selected task
+            KeyCode::Char(' ') | KeyCode::Enter => {
+                // Toggle task completion
+                self.tasks.toggle_selected();
+                // Persist state
+                self.save_state();
+            }
+            // 't' assigns selected task as active timer target
+            KeyCode::Char('t') => {
+                // Set selected as active
+                self.tasks.set_selected_active();
+                // Set status notification
+                if let Some(task) = self.tasks.active_task() {
+                    // Status banner
+                    self.set_status_message(format!("Target set to: {}", task.title));
+                }
+                // Persist state
+                self.save_state();
+            }
+            // 'd' or 'x' deletes selected task
+            KeyCode::Char('d') | KeyCode::Char('x') => {
+                // Remove task
+                self.tasks.remove_selected();
+                // Set notification
+                self.set_status_message("Task deleted.".to_string());
+                // Persist state
+                self.save_state();
+            }
+            // Down arrow or 'j' moves cursor down
+            KeyCode::Down | KeyCode::Char('j') => {
+                // Move down
+                self.tasks.next();
+            }
+            // Up arrow or 'k' moves cursor up
+            KeyCode::Up | KeyCode::Char('k') => {
+                // Move up
+                self.tasks.previous();
+            }
+            // '1' sets filter to All tasks
+            KeyCode::Char('1') => {
+                // Set filter to All
+                self.tasks.filter = TaskFilter::All;
+                // Reset selected index
+                self.tasks.selected_index = 0;
+            }
+            // '2' sets filter to Active tasks
+            KeyCode::Char('2') => {
+                // Set filter to Active
+                self.tasks.filter = TaskFilter::Active;
+                // Reset selected index
+                self.tasks.selected_index = 0;
+            }
+            // '3' sets filter to Completed tasks
+            KeyCode::Char('3') => {
+                // Set filter to Completed
+                self.tasks.filter = TaskFilter::Completed;
+                // Reset selected index
+                self.tasks.selected_index = 0;
+            }
+            // Ignore other keys
+            _ => {}
+        }
+    }
+
+    // Handles key events when viewing the Stats tab
+    fn handle_stats_key(&mut self, _key: KeyEvent) {
+        // No interactive controls on stats dashboard beyond global navigation
+    }
+
+    // Handles key events when viewing the Settings tab
+    fn handle_settings_key(&mut self, key: KeyEvent) {
+        // Match key code
+        match key.code {
+            // Down arrow or 'j' moves to next setting row
+            KeyCode::Down | KeyCode::Char('j') => {
+                // Maximum 8 setting rows (0..=8)
+                if self.settings_index < 8 {
+                    // Increment row
+                    self.settings_index += 1;
+                } else {
+                    // Wrap to first row
+                    self.settings_index = 0;
+                }
+            }
+            // Up arrow or 'k' moves to previous setting row
+            KeyCode::Up | KeyCode::Char('k') => {
+                // Decrement row
+                if self.settings_index > 0 {
+                    // Decrement
+                    self.settings_index -= 1;
+                } else {
+                    // Wrap to last row
+                    self.settings_index = 8;
+                }
+            }
+            // Right arrow, '+', or 'l' increments setting value
+            KeyCode::Right | KeyCode::Char('+') | KeyCode::Char('l') => {
+                // Adjust setting positive
+                self.adjust_setting(1);
+            }
+            // Left arrow, '-', or 'h' decrements setting value
+            KeyCode::Left | KeyCode::Char('-') | KeyCode::Char('h') => {
+                // Adjust setting negative
+                self.adjust_setting(-1);
+            }
+            // Space or Enter toggles boolean setting flags
+            KeyCode::Char(' ') | KeyCode::Enter => {
+                // Toggle setting
+                self.toggle_setting();
+            }
+            // Ignore other keys
+            _ => {}
+        }
+    }
+
+    // Modifies numerical settings or cycles themes by delta (+1 or -1)
+    fn adjust_setting(&mut self, delta: i32) {
+        // Match on active settings row index
+        match self.settings_index {
+            // Setting 0: Work duration minutes
+            0 => {
+                // New value clamped between 1 and 120 minutes
+                let new_val = (self.config.work_duration_mins as i32 + delta).clamp(1, 120) as u32;
+                // Update config
+                self.config.work_duration_mins = new_val;
+                // Reset timer if currently stopped
+                if self.timer.status == crate::timer::TimerStatus::Stopped && self.timer.phase == PomodoroPhase::Work {
+                    self.timer.reset(&self.config);
+                }
+            }
+            // Setting 1: Short break minutes
+            1 => {
+                // New value clamped between 1 and 60 minutes
+                let new_val = (self.config.short_break_mins as i32 + delta).clamp(1, 60) as u32;
+                // Update config
+                self.config.short_break_mins = new_val;
+                // Reset timer if in ShortBreak and stopped
+                if self.timer.status == crate::timer::TimerStatus::Stopped && self.timer.phase == PomodoroPhase::ShortBreak {
+                    self.timer.reset(&self.config);
+                }
+            }
+            // Setting 2: Long break minutes
+            2 => {
+                // New value clamped between 1 and 90 minutes
+                let new_val = (self.config.long_break_mins as i32 + delta).clamp(1, 90) as u32;
+                // Update config
+                self.config.long_break_mins = new_val;
+                // Reset timer if in LongBreak and stopped
+                if self.timer.status == crate::timer::TimerStatus::Stopped && self.timer.phase == PomodoroPhase::LongBreak {
+                    self.timer.reset(&self.config);
+                }
+            }
+            // Setting 3: Long break interval (sessions count)
+            3 => {
+                // New value clamped between 1 and 12 sessions
+                let new_val = (self.config.long_break_interval as i32 + delta).clamp(1, 12) as u32;
+                // Update config
+                self.config.long_break_interval = new_val;
+            }
+            // Setting 4: Auto-start breaks toggle
+            4 => {
+                // Toggle flag
+                self.config.auto_start_breaks = !self.config.auto_start_breaks;
+            }
+            // Setting 5: Auto-start work toggle
+            5 => {
+                // Toggle flag
+                self.config.auto_start_work = !self.config.auto_start_work;
+            }
+            // Setting 6: Desktop notifications toggle
+            6 => {
+                // Toggle flag
+                self.config.desktop_notifications = !self.config.desktop_notifications;
+            }
+            // Setting 7: Sound enabled toggle
+            7 => {
+                // Toggle flag
+                self.config.sound_enabled = !self.config.sound_enabled;
+            }
+            // Setting 8: Color theme selection
+            8 => {
+                // Get all theme choices
+                let all_themes = ThemeChoice::all();
+                // Find current theme index
+                let cur_idx = all_themes.iter().position(|&t| t == self.config.theme).unwrap_or(0);
+                // Calculate next theme index with wrapping
+                let next_idx = if delta > 0 {
+                    (cur_idx + 1) % all_themes.len()
+                } else {
+                    (cur_idx + all_themes.len() - 1) % all_themes.len()
+                };
+                // Update theme choice
+                self.config.theme = all_themes[next_idx];
+            }
+            // Fallback
+            _ => {}
+        }
+        // Save updated preferences to disk
+        self.save_state();
+    }
+
+    // Toggles boolean feature flags or cycles theme on Enter / Space press
+    fn toggle_setting(&mut self) {
+        // Re-use adjust_setting with +1
+        self.adjust_setting(1);
+    }
+}
