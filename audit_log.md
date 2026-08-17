@@ -11,6 +11,7 @@ This document maintains a transparent, permanent audit log of repository hygiene
 | **AUD-001** | 2026-08-17 | Git Hygiene & Index Cleanup | `3c26c15` $\rightarrow$ `6c3c545` | **RESOLVED** |
 | **AUD-002** | 2026-08-17 | Code Quality & Formatting | `1c33c9c` | **RESOLVED** |
 | **AUD-003** | 2026-08-17 | Feature Integration & QA Test Expansion | `20e8378` | **VERIFIED** |
+| **AUD-004** | 2026-08-17 | Documentation & ASCII Art Alignment | Pending | **RESOLVED** |
 
 ---
 
@@ -57,6 +58,20 @@ This document maintains a transparent, permanent audit log of repository hygiene
   4. **QA Test Expansion**: Expanded automated test suite to **91 unit, integration, and UI rendering tests** (100% pass rate).
   5. **Documentation**: Synchronized `README.md`, `IMPLEMENTATION.md`, `WALKTHROUGH.md`, and `test_report.md`.
 - **Resolution Status:** **VERIFIED (91/91 PASS)**
+
+---
+
+### [AUD-004] ASCII UI Diagram Alignment & Monospace Readability Calibration
+- **Date:** August 17, 2026
+- **Severity:** Documentation Polish & UI Representation
+- **Description:**
+  - Unicode emoji glyphs in ASCII code blocks caused variable-width misalignment across markdown renderers (e.g. GitHub and VSCode).
+  - Specific rows in Tab 2 (Tasks) and Tab 4 (Settings) diagrams had mismatched character offsets and protruding right border boundaries.
+- **Remediation & Action Taken:**
+  1. Recalibrated all 5 ASCII diagrams across `README.md` and `WALKTHROUGH.md` to a strict 79-character width format.
+  2. Replaced variable-width emoji characters with standard monowidth ASCII tokens (`(*)`, `[x]`, `[v]`, `[ACTIVE]`).
+  3. Programmatically validated character counts across all diagram lines with 100% border alignment.
+- **Resolution Status:** **RESOLVED**
 
 ---
 

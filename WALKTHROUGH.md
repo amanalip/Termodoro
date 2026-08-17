@@ -24,16 +24,16 @@ This document provides a detailed, beginner-friendly walkthrough of **Termodoro*
 Termodoro divides the terminal window into three main regions:
 
 ```
-┌──────────────────┬──────────────────────────────────────────────────────────────────┐
-│  🍅 Termodoro    │  [1] Timer  │  [2] Tasks  │  [3] Stats  │  [4] Settings            │
-├──────────────────┴──────────────────────────────────────────────────────────────────┤
-│                                                                                     │
-│                                  Active Tab Content                                 │
-│                                (Switched dynamically)                               │
-│                                                                                     │
-├─────────────────────────────────────────────────────────────────────────────────────┤
-│  [Tab] Switch Tab   [?] Help Modal   [q] Quit  │ Theme: Catppuccin Mocha            │
-└─────────────────────────────────────────────────────────────────────────────────────┘
+┌──────────────────┬──────────────────────────────────────────────────────────┐
+│  Termodoro TUI   │ [1] Timer   │ [2] Tasks   │ [3] Stats   │ [4] Settings   │
+├──────────────────┴──────────────────────────────────────────────────────────┤
+│                                                                             │
+│                             Active Tab View Content                         │
+│                              (Switched dynamically)                         │
+│                                                                             │
+├─────────────────────────────────────────────────────────────────────────────┤
+│  [Tab] Switch Tab   [?] Help Modal   [q] Quit   │  Theme: Catppuccin Mocha  │
+└─────────────────────────────────────────────────────────────────────────────┘
 ```
 
 1. **Header Bar (Top, 3 rows)**: Shows the application branding logo and interactive tab selectors (`[1] Timer`, `[2] Tasks`, `[3] Stats`, `[4] Settings`).

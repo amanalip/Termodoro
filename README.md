@@ -190,7 +190,7 @@ The Timer view is the central hub for running focus sessions and breaks.
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│ 🍅 FOCUS SESSION   [● RUNNING]   Cycle 1/4 [◉ ○ ○ ○]                       │
+│  (*) FOCUS SESSION   [RUNNING]   Cycle 1/4 [(*) ( ) ( ) ( )]                │
 │                                                                             │
 │                  ████  ████    :   ████  ████                               │
 │                     █  █       :   █  █  █  █                               │
@@ -201,10 +201,10 @@ The Timer view is the central hub for running focus sessions and breaks.
 │ ┌─────────────────────────────────────────────────────────────────────────┐ │
 │ │ █████████████████████████████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░ 48%       │ │
 │ └─────────────────────────────────────────────────────────────────────────┘ │
-│ ┌─ 🎯 Current Target ─────────────────────────────────────────────────────┐ │
-│ │   Active Focus: Refactor storage module (🍅 2/4)                        │ │
+│ ┌─ [Target] Current Focus ────────────────────────────────────────────────┐ │
+│ │   Active Task: Refactor storage module (Spent: 2 / Est: 4)              │ │
 │ └─────────────────────────────────────────────────────────────────────────┘ │
-│   Today's Sessions: 4 pomodoros (100 mins)   │   Streak: 🔥 3 days          │
+│   Today's Focus: 4 sessions (100 mins)   │   Daily Streak: 3 days           │
 │                                                                             │
 │   [Space] Pause   [r] Reset   [s] Skip Phase   [a] Quick Add Task           │
 └─────────────────────────────────────────────────────────────────────────────┘
@@ -226,12 +226,12 @@ The Tasks view provides a structured environment for managing tasks, estimating 
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │ Filter: [1] All (3)   [2] Active (2)   [3] Completed (1)                    │
 ├─────────────────────────────────────────────────────────────────────────────┤
-│   Status   Task Title                                Est. Pomodoros Active  │
-│ ▶  ○       Implement data export feature             🍅 1 / 3       🎯 ACTIVE│
-│    ○       Write comprehensive documentation         🍅 0 / 2               │
-│    ✔       Fix terminal raw mode cleanup             🍅 2 / 2               │
+│   Status   Task Title                                Est. Pomos     Target  │
+│ >  [ ]     Implement data export feature              1 / 3 pomos  [ACTIVE] │
+│    [ ]     Write comprehensive documentation          0 / 2 pomos           │
+│    [v]     Fix terminal raw mode cleanup              2 / 2 pomos  [DONE]   │
 ├─────────────────────────────────────────────────────────────────────────────┤
-│ [a] Add Task  [Space] Toggle Done  [t] Set Target  [d] Delete  [↑/↓] Select │
+│ [a] Add Task  [Space] Toggle Done  [t] Set Target  [d] Delete  [j/k] Select │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -251,20 +251,20 @@ The Stats view visualizes your focus history and habit consistency:
 
 ```
 ┌────────────────────────┬────────────────────────┬───────────────────────────┐
-│ 📅 Today's Focus       │ ⚡ Current Streak      │ 🏆 All-Time Focus         │
-│ 4 🍅                   │ 🔥 3 Days              │ 28 Sessions               │
-│ 100 minutes focused    │ Personal Best: 7 Days  │ 11.7 Total Focus Hours    │
+│ [Today's Focus]        │ [Current Streak]       │ [All-Time Focus]          │
+│ 4 Sessions             │ 3 Days Active          │ 28 Total Sessions         │
+│ 100 Minutes Focused    │ Personal Best: 7 Days  │ 11.7 Total Hours          │
 ├────────────────────────┴────────────────────────┴───────────────────────────┤
-│ 📊 Daily Activity (Past 7 Days)                                             │
+│ Weekly Activity (Past 7 Days)                                               │
 │                                                                             │
-│    █        █        █        █        █        █        █                  │
+│    ██       ██       ██       ██       ██       ██       ██                 │
 │   Mon      Tue      Wed      Thu      Fri      Sat      Sun                 │
 ├─────────────────────────────────────────────────────────────────────────────┤
-│ 🕒 Recent Completed Sessions                                                │
-│ Time              Phase              Duration    Task Assigned              │
-│ 2026-08-17 15:30  🍅 FOCUS SESSION   25 mins     Implement data export      │
-│ 2026-08-17 15:00  ☕ SHORT BREAK      5 mins      -                          │
-│ 2026-08-17 14:30  🍅 FOCUS SESSION   25 mins     Implement data export      │
+│ Recent Completed Sessions                                                   │
+│ Date / Time       Phase              Duration    Associated Task            │
+│ 2026-08-17 15:30  Work (Focus)       25 mins     Implement data export      │
+│ 2026-08-17 15:00  Short Break         5 mins     -                          │
+│ 2026-08-17 14:30  Work (Focus)       25 mins     Implement data export      │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -283,17 +283,17 @@ The Settings view allows you to customize durations, toggles, and visual appeara
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │   Setting                 Current Value      Description                    │
-│ ▶ Focus Duration          25 mins            Length of a standard work session│
-│   Short Break             5 mins             Duration of short breaks       │
-│   Long Break              15 mins            Duration of long breaks        │
-│   Long Break Interval     4 sessions         Work sessions before break (1-24)│
+│ > Focus Duration          25 mins            Length of standard work session│
+│   Short Break             5 mins             Duration of short rest breaks  │
+│   Long Break              15 mins            Duration of long recovery break│
+│   Long Break Interval     4 sessions         Work sessions before break 1-24│
 │   Auto-start Breaks       Disabled           Automatically start break timer│
 │   Auto-start Work         Disabled           Automatically start work timer │
 │   Desktop Notifications   Enabled            Send native OS notification    │
-│   Sound / Bell Alert      Enabled            Ring audio chimes / bell       │
-│   Color Theme             Catppuccin Mocha   Active TUI color scheme        │
+│   Sound / Bell Alert      Enabled            Play acoustic audio chimes     │
+│   Color Theme             Catppuccin Mocha   Active TUI color palette       │
 ├─────────────────────────────────────────────────────────────────────────────┤
-│ [↑/↓] or [j/k] Select   [←/→], [h/l], [+/-] or [_/=] Adjust   [Space] Toggle │
+│ [j/k] Select Option   [h/l], [+/-], [_/=] Adjust   [Space / Enter] Toggle   │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
