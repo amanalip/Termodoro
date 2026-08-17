@@ -304,5 +304,114 @@ mod tests {
 
         let _ = std::fs::remove_dir_all(temp_dir);
     }
+
+    #[test]
+    fn test_render_all_timer_phases_and_statuses() {
+        let (mut app, temp_dir) = create_test_app();
+        let backend = TestBackend::new(80, 24);
+        let mut terminal = Terminal::new(backend).unwrap();
+
+        let phases = [
+            crate::timer::PomodoroPhase::Work,
+            crate::timer::PomodoroPhase::ShortBreak,
+            crate::timer::PomodoroPhase::LongBreak,
+        ];
+        let statuses = [
+            crate::timer::TimerStatus::Stopped,
+            crate::timer::TimerStatus::Running,
+            crate::timer::TimerStatus::Paused,
+        ];
+
+        for phase in phases {
+            for status in statuses {
+                app.timer.phase = phase;
+                app.timer.status = status;
+
+                // Render without active task
+                app.tasks.active_task_id = None;
+                terminal.draw(|f| render(f, &app)).unwrap();
+
+                // Render with active task
+                app.tasks.add("Design System".to_string(), 4);
+                terminal.draw(|f| render(f, &app)).unwrap();
+            }
+        }
+
+        let _ = std::fs::remove_dir_all(temp_dir);
+    }
+
+    #[test]
+    fn test_render_all_settings_rows_highlighted() {
+        let (mut app, temp_dir) = create_test_app();
+        app.active_tab = ActiveTab::Settings;
+        let backend = TestBackend::new(90, 25);
+        let mut terminal = Terminal::new(backend).unwrap();
+
+        for i in 0..=8 {
+            app.settings_index = i;
+            terminal.draw(|f| render(f, &app)).unwrap();
+        }
+
+        let _ = std::fs::remove_dir_all(temp_dir);
+    }
+
+    #[test]
+    fn test_render_task_modal_both_focus_states() {
+        let (mut app, temp_dir) = create_test_app();
+        let backend = TestBackend::new(80, 24);
+        let mut terminal = Terminal::new(backend).unwrap();
+
+        app.open_task_modal();
+
+        // Focus 0 (Title input) with text
+        app.task_modal_focus = 0;
+        app.task_input_title = "My Task".to_string();
+        terminal.draw(|f| render(f, &app)).unwrap();
+
+        // Focus 0 (Title input) empty (cursor)
+        app.task_input_title.clear();
+        terminal.draw(|f| render(f, &app)).unwrap();
+
+        // Focus 1 (Estimated Pomodoros)
+        app.task_modal_focus = 1;
+        app.task_input_estimated = 5;
+        terminal.draw(|f| render(f, &app)).unwrap();
+
+        let _ = std::fs::remove_dir_all(temp_dir);
+    }
+
+    #[test]
+    fn test_render_empty_views() {
+        let (mut app, temp_dir) = create_test_app();
+        let backend = TestBackend::new(80, 24);
+        let mut terminal = Terminal::new(backend).unwrap();
+
+        // Empty tasks tab
+        app.active_tab = ActiveTab::Tasks;
+        assert_eq!(app.tasks.tasks.len(), 0);
+        terminal.draw(|f| render(f, &app)).unwrap();
+
+        // Empty stats tab
+        app.active_tab = ActiveTab::Stats;
+        assert_eq!(app.stats.sessions.len(), 0);
+        terminal.draw(|f| render(f, &app)).unwrap();
+
+        let _ = std::fs::remove_dir_all(temp_dir);
+    }
+
+    #[test]
+    fn test_render_extreme_small_terminals() {
+        let (app, temp_dir) = create_test_app();
+        let micro_dimensions = [(40, 15), (50, 15), (35, 12)];
+
+        for (width, height) in micro_dimensions {
+            let backend = TestBackend::new(width, height);
+            let mut terminal = Terminal::new(backend).unwrap();
+            terminal.draw(|f| render(f, &app)).unwrap();
+        }
+
+        let _ = std::fs::remove_dir_all(temp_dir);
+    }
 }
+
 

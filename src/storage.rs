@@ -202,5 +202,26 @@ mod tests {
         // Cleanup
         let _ = fs::remove_dir_all(temp_dir);
     }
+
+    #[test]
+    fn test_storage_custom_deep_path_creation() {
+        let temp_dir = std::env::temp_dir().join(format!("termodoro_deep_{}", uuid::Uuid::new_v4()));
+        let deep_file_path = temp_dir.join("sub1").join("sub2").join("deep_data.json");
+        let storage = Storage::with_path(deep_file_path.clone());
+
+        let tasks = TaskManager::new();
+        let config = Config::default();
+        let stats = StatsHistory::new();
+
+        // Saving to non-existent nested directory creates parent dirs
+        storage.save(&config, &tasks, &stats);
+        assert!(deep_file_path.exists());
+
+        let loaded = storage.load();
+        assert_eq!(loaded.config, config);
+
+        let _ = fs::remove_dir_all(temp_dir);
+    }
 }
+
 

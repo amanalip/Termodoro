@@ -1113,6 +1113,196 @@ mod tests {
 
         let _ = std::fs::remove_dir_all(temp_dir);
     }
+
+    #[test]
+    fn test_tasks_tab_key_interactions() {
+        let (mut app, temp_dir) = create_test_app();
+        app.active_tab = ActiveTab::Tasks;
+
+        // On empty list, keys should not crash
+        app.on_key_event(make_key(KeyCode::Char('j')));
+        app.on_key_event(make_key(KeyCode::Char('k')));
+        app.on_key_event(make_key(KeyCode::Char('d')));
+        app.on_key_event(make_key(KeyCode::Char('x')));
+        app.on_key_event(make_key(KeyCode::Char('t')));
+        app.on_key_event(make_key(KeyCode::Char(' ')));
+        app.on_key_event(make_key(KeyCode::Enter));
+        assert_eq!(app.tasks.tasks.len(), 0);
+
+        // Add 3 tasks
+        app.tasks.add("Task 1".to_string(), 2);
+        app.tasks.add("Task 2".to_string(), 1);
+        app.tasks.add("Task 3".to_string(), 3);
+
+        // Navigate with j and k
+        app.tasks.selected_index = 0;
+        app.on_key_event(make_key(KeyCode::Char('j')));
+        assert_eq!(app.tasks.selected_index, 1);
+
+        app.on_key_event(make_key(KeyCode::Char('k')));
+        assert_eq!(app.tasks.selected_index, 0);
+
+        // Toggle task completion with Space
+        app.on_key_event(make_key(KeyCode::Char(' ')));
+        assert!(app.tasks.tasks[0].completed);
+
+        // Toggle back with Enter
+        app.on_key_event(make_key(KeyCode::Enter));
+        assert!(!app.tasks.tasks[0].completed);
+
+        // Set active target with 't'
+        app.tasks.selected_index = 2;
+        app.on_key_event(make_key(KeyCode::Char('t')));
+        assert_eq!(app.tasks.active_task().unwrap().title, "Task 3");
+        assert!(app.status_message.as_ref().unwrap().contains("Target set to: Task 3"));
+
+        // Delete with 'd'
+        app.tasks.selected_index = 1;
+        app.on_key_event(make_key(KeyCode::Char('d')));
+        assert_eq!(app.tasks.tasks.len(), 2);
+        assert_eq!(app.tasks.tasks[0].title, "Task 1");
+        assert_eq!(app.tasks.tasks[1].title, "Task 3");
+
+        // Delete with 'x'
+        app.tasks.selected_index = 0;
+        app.on_key_event(make_key(KeyCode::Char('x')));
+        assert_eq!(app.tasks.tasks.len(), 1);
+        assert_eq!(app.tasks.tasks[0].title, "Task 3");
+
+        let _ = std::fs::remove_dir_all(temp_dir);
+    }
+
+    #[test]
+    fn test_settings_tab_vim_keys_and_live_timer_updates() {
+        let (mut app, temp_dir) = create_test_app();
+        app.active_tab = ActiveTab::Settings;
+
+        // Navigate settings rows with 'j' and 'k'
+        app.settings_index = 0;
+        app.on_key_event(make_key(KeyCode::Char('j')));
+        assert_eq!(app.settings_index, 1);
+        app.on_key_event(make_key(KeyCode::Char('k')));
+        assert_eq!(app.settings_index, 0);
+
+        // Adjust setting with 'l' (+) and 'h' (-)
+        app.on_key_event(make_key(KeyCode::Char('l')));
+        assert_eq!(app.config.work_duration_mins, 26);
+        assert_eq!(app.timer.time_remaining_secs, 26 * 60);
+
+        app.on_key_event(make_key(KeyCode::Char('h')));
+        assert_eq!(app.config.work_duration_mins, 25);
+        assert_eq!(app.timer.time_remaining_secs, 25 * 60);
+
+        // When timer is running, changing work duration does not reset countdown
+        app.timer.status = crate::timer::TimerStatus::Running;
+        app.timer.time_remaining_secs = 500;
+        app.on_key_event(make_key(KeyCode::Char('l')));
+        assert_eq!(app.config.work_duration_mins, 26);
+        assert_eq!(app.timer.time_remaining_secs, 500); // unaffected while running
+        app.timer.status = crate::timer::TimerStatus::Stopped;
+
+        // Live update for ShortBreak
+        app.settings_index = 1;
+        app.timer.phase = PomodoroPhase::ShortBreak;
+        app.timer.status = crate::timer::TimerStatus::Stopped;
+        app.timer.time_remaining_secs = 5 * 60;
+        app.on_key_event(make_key(KeyCode::Char('l'))); // +1 min to 6 mins
+        assert_eq!(app.config.short_break_mins, 6);
+        assert_eq!(app.timer.time_remaining_secs, 6 * 60);
+
+        // Live update for LongBreak
+        app.settings_index = 2;
+        app.timer.phase = PomodoroPhase::LongBreak;
+        app.timer.status = crate::timer::TimerStatus::Stopped;
+        app.timer.time_remaining_secs = 15 * 60;
+        app.on_key_event(make_key(KeyCode::Char('l'))); // +1 min to 16 mins
+        assert_eq!(app.config.long_break_mins, 16);
+        assert_eq!(app.timer.time_remaining_secs, 16 * 60);
+
+        // Clamping for long break interval (row 3)
+        app.settings_index = 3;
+        for _ in 0..20 {
+            app.on_key_event(make_key(KeyCode::Char('l')));
+        }
+        assert_eq!(app.config.long_break_interval, 12);
+        for _ in 0..20 {
+            app.on_key_event(make_key(KeyCode::Char('h')));
+        }
+        assert_eq!(app.config.long_break_interval, 1);
+
+        // Theme wrap-around backwards
+        app.settings_index = 8;
+        app.config.theme = ThemeChoice::CatppuccinMocha;
+        app.on_key_event(make_key(KeyCode::Char('h')));
+        assert_eq!(app.config.theme, ThemeChoice::SolarizedDark);
+
+        let _ = std::fs::remove_dir_all(temp_dir);
+    }
+
+    #[test]
+    fn test_status_message_expiration_on_ticks() {
+        let (mut app, temp_dir) = create_test_app();
+        app.set_status_message("Temporary Notification".to_string());
+        assert_eq!(app.status_message.as_deref(), Some("Temporary Notification"));
+        assert_eq!(app.status_message_ticks, 40);
+
+        // Tick 39 times
+        for _ in 0..39 {
+            app.on_tick();
+            assert!(app.status_message.is_some());
+        }
+        assert_eq!(app.status_message_ticks, 1);
+
+        // Final 40th tick expires the status message
+        app.on_tick();
+        assert_eq!(app.status_message_ticks, 0);
+        assert_eq!(app.status_message, None);
+
+        let _ = std::fs::remove_dir_all(temp_dir);
+    }
+
+    #[test]
+    fn test_task_modal_validation_and_bounds() {
+        let (mut app, temp_dir) = create_test_app();
+        app.open_task_modal();
+        assert!(app.show_task_modal);
+
+        // Submitting with whitespace only should be rejected
+        app.task_input_title = "     ".to_string();
+        app.on_key_event(make_key(KeyCode::Enter));
+        assert!(app.show_task_modal); // Still open
+        assert_eq!(app.tasks.tasks.len(), 0);
+
+        // Focus navigation with Up and BackTab
+        app.task_modal_focus = 1;
+        app.on_key_event(make_key(KeyCode::Up));
+        assert_eq!(app.task_modal_focus, 0);
+
+        app.task_modal_focus = 1;
+        app.on_key_event(make_key(KeyCode::BackTab));
+        assert_eq!(app.task_modal_focus, 0);
+
+        // Bounds on estimated pomodoros
+        app.task_modal_focus = 1;
+        // Upper bound 20
+        for _ in 0..25 {
+            app.on_key_event(make_key(KeyCode::Right));
+        }
+        assert_eq!(app.task_input_estimated, 20);
+
+        // Lower bound 1
+        for _ in 0..25 {
+            app.on_key_event(make_key(KeyCode::Left));
+        }
+        assert_eq!(app.task_input_estimated, 1);
+
+        // Digit '0' should not change estimated to 0
+        app.on_key_event(make_key(KeyCode::Char('0')));
+        assert_eq!(app.task_input_estimated, 1);
+
+        let _ = std::fs::remove_dir_all(temp_dir);
+    }
 }
+
 
 

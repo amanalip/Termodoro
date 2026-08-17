@@ -425,6 +425,54 @@ mod tests {
         manager.increment_active_spent(); // should not panic
         assert_eq!(manager.tasks.len(), 0);
     }
+
+    #[test]
+    fn test_task_filter_default() {
+        assert_eq!(TaskFilter::default(), TaskFilter::All);
+    }
+
+    #[test]
+    fn test_task_operations_with_active_filters() {
+        let mut manager = TaskManager::new();
+        manager.add("Pending 1".to_string(), 1);
+        manager.add("Pending 2".to_string(), 2);
+        manager.add("Done 1".to_string(), 3);
+        manager.selected_index = 2;
+        manager.toggle_selected(); // Mark Done 1 as completed
+
+        // Switch to Completed filter
+        manager.filter = TaskFilter::Completed;
+        assert_eq!(manager.filtered_indices().len(), 1);
+        manager.selected_index = 0;
+
+        // Toggle selected in completed filter -> marks it pending, now completed filter has 0 items
+        manager.toggle_selected();
+        assert_eq!(manager.filtered_indices().len(), 0);
+
+        // Deleting when filtered list is empty should not panic
+        manager.remove_selected();
+        assert_eq!(manager.tasks.len(), 3);
+
+        // Switch to Active filter
+        manager.filter = TaskFilter::Active;
+        assert_eq!(manager.filtered_indices().len(), 3);
+        manager.selected_index = 2;
+        manager.remove_selected(); // Removes the 3rd active task
+        assert_eq!(manager.filtered_indices().len(), 2);
+        assert_eq!(manager.selected_index, 1);
+    }
+
+    #[test]
+    fn test_tasks_with_special_characters() {
+        let mut manager = TaskManager::new();
+        let unicode_title = "Refactor 🦀 Rust & Python (v2.0) / 日本語 test! 🚀";
+        manager.add(unicode_title.to_string(), 5);
+        assert_eq!(manager.tasks.len(), 1);
+        assert_eq!(manager.tasks[0].title, unicode_title);
+        assert_eq!(manager.tasks[0].pomodoros_estimated, 5);
+        assert_eq!(manager.active_task().unwrap().title, unicode_title);
+    }
 }
+
 
 

@@ -459,7 +459,48 @@ mod tests {
         assert_eq!(PomodoroPhase::LongBreak.title(), "LONG BREAK");
         assert_eq!(PomodoroPhase::LongBreak.emoji(), "🌴");
     }
+
+    #[test]
+    fn test_target_duration_secs_all_phases() {
+        let config = Config {
+            work_duration_mins: 40,
+            short_break_mins: 8,
+            long_break_mins: 20,
+            ..Config::default()
+        };
+        let timer = PomodoroTimer::new(&config);
+        assert_eq!(timer.target_duration_secs(PomodoroPhase::Work, &config), 40 * 60);
+        assert_eq!(timer.target_duration_secs(PomodoroPhase::ShortBreak, &config), 8 * 60);
+        assert_eq!(timer.target_duration_secs(PomodoroPhase::LongBreak, &config), 20 * 60);
+    }
+
+    #[test]
+    fn test_timer_toggle_transitions() {
+        let config = Config::default();
+        let mut timer = PomodoroTimer::new(&config);
+
+        // Stopped -> Running
+        assert_eq!(timer.status, TimerStatus::Stopped);
+        timer.toggle();
+        assert_eq!(timer.status, TimerStatus::Running);
+
+        // Running -> Paused
+        timer.toggle();
+        assert_eq!(timer.status, TimerStatus::Paused);
+
+        // Paused -> Running
+        timer.toggle();
+        assert_eq!(timer.status, TimerStatus::Running);
+
+        // Running -> Paused via pause()
+        timer.pause();
+        assert_eq!(timer.status, TimerStatus::Paused);
+        // Calling pause() again while already paused keeps it paused
+        timer.pause();
+        assert_eq!(timer.status, TimerStatus::Paused);
+    }
 }
+
 
 
 

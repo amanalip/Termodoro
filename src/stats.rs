@@ -442,6 +442,134 @@ mod tests {
         assert_eq!(*count, 2);
         assert!(!today_label.is_empty());
     }
+
+    #[test]
+    fn test_multi_day_streak_yesterday_continuation() {
+        let mut stats = StatsHistory::new();
+        let today = Local::now().date_naive();
+
+        // 4 consecutive days of work ending yesterday (offset 1, 2, 3, 4) - today has 0 sessions
+        for offset in 1..=4 {
+            let date = today - chrono::Duration::days(offset);
+            let dt = date.and_hms_opt(14, 0, 0).unwrap().and_local_timezone(Local).unwrap().with_timezone(&Utc);
+            stats.sessions.push(CompletedSession {
+                timestamp: dt,
+                phase: PomodoroPhase::Work,
+                duration_mins: 25,
+                task_id: None,
+                task_title: None,
+            });
+        }
+
+        // Streak from yesterday should be 4 days
+        assert_eq!(stats.current_streak_days(), 4);
+        assert_eq!(stats.longest_streak_days(), 4);
+        assert_eq!(stats.today_work_sessions(), 0);
+    }
+
+    #[test]
+    fn test_out_of_order_session_timestamps() {
+        let mut stats = StatsHistory::new();
+        let today = Local::now().date_naive();
+
+        // Insert sessions in reverse/shuffled chronological order
+        let offsets = [0, 3, 1, 2];
+        for &offset in &offsets {
+            let date = today - chrono::Duration::days(offset);
+            let dt = date.and_hms_opt(9, 0, 0).unwrap().and_local_timezone(Local).unwrap().with_timezone(&Utc);
+            stats.sessions.push(CompletedSession {
+                timestamp: dt,
+                phase: PomodoroPhase::Work,
+                duration_mins: 30,
+                task_id: None,
+                task_title: None,
+            });
+        }
+
+        // Distinct dates should be 4 and sorted properly
+        let distinct = stats.distinct_work_dates();
+        assert_eq!(distinct.len(), 4);
+        assert!(distinct.windows(2).all(|w| w[0] < w[1]));
+
+        // Continuous 4-day streak
+        assert_eq!(stats.current_streak_days(), 4);
+        assert_eq!(stats.longest_streak_days(), 4);
+        assert_eq!(stats.total_focus_minutes(), 120);
+    }
+
+    #[test]
+    fn test_distribution_variable_day_windows() {
+        let mut stats = StatsHistory::new();
+        stats.record(PomodoroPhase::Work, 25, None, None);
+
+        // 0 days window
+        let dist0 = stats.last_days_distribution(0);
+        assert_eq!(dist0.len(), 0);
+
+        // 1 day window
+        let dist1 = stats.last_days_distribution(1);
+        assert_eq!(dist1.len(), 1);
+        assert_eq!(dist1[0].1, 1);
+
+        // 14 days window
+        let dist14 = stats.last_days_distribution(14);
+        assert_eq!(dist14.len(), 14);
+        assert_eq!(dist14[13].1, 1); // today is last index
+
+        // 30 days window
+        let dist30 = stats.last_days_distribution(30);
+        assert_eq!(dist30.len(), 30);
+    }
+
+    #[test]
+    fn test_complex_multi_streak_history() {
+        let mut stats = StatsHistory::new();
+        let today = Local::now().date_naive();
+
+        // Streak 1: 3-day streak from today-20 to today-18
+        for offset in 18..=20 {
+            let date = today - chrono::Duration::days(offset);
+            let dt = date.and_hms_opt(12, 0, 0).unwrap().and_local_timezone(Local).unwrap().with_timezone(&Utc);
+            stats.sessions.push(CompletedSession {
+                timestamp: dt,
+                phase: PomodoroPhase::Work,
+                duration_mins: 25,
+                task_id: None,
+                task_title: None,
+            });
+        }
+
+        // Streak 2: 6-day streak from today-15 to today-10
+        for offset in 10..=15 {
+            let date = today - chrono::Duration::days(offset);
+            let dt = date.and_hms_opt(12, 0, 0).unwrap().and_local_timezone(Local).unwrap().with_timezone(&Utc);
+            stats.sessions.push(CompletedSession {
+                timestamp: dt,
+                phase: PomodoroPhase::Work,
+                duration_mins: 25,
+                task_id: None,
+                task_title: None,
+            });
+        }
+
+        // Streak 3: 2-day current streak: today-1 and today
+        for offset in 0..=1 {
+            let date = today - chrono::Duration::days(offset);
+            let dt = date.and_hms_opt(12, 0, 0).unwrap().and_local_timezone(Local).unwrap().with_timezone(&Utc);
+            stats.sessions.push(CompletedSession {
+                timestamp: dt,
+                phase: PomodoroPhase::Work,
+                duration_mins: 25,
+                task_id: None,
+                task_title: None,
+            });
+        }
+
+        assert_eq!(stats.current_streak_days(), 2);
+        assert_eq!(stats.longest_streak_days(), 6);
+        assert_eq!(stats.total_work_sessions(), 11);
+    }
 }
+
 
 
