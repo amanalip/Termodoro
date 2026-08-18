@@ -101,6 +101,7 @@ Termodoro/
 ├── audit_log.md                # Permanent audit log & verification history (AUD-001 to AUD-013)
 ├── new_features_tracker.md     # Feature tracking roadmap and specifications
 ├── user_journeys/              # Interactive step-by-step visual user journey walkthroughs
+│   ├── README.md               # User journeys index, workflow catalog & keybinding reference
 │   ├── 01_focus_session_and_cycling.md
 │   ├── 02_task_management_and_estimates.md
 │   ├── 03_analytics_and_streaks.md
@@ -130,10 +131,11 @@ Termodoro/
 
 ## 5. Interactive User Journeys & Guides
 
-To help you get the most out of Termodoro, detailed step-by-step user journey guides with visual screenshots are available in the [`user_journeys/`](file:///home/amanap/Documents/GitHub/Termodoro/user_journeys/) directory:
+To help you get the most out of Termodoro, detailed step-by-step user journey guides with visual screenshots are available in the [`user_journeys/`](file:///home/amanap/Documents/GitHub/Termodoro/user_journeys/) directory (see [**`user_journeys/README.md`**](file:///home/amanap/Documents/GitHub/Termodoro/user_journeys/README.md) for the full catalog):
 
 | User Journey | Guide Document | Key Workflows & Visual Highlights |
 | :--- | :--- | :--- |
+| **Catalog & Overview** | [**`user_journeys/README.md`**](file:///home/amanap/Documents/GitHub/Termodoro/user_journeys/README.md) | User journeys overview, workflow directory index, design architecture, and master keybinding reference cheatsheet. |
 | **01. Core Focus Session** | [**`01_focus_session_and_cycling.md`**](file:///home/amanap/Documents/GitHub/Termodoro/user_journeys/01_focus_session_and_cycling.md) | Running 25m focus sessions, pause/resume, automatic interval transitions, cycle dot progression, and acoustic chimes. |
 | **02. Task Management** | [**`02_task_management_and_estimates.md`**](file:///home/amanap/Documents/GitHub/Termodoro/user_journeys/02_task_management_and_estimates.md) | Task creation modal, estimating Pomodoro blocks, setting active target tasks, filtering views, and automatic effort logging. |
 | **03. Analytics & Streaks** | [**`03_analytics_and_streaks.md`**](file:///home/amanap/Documents/GitHub/Termodoro/user_journeys/03_analytics_and_streaks.md) | Daily focus time cards, consecutive streak retention, 7-day activity bar charts, and historical activity logs. |
