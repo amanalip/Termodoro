@@ -12,7 +12,7 @@
 [![Safety](https://img.shields.io/badge/unsafe%20code-0%25%20(Safe%20Rust)-brightgreen.svg)](audit_log.md)
 [![Privacy](https://img.shields.io/badge/telemetry-0%25%20(100%25%20Offline)-blueviolet.svg)](audit_log.md)
 
-![Termodoro Focus Timer View](assets/screenshots/kde_01_timer_view.png)
+![Termodoro Focus Timer View](assets/screenshots/01_timer_view.svg)
 
 *A keyboard-driven, ultra-fast Pomodoro timer and task manager crafted in pure Rust with Ratatui on KDE Linux / CachyOS.*
 
@@ -575,7 +575,7 @@ These shortcuts function across every screen in Termodoro:
 
 The Timer view is the central hub for running focus sessions and breaks.
 
-![Tab 1: Pomodoro Focus Timer](assets/screenshots/kde_01_timer_view.png)
+![Tab 1: Pomodoro Focus Timer](assets/screenshots/01_timer_view.svg)
 
 #### Controls in Timer View
 - `Space`: Toggle timer state between Running and Paused.
@@ -589,7 +589,7 @@ The Timer view is the central hub for running focus sessions and breaks.
 
 The Tasks view provides a structured environment for managing tasks, estimating workload, and tracking completed Pomodoro sessions against specific goals.
 
-![Tab 2: Task Management & Targets](assets/screenshots/kde_02_task_manager.png)
+![Tab 2: Task Management & Targets](assets/screenshots/02_task_manager.svg)
 
 #### Controls in Tasks View
 - `a`: Open the **Add Task** dialog.
@@ -605,7 +605,7 @@ The Tasks view provides a structured environment for managing tasks, estimating 
 
 The Stats view visualizes your focus history, habit consistency, and daily work distribution:
 
-![Tab 3: Productivity Analytics & Streaks](assets/screenshots/kde_03_stats_view.png)
+![Tab 3: Productivity Analytics & Streaks](assets/screenshots/03_stats_view.svg)
 
 #### Key Metrics Explained
 - **Today's Focus**: Total work sessions completed on the current local calendar day and cumulative focus minutes.
@@ -619,7 +619,7 @@ The Stats view visualizes your focus history, habit consistency, and daily work 
 
 The Settings view allows you to customize durations, toggles, and visual appearance in real time across **18 built-in color themes**:
 
-![Tab 4: Preferences & Theme Selector](assets/screenshots/kde_04_settings_view.png)
+![Tab 4: Preferences & Theme Selector](assets/screenshots/04_settings_view.svg)
 
 #### Controls in Settings View
 - `↑` / `k` and `↓` / `j`: Select configuration option.
@@ -657,7 +657,7 @@ The Settings view allows you to customize durations, toggles, and visual appeara
 #### 1. Add Task Modal Dialog
 Quickly create new tasks, assign titles, and define estimated Pomodoro intervals with direct input navigation:
 
-![Add Task Modal Dialog](assets/screenshots/kde_05_task_modal.png)
+![Add Task Modal Dialog](assets/screenshots/05_task_modal.svg)
 
 ##### Controls in Add Task Modal
 - `Tab` / `Shift+Tab` / `↓` / `↑`: Switch focus between **Task Title** and **Pomodoro Estimate** fields.
@@ -668,7 +668,7 @@ Quickly create new tasks, assign titles, and define estimated Pomodoro intervals
 #### 2. Help & Keybindings Dialog
 Press `?` at any point from any screen to open the interactive keyboard cheat sheet:
 
-![Help & Keybindings Dialog](assets/screenshots/kde_06_help_modal.png)
+![Help & Keybindings Dialog](assets/screenshots/06_help_modal.svg)
 
 ##### Dismissing the Help Modal
 - Press `?`, `Esc`, `q`, or `Enter` to dismiss the overlay and return instantly to your current view.

@@ -85,10 +85,10 @@ From anywhere in Termodoro, press `2` (or press `Tab`) to navigate to **Tab 2: T
 ## 3. Visual Layout & Interface Details
 
 ### Interactive Tasks Table View
-![Termodoro Tasks View](../assets/screenshots/kde_02_task_manager.png)
+![Termodoro Tasks View](../assets/screenshots/02_task_manager.svg)
 
 ### Task Creation Modal Dialog
-![Termodoro Task Modal](../assets/screenshots/kde_05_task_modal.png)
+![Termodoro Task Modal](../assets/screenshots/05_task_modal.svg)
 
 ### Tasks View Components:
 1. **Filter Selector Bar**: Visual badges showing `[● All (1)]`, `[  Active (2)]`, `[  Completed (3)]`.

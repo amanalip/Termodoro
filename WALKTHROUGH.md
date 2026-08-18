@@ -59,7 +59,7 @@ Termodoro divides the terminal window into three main regions:
    ```
 2. **View the Timer**: By default, Termodoro opens on Tab 1 (**Timer**). The header indicates `FOCUS SESSION [■ READY] Cycle 1/4 [◉ ○ ○ ○]`.
 
-   ![Focus Timer Screen](assets/screenshots/kde_01_timer_view.png)
+   ![Focus Timer Screen](assets/screenshots/01_timer_view.svg)
 
 3. **Begin Focus Interval**: Press `Space`. The status changes to `[● RUNNING]`, and the 5-row digital clock begins counting down from `25:00`. The progress gauge fills smoothly as time elapses.
 4. **Pausing When Interrupted**: If you need to step away, press `Space` to pause the countdown (`[|| PAUSED]`). Press `Space` again to resume.
@@ -77,11 +77,11 @@ Termodoro divides the terminal window into three main regions:
 
 1. **Open Tasks View**: Press `2` or `Tab` to navigate to the **Tasks** tab.
 
-   ![Task Manager Screen](assets/screenshots/kde_02_task_manager.png)
+   ![Task Manager Screen](assets/screenshots/02_task_manager.svg)
 
 2. **Create a Task**: Press `a` to open the task creation dialog:
 
-   ![Add Task Dialog](assets/screenshots/kde_05_task_modal.png)
+   ![Add Task Dialog](assets/screenshots/05_task_modal.svg)
 
    - Type your task description (e.g., `Write unit tests`).
    - Press `Tab` to move to the estimated Pomodoros field.
@@ -98,7 +98,7 @@ Termodoro divides the terminal window into three main regions:
 
 1. **Open Analytics Dashboard**: Press `3` to view the **Stats** tab.
 
-   ![Analytics Screen](assets/screenshots/kde_03_stats_view.png)
+   ![Analytics Screen](assets/screenshots/03_stats_view.svg)
 
 2. **Interpret Summary Cards**:
    - **Today's Focus**: Total Pomodoro work sessions completed today and total minutes spent in focus.
@@ -113,7 +113,7 @@ Termodoro divides the terminal window into three main regions:
 
 1. **Open Settings View**: Press `4` to enter the **Settings** tab.
 
-   ![Settings Screen](assets/screenshots/kde_04_settings_view.png)
+   ![Settings Screen](assets/screenshots/04_settings_view.svg)
 
 2. **Customize Durations & Cycles**:
    - Highlight **Focus Duration** and press `→`, `l`, `+`, or `=` to increase focus sessions (1 - 120 mins).
@@ -145,7 +145,7 @@ Termodoro divides the terminal window into three main regions:
 5. **Instant Persistence**: All changes are automatically saved to your storage file immediately.
 6. **Keybindings Reference**: Press `?` anytime to inspect the help cheat sheet overlay:
 
-   ![Help Dialog](assets/screenshots/kde_06_help_modal.png)
+   ![Help Dialog](assets/screenshots/06_help_modal.svg)
 
 
 ---

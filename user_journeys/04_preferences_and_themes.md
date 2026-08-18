@@ -82,10 +82,10 @@ From any tab in Termodoro, press `4` to enter **Tab 4: Settings View**.
 ## 3. Visual Layout & Interface Details
 
 ### Live Settings View Editor
-![Termodoro Settings View](../assets/screenshots/kde_04_settings_view.png)
+![Termodoro Settings View](../assets/screenshots/04_settings_view.svg)
 
 ### Global Keybinding Reference Modal (`?`)
-![Termodoro Help Modal](../assets/screenshots/kde_06_help_modal.png)
+![Termodoro Help Modal](../assets/screenshots/06_help_modal.svg)
 
 ---
 

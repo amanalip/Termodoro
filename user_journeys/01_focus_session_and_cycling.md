@@ -96,7 +96,7 @@ Upon finishing the 4th session, Termodoro automatically enters a **15-minute Lon
 
 Below is the live operational layout of Tab 1 during an active focus session:
 
-![Termodoro Timer View](../assets/screenshots/kde_01_timer_view.png)
+![Termodoro Timer View](../assets/screenshots/01_timer_view.svg)
 
 ### Anatomy of Tab 1:
 1. **Header Navigation Bar**: Highlights active tab `1: Timer` along with quick access to `2: Tasks`, `3: Stats`, and `4: Settings`.

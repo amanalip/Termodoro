@@ -76,7 +76,7 @@ The bottom panel displays an activity history table detailing your recent sessio
 
 Below is the live operational layout of Tab 3:
 
-![Termodoro Stats View](../assets/screenshots/kde_03_stats_view.png)
+![Termodoro Stats View](../assets/screenshots/03_stats_view.svg)
 
 ### Key Analytics Layout Elements:
 1. **Summary Cards Header**: 4 bordered visual blocks showing Focus Time, Pomodoros, Current Streak, and Personal Best.
