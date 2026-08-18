@@ -151,22 +151,12 @@ graph TD
 The timer operates according to a strict three-phase finite state machine with support for 24-cycle progressions:
 
 ```mermaid
-stateDiagram-v2
-    [*] --> Work: Launch (Cycle 1)
-    
-    Work --> ShortBreak: 25m Complete (Cycles 1 to N-1)
-    Work --> LongBreak: 25m Complete (Cycle == N)
-    
-    ShortBreak --> Work: 5m Break Complete (Cycle increments)
-    LongBreak --> Work: 15m Break Complete (Cycle resets to 1)
-    
-    state Work {
-        Stopped --> Running: Press Space
-        Running --> Paused: Press Space
-        Paused --> Running: Press Space
-        Running --> Stopped: Press r
-        Paused --> Stopped: Press r
-    }
+flowchart TD
+    Start([Application Launch]) --> Work["Work Phase (25 min Focus)"]
+    Work -->|Completed (Cycles 1 to N-1)| ShortBreak["Short Break (5 min)"]
+    Work -->|Completed (Cycle N)| LongBreak["Long Break (15 min)"]
+    ShortBreak -->|Break Finished (Cycle + 1)| Work
+    LongBreak -->|Break Finished (Cycle Reset to 1)| Work
 ```
 
 ### Phase Transition Logic & 24-Cycle Progression
@@ -183,21 +173,17 @@ stateDiagram-v2
 Ratatui employs an immediate-mode rendering architecture where the entire screen is redrawn on each tick from current state:
 
 ```mermaid
-sequenceDiagram
-    autonumber
-    participant Loop as Event Loop
-    participant App as App State
-    participant UI as UI Coordinator
-    participant Buffer as Terminal Buffer
-
-    Loop->>App: Calculate tick and remaining time
-    Loop->>UI: Trigger draw frame
-    UI->>UI: Compute layout constraints
-    UI->>UI: Render header bar and tabs
-    UI->>UI: Render active tab view
-    UI->>UI: Render modal overlays
-    UI->>UI: Render status toast and footer
-    UI->>Buffer: Flush diff to terminal via Crossterm
+flowchart TD
+    A["Event Loop (100ms Tick)"] --> B["Update App State and Countdown"]
+    B --> C["Compute Layout Rectangles"]
+    C --> D["Render Header and Tab Selectors"]
+    C --> E["Render Active Tab View (Timer / Tasks / Stats / Settings)"]
+    C --> F["Render Modal Overlays (if active)"]
+    C --> G["Render Status Toast and Keybinding Footer"]
+    D --> H["Flush Diff Buffer to Screen via Crossterm"]
+    E --> H
+    F --> H
+    G --> H
 ```
 
 ### Big Digits Block Rasterization
