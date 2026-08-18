@@ -291,4 +291,34 @@ mod tests {
         set_audio_muted_for_tests(false);
         assert!(!AUDIO_MUTED_FOR_TESTS.load(Ordering::SeqCst));
     }
+
+    #[test]
+    fn test_create_riff_wav_byte_level_alignment() {
+        let samples = vec![0x1234i16, -0x1234i16];
+        let wav = create_riff_wav_pcm16(&samples, 44100);
+        // Header length must be exactly 44 bytes
+        assert_eq!(wav.len(), 44 + 4);
+        // Channels = 1 (little-endian: 0x01, 0x00)
+        assert_eq!(wav[22], 1);
+        assert_eq!(wav[23], 0);
+        // Bits per sample = 16 (little-endian: 0x10, 0x00)
+        assert_eq!(wav[34], 16);
+        assert_eq!(wav[35], 0);
+        // Data payload begins at offset 44
+        assert_eq!(wav[44], 0x34);
+        assert_eq!(wav[45], 0x12);
+    }
+
+    #[test]
+    fn test_generate_chimes_finite_and_clean_samples() {
+        let work_samples = generate_work_complete_chime();
+        let short_break_samples = generate_break_complete_chime();
+        let long_break_samples = generate_long_break_chime();
+
+        for samples in [&work_samples, &short_break_samples, &long_break_samples] {
+            assert!(!samples.is_empty());
+            // Verify RIFF WAV has at least the 44-byte header + data
+            assert!(samples.len() > 44);
+        }
+    }
 }

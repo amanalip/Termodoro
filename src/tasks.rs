@@ -531,4 +531,62 @@ mod tests {
         manager.active_task_id = Some("nonexistent-uuid".to_string());
         assert_eq!(manager.active_task(), None);
     }
+
+    #[test]
+    fn test_tasks_large_volume_performance() {
+        let mut manager = TaskManager::new();
+        // Add 500 tasks
+        for i in 0..500 {
+            manager.add(format!("Task number {}", i), (i % 5) + 1);
+        }
+        assert_eq!(manager.tasks.len(), 500);
+
+        // Toggle every second task complete
+        for i in 0..250 {
+            manager.selected_index = i * 2;
+            manager.toggle_selected();
+        }
+
+        // Active filter should have 250 items
+        manager.filter = TaskFilter::Active;
+        assert_eq!(manager.filtered_indices().len(), 250);
+
+        // Completed filter should have 250 items
+        manager.filter = TaskFilter::Completed;
+        assert_eq!(manager.filtered_indices().len(), 250);
+    }
+
+    #[test]
+    fn test_tasks_serde_roundtrip_skip_fields() {
+        let mut manager = TaskManager::new();
+        manager.add("Persisted Task".to_string(), 3);
+        manager.selected_index = 42;
+        manager.filter = TaskFilter::Completed;
+
+        let json = serde_json::to_string(&manager).unwrap();
+        // Transient fields should not be in JSON
+        assert!(!json.contains("selected_index"));
+        assert!(!json.contains("filter"));
+
+        let restored: TaskManager = serde_json::from_str(&json).unwrap();
+        assert_eq!(restored.tasks.len(), 1);
+        assert_eq!(restored.tasks[0].title, "Persisted Task");
+        // Deserialized manager gets default selected_index = 0 and filter = All
+        assert_eq!(restored.selected_index, 0);
+        assert_eq!(restored.filter, TaskFilter::All);
+    }
+
+    #[test]
+    fn test_tasks_empty_navigation_and_actions() {
+        let mut manager = TaskManager::new();
+        // Operations on empty manager must not panic
+        manager.next();
+        manager.previous();
+        manager.toggle_selected();
+        manager.remove_selected();
+        manager.set_selected_active();
+        manager.increment_active_spent();
+        assert_eq!(manager.filtered_indices().len(), 0);
+        assert_eq!(manager.active_task(), None);
+    }
 }

@@ -124,13 +124,35 @@ This document maintains a transparent, permanent audit log of repository hygiene
 
 ---
 
+### [AUD-006] Section A 18-Color Themes Implementation & E2E Verification
+- **Date:** August 17, 2026
+- **Severity:** Feature Expansion & UI Theming
+- **Summary of Changes:**
+  1. Expanded built-in visual color themes from 6 to 18 palettes covering popular dark and light themes (Catppuccin Mocha/Macchiato/Frappé/Latte, Nord, Gruvbox, Tokyo Night, Dracula, Solarized Dark/Light, Rosé Pine, One Dark, Kanagawa, Everforest Dark/Light, Synthwave '84, Monokai Pro, OLED Phosphor).
+  2. Implemented end-to-end integration tests verifying bidirectional cycling (`h`/`l`), atomic disk persistence, and rendering on all 4 tabs and modal dialogs.
+- **Resolution Status:** **RESOLVED & VERIFIED**
+
+---
+
+### [AUD-007] Exhaustive Edge-Case & Deep Integrity Testing Expansion
+- **Date:** August 17, 2026
+- **Severity:** Testing Rigor & Quality Assurance
+- **Summary of Changes:**
+  1. **Exhaustive App & Modal Testing**: Added key isolation tests inside modal dialogs (preventing inadvertent quits or tab switching while typing), exhaustive 9-row settings clamping tests (rows 0–8), and non-panicking empty task navigation.
+  2. **High-Volume & Bounds Benchmarks**: Added 500-task performance benchmark with multi-filter toggles, 150-session analytics aggregation, 50 rapid phase skips without state machine corruption, and zero-duration progress ratio safety checks.
+  3. **Storage & Serialization Robustness**: Added full dataset disk save/load roundtrips, transient UI field exclusions from JSON, and comprehensive serde roundtrips across all 18 theme choices, timers, and stats.
+  4. **Acoustic WAV Structure**: Added 16-bit PCM little-endian byte-level offset assertions and non-empty finite sample buffer tests.
+- **Resolution Status:** **CERTIFIED (111 / 111 Tests Passed)**
+
+---
+
 ## Fact-Check, Sanity Audit & Certification Matrix
 
 | Audit Target | Documented Metric | Verified Fact | Verification Evidence |
 | :--- | :--- | :--- | :--- |
 | **Compiler Toolchain** | Rust 1.74+ | Edition 2021 | Tested on `rustc 1.80+` |
 | **Dependencies** | 8 direct crates | Clean resolution | Verified in `Cargo.lock` |
-| **Automated Tests** | 93 Unit & Integration | 93 Passed, 0 Failed | `cargo test` (1.12s runtime) |
+| **Automated Tests** | 111 Unit & Integration | 111 Passed, 0 Failed | `cargo test` (1.20s runtime) |
 | **Unsafe Blocks** | 0 Unsafe blocks | 100% Safe Rust | AST scan (`! grep -rn "unsafe" src/`) |
 | **Linter Warnings** | 0 Warnings | Clean Clippy output | `cargo clippy -- -D warnings` |
 | **Audio Spec** | 16-bit PCM RIFF | 44.1kHz sample rate | RFC 2361 chunk verification |

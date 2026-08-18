@@ -358,13 +358,13 @@ If an unhandled error triggers a panic, this hook executes first:
 
 ## 11. Automated Testing Strategy & Benchmarks
 
-Termodoro includes **93 automated unit, integration, and UI rendering tests** across all 9 modules:
+Termodoro includes **111 automated unit, integration, and UI rendering tests** across all 9 modules:
 
-- **Audio Engine (`src/audio.rs`)**: Tests 16-bit PCM RIFF headers, signal clipping bounds ($>10000$, $<32000$), custom sample rates ($8\text{kHz}$ to $96\text{kHz}$), and atomic muting flags.
-- **Timer Engine (`src/timer.rs`)**: Tests 24-cycle state machine progression, large duration formatting (up to 120 mins), pause, toggle, and reset transitions.
-- **Task Management (`src/tasks.rs`)**: Tests UUID generation uniqueness across 100 tasks, boundary deletions, and active task auto-reassignment.
-- **Productivity Analytics (`src/stats.rs`)**: Tests multi-day streaks across year and month boundaries, session metadata retention, and weekday histogram labels.
-- **Application Workflows (`src/app.rs`)**: Tests 18-theme forward/backward navigation and disk persistence, full 24-cycle E2E workflows, sound & desktop notification flags, status message expiration, and keybinding dispatchers.
+- **Audio Engine (`src/audio.rs`)**: Tests 16-bit PCM RIFF headers, signal clipping bounds ($>10000$, $<32000$), custom sample rates ($8\text{kHz}$ to $96\text{kHz}$), byte-level RIFF alignment, and atomic muting flags.
+- **Timer Engine (`src/timer.rs`)**: Tests 24-cycle state machine progression, large duration formatting (up to 120 mins), 50 rapid skips, zero-duration progress calculations, pause, toggle, and reset transitions.
+- **Task Management (`src/tasks.rs`)**: Tests UUID generation uniqueness across 100 tasks, 500-task high volume benchmarks, transient JSON exclusions, boundary deletions, empty manager resilience, and active task auto-reassignment.
+- **Productivity Analytics (`src/stats.rs`)**: Tests multi-day streaks across year and month boundaries, 150-session volume aggregations, minute-to-hour calculations, session metadata retention, and weekday histogram labels.
+- **Application Workflows (`src/app.rs`)**: Tests 18-theme forward/backward navigation and disk persistence, exhaustive 9-row settings clamping, modal input isolation, full 24-cycle E2E workflows, sound & desktop notification flags, status message expiration, and keybinding dispatchers.
 - **UI Terminal Frame Rendering (`src/ui/mod.rs`)**: Uses Ratatui `TestBackend` to render all 4 tabs, modal dialogs, 24-dot cycle views, all 18 color themes, and 11 distinct terminal geometries from $50\times 18$ to $250\times 60$.
 
 Run the complete test suite with:

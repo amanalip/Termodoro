@@ -217,10 +217,33 @@ mod tests {
 
     #[test]
     fn test_char_pattern_all_valid_chars() {
-        let chars = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ':', '?'];
-        for c in chars {
+        let digits = [
+            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '?', 'X', ' ',
+        ];
+        for c in digits {
             let pattern = char_pattern(c);
             assert_eq!(pattern.len(), 5);
+            for row in pattern {
+                assert_eq!(row.chars().count(), 4);
+            }
+        }
+
+        let colon_pattern = char_pattern(':');
+        assert_eq!(colon_pattern.len(), 5);
+        for row in colon_pattern {
+            assert_eq!(row.chars().count(), 1);
+        }
+    }
+
+    #[test]
+    fn test_render_big_time_boundary_values() {
+        // High minutes
+        let lines = render_big_time(120, 0);
+        assert_eq!(lines.len(), 5);
+        // All rows same width
+        let len0 = lines[0].chars().count();
+        for line in &lines {
+            assert_eq!(line.chars().count(), len0);
         }
     }
 }

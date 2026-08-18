@@ -563,4 +563,72 @@ mod tests {
         timer.time_remaining_secs = 1;
         assert_eq!(timer.formatted_time(), (0, 1));
     }
+
+    #[test]
+    fn test_timer_zero_total_duration_progress_ratio() {
+        let config = Config::default();
+        let mut timer = PomodoroTimer::new(&config);
+        timer.total_duration_secs = 0;
+        timer.time_remaining_secs = 0;
+        assert_eq!(timer.progress_ratio(), 0.0);
+    }
+
+    #[test]
+    fn test_timer_multiple_consecutive_skips() {
+        let mut config = Config::default();
+        config.long_break_interval = 4;
+        let mut timer = PomodoroTimer::new(&config);
+
+        // Skip 50 times in a row
+        for _ in 0..50 {
+            timer.skip_to_next(&config);
+            assert!(timer.current_cycle >= 1 && timer.current_cycle <= 4);
+            assert!(timer.time_remaining_secs > 0);
+            assert_eq!(timer.time_remaining_secs, timer.total_duration_secs);
+        }
+    }
+
+    #[test]
+    fn test_timer_reset_across_all_phases() {
+        let config = Config::default();
+        let mut timer = PomodoroTimer::new(&config);
+
+        // Work reset
+        timer.status = TimerStatus::Running;
+        timer.time_remaining_secs = 10;
+        timer.reset(&config);
+        assert_eq!(timer.status, TimerStatus::Stopped);
+        assert_eq!(timer.time_remaining_secs, config.work_duration_mins * 60);
+
+        // ShortBreak reset
+        timer.phase = PomodoroPhase::ShortBreak;
+        timer.status = TimerStatus::Paused;
+        timer.time_remaining_secs = 5;
+        timer.reset(&config);
+        assert_eq!(timer.status, TimerStatus::Stopped);
+        assert_eq!(timer.time_remaining_secs, config.short_break_mins * 60);
+
+        // LongBreak reset
+        timer.phase = PomodoroPhase::LongBreak;
+        timer.status = TimerStatus::Running;
+        timer.time_remaining_secs = 20;
+        timer.reset(&config);
+        assert_eq!(timer.status, TimerStatus::Stopped);
+        assert_eq!(timer.time_remaining_secs, config.long_break_mins * 60);
+    }
+
+    #[test]
+    fn test_timer_serde_roundtrip() {
+        let config = Config::default();
+        let mut timer = PomodoroTimer::new(&config);
+        timer.completed_pomodoros = 7;
+        timer.current_cycle = 3;
+        timer.status = TimerStatus::Paused;
+
+        let json = serde_json::to_string(&timer).unwrap();
+        let restored: PomodoroTimer = serde_json::from_str(&json).unwrap();
+        assert_eq!(restored.completed_pomodoros, 7);
+        assert_eq!(restored.current_cycle, 3);
+        assert_eq!(restored.status, TimerStatus::Paused);
+    }
 }

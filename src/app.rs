@@ -1487,4 +1487,121 @@ mod tests {
 
         let _ = std::fs::remove_dir_all(temp_dir);
     }
+
+    #[test]
+    fn test_all_settings_rows_min_max_clamping_exhaustive() {
+        let (mut app, temp_dir) = create_test_app();
+        app.active_tab = ActiveTab::Settings;
+
+        // Row 0: work_duration_mins (1..=120)
+        app.settings_index = 0;
+        for _ in 0..150 {
+            app.on_key_event(make_key(KeyCode::Char('l')));
+        }
+        assert_eq!(app.config.work_duration_mins, 120);
+        for _ in 0..150 {
+            app.on_key_event(make_key(KeyCode::Char('h')));
+        }
+        assert_eq!(app.config.work_duration_mins, 1);
+
+        // Row 1: short_break_mins (1..=60)
+        app.settings_index = 1;
+        for _ in 0..100 {
+            app.on_key_event(make_key(KeyCode::Char('l')));
+        }
+        assert_eq!(app.config.short_break_mins, 60);
+        for _ in 0..100 {
+            app.on_key_event(make_key(KeyCode::Char('h')));
+        }
+        assert_eq!(app.config.short_break_mins, 1);
+
+        // Row 2: long_break_mins (1..=90)
+        app.settings_index = 2;
+        for _ in 0..120 {
+            app.on_key_event(make_key(KeyCode::Char('l')));
+        }
+        assert_eq!(app.config.long_break_mins, 90);
+        for _ in 0..120 {
+            app.on_key_event(make_key(KeyCode::Char('h')));
+        }
+        assert_eq!(app.config.long_break_mins, 1);
+
+        // Row 3: long_break_interval (1..=24)
+        app.settings_index = 3;
+        for _ in 0..30 {
+            app.on_key_event(make_key(KeyCode::Char('l')));
+        }
+        assert_eq!(app.config.long_break_interval, 24);
+        for _ in 0..30 {
+            app.on_key_event(make_key(KeyCode::Char('h')));
+        }
+        assert_eq!(app.config.long_break_interval, 1);
+
+        // Rows 4, 5, 6, 7: toggles via space and enter
+        for row in 4..=7 {
+            app.settings_index = row;
+            let before = match row {
+                4 => app.config.auto_start_breaks,
+                5 => app.config.auto_start_work,
+                6 => app.config.desktop_notifications,
+                7 => app.config.sound_enabled,
+                _ => false,
+            };
+            app.on_key_event(make_key(KeyCode::Char(' ')));
+            let after = match row {
+                4 => app.config.auto_start_breaks,
+                5 => app.config.auto_start_work,
+                6 => app.config.desktop_notifications,
+                7 => app.config.sound_enabled,
+                _ => false,
+            };
+            assert_eq!(after, !before);
+        }
+
+        let _ = std::fs::remove_dir_all(temp_dir);
+    }
+
+    #[test]
+    fn test_modal_exclusive_key_handling() {
+        let (mut app, temp_dir) = create_test_app();
+        app.open_task_modal();
+        assert!(app.show_task_modal);
+
+        // Pressing 'q' inside modal must NOT quit the application, but type into title
+        app.on_key_event(make_key(KeyCode::Char('q')));
+        assert!(!app.should_quit);
+        assert_eq!(app.task_input_title, "q");
+
+        // Pressing '1' or '2' inside modal must type '1' or '2' and NOT switch tabs
+        app.on_key_event(make_key(KeyCode::Char('1')));
+        assert_eq!(app.active_tab, ActiveTab::Timer);
+        assert_eq!(app.task_input_title, "q1");
+
+        // Esc closes modal cleanly
+        app.on_key_event(make_key(KeyCode::Esc));
+        assert!(!app.show_task_modal);
+
+        let _ = std::fs::remove_dir_all(temp_dir);
+    }
+
+    #[test]
+    fn test_empty_tasks_key_interactions_graceful() {
+        let (mut app, temp_dir) = create_test_app();
+        app.active_tab = ActiveTab::Tasks;
+        assert_eq!(app.tasks.tasks.len(), 0);
+
+        // All keys on empty list must not panic
+        app.on_key_event(make_key(KeyCode::Char('j')));
+        app.on_key_event(make_key(KeyCode::Char('k')));
+        app.on_key_event(make_key(KeyCode::Char('x')));
+        app.on_key_event(make_key(KeyCode::Char('d')));
+        app.on_key_event(make_key(KeyCode::Char(' ')));
+        app.on_key_event(make_key(KeyCode::Char('t')));
+        app.on_key_event(make_key(KeyCode::Enter));
+
+        assert_eq!(app.tasks.tasks.len(), 0);
+        assert_eq!(app.tasks.active_task_id, None);
+
+        let _ = std::fs::remove_dir_all(temp_dir);
+    }
 }

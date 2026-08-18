@@ -143,8 +143,8 @@ If you are new to Rust or TUI development, here is how the code flows:
 
 ## 4. Verification, Testing & Quality Assurance
 
-### Running the Test Suite (93 Tests)
-Termodoro includes a comprehensive suite of **93 automated unit, integration, and UI rendering tests**:
+### Running the Test Suite (111 Tests)
+Termodoro includes a comprehensive suite of **111 automated unit, integration, and UI rendering tests**:
 
 ```bash
 cargo test
@@ -154,15 +154,15 @@ cargo test
 
 | Module | Location | Tested Aspects |
 | :--- | :--- | :--- |
-| **Audio Engine** | `src/audio.rs` | 16-bit PCM WAV headers, amplitude bounds, zero-clipping headroom, custom sample rates |
-| **Timer Engine** | `src/timer.rs` | 24-cycle state machine progression, duration formatting up to 120m, pause & reset |
-| **Task Management** | `src/tasks.rs` | 100-task UUID uniqueness, position-based deletion, active task auto-reassignment |
-| **Analytics & Streaks** | `src/stats.rs` | Multi-day streaks across year/month boundaries, session metadata, weekday labels |
-| **Application State** | `src/app.rs` | 24-cycle E2E workflows, sound & desktop notification flags, status expiration, key routing |
-| **Persistence** | `src/storage.rs` | Atomic writes, corrupt JSON resilience, custom nested directory creation |
+| **Audio Engine** | `src/audio.rs` | 16-bit PCM WAV headers, amplitude bounds, zero-clipping headroom, byte-level alignment, custom sample rates |
+| **Timer Engine** | `src/timer.rs` | 24-cycle state machine progression, duration formatting up to 120m, 50 rapid skips, zero-division safety, pause & reset |
+| **Task Management** | `src/tasks.rs` | 100-task UUID uniqueness, 500-task high volume benchmarks, transient JSON exclusions, position-based deletion, active task auto-reassignment |
+| **Analytics & Streaks** | `src/stats.rs` | Multi-day streaks across year/month boundaries, 150-session volume aggregations, minute-to-hour calculations, session metadata, weekday labels |
+| **Application State** | `src/app.rs` | 18-theme cycling & persistence E2E, exhaustive 9-row settings clamping, modal input isolation, 24-cycle workflows, sound & desktop notification flags, status expiration, key routing |
+| **Persistence** | `src/storage.rs` | Full dataset roundtrips, atomic writes, corrupt JSON resilience, custom nested directory creation |
 | **Configuration** | `src/config.rs` | Default parameters and Serde JSON serialization |
-| **Themes** | `src/theme.rs` | All 6 palettes, color choices, and wrap-around navigation |
-| **Digital Typography** | `src/ui/digits.rs` | 5x3 block font rasterization for all digits, colon, and fallbacks |
+| **Themes** | `src/theme.rs` | All 18 palettes, WCAG AA contrast ratios, and serde roundtrips |
+| **Digital Typography** | `src/ui/digits.rs` | 5x3 block font rasterization for all digits, colon, boundary values, and fallbacks |
 | **Terminal UI Rendering** | `src/ui/mod.rs` | Ratatui `TestBackend` rendering across 11 terminal geometries (50x18 to 250x60) |
 
 ## 5. Fact-Check, Sanity Audit & Operational Verification

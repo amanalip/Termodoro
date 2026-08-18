@@ -227,4 +227,48 @@ mod tests {
 
         let _ = fs::remove_dir_all(temp_dir);
     }
+
+    #[test]
+    fn test_storage_save_and_load_with_full_dataset() {
+        let temp_dir =
+            std::env::temp_dir().join(format!("termodoro_fulldataset_{}", uuid::Uuid::new_v4()));
+        let file_path = temp_dir.join("data.json");
+        let storage = Storage::with_path(file_path.clone());
+
+        let mut config = Config::default();
+        config.theme = crate::theme::ThemeChoice::OledPhosphor;
+        config.work_duration_mins = 50;
+        config.short_break_mins = 10;
+        config.long_break_mins = 30;
+        config.long_break_interval = 6;
+        config.sound_enabled = false;
+        config.desktop_notifications = true;
+
+        let mut tasks = TaskManager::new();
+        for i in 0..20 {
+            tasks.add(format!("Full Dataset Task {}", i), (i % 4) + 1);
+        }
+
+        let mut stats = StatsHistory::new();
+        for i in 0..20 {
+            stats.record(
+                crate::timer::PomodoroPhase::Work,
+                50,
+                Some(format!("task-id-{}", i)),
+                Some(format!("Full Dataset Task {}", i)),
+            );
+        }
+
+        storage.save(&config, &tasks, &stats);
+        assert!(file_path.exists());
+
+        let loaded = storage.load();
+        assert_eq!(loaded.config.theme, crate::theme::ThemeChoice::OledPhosphor);
+        assert_eq!(loaded.config.work_duration_mins, 50);
+        assert_eq!(loaded.tasks.tasks.len(), 20);
+        assert_eq!(loaded.stats.sessions.len(), 20);
+        assert_eq!(loaded.stats.total_focus_minutes(), 1000);
+
+        let _ = fs::remove_dir_all(temp_dir);
+    }
 }

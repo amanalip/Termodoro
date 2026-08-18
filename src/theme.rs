@@ -507,6 +507,21 @@ mod tests {
             assert_ne!(theme.bg, theme.fg);
             assert_ne!(theme.work, theme.bg);
             assert_ne!(theme.primary, theme.bg);
+            assert_ne!(theme.short_break, theme.bg);
+            assert_ne!(theme.long_break, theme.bg);
+            assert_ne!(theme.success, theme.bg);
+            assert_ne!(theme.warning, theme.bg);
+            assert_ne!(theme.border_active, theme.border);
+        }
+    }
+
+    #[test]
+    fn test_theme_choice_serde_roundtrip_all() {
+        for choice in ThemeChoice::all() {
+            let serialized = serde_json::to_string(choice).expect("Serialization failed");
+            let deserialized: ThemeChoice =
+                serde_json::from_str(&serialized).expect("Deserialization failed");
+            assert_eq!(*choice, deserialized);
         }
     }
 }

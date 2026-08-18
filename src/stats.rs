@@ -688,4 +688,55 @@ mod tests {
             assert!(parts[1].parse::<u32>().is_ok());
         }
     }
+
+    #[test]
+    fn test_stats_total_focus_hours_formatting() {
+        let mut stats = StatsHistory::new();
+        assert_eq!(stats.total_focus_minutes(), 0);
+
+        stats.record(PomodoroPhase::Work, 30, None, None);
+        assert_eq!(stats.total_focus_minutes(), 30);
+
+        stats.record(PomodoroPhase::Work, 90, None, None);
+        assert_eq!(stats.total_focus_minutes(), 120);
+    }
+
+    #[test]
+    fn test_stats_large_volume_aggregation() {
+        let mut stats = StatsHistory::new();
+        // Record 100 work sessions and 50 break sessions
+        for _ in 0..100 {
+            stats.record(PomodoroPhase::Work, 25, None, None);
+        }
+        for _ in 0..30 {
+            stats.record(PomodoroPhase::ShortBreak, 5, None, None);
+        }
+        for _ in 0..20 {
+            stats.record(PomodoroPhase::LongBreak, 15, None, None);
+        }
+
+        assert_eq!(stats.sessions.len(), 150);
+        assert_eq!(stats.total_work_sessions(), 100);
+        assert_eq!(stats.total_focus_minutes(), 2500);
+    }
+
+    #[test]
+    fn test_stats_serde_roundtrip() {
+        let mut stats = StatsHistory::new();
+        stats.record(
+            PomodoroPhase::Work,
+            25,
+            Some("uuid-123".to_string()),
+            Some("Serde Task".to_string()),
+        );
+
+        let json = serde_json::to_string(&stats).unwrap();
+        let restored: StatsHistory = serde_json::from_str(&json).unwrap();
+        assert_eq!(restored.sessions.len(), 1);
+        assert_eq!(
+            restored.sessions[0].task_title.as_deref(),
+            Some("Serde Task")
+        );
+        assert_eq!(restored.total_focus_minutes(), 25);
+    }
 }
