@@ -265,7 +265,10 @@ fn save_screenshot(svg: &str, out_dir: &Path, name: &str) {
     let _ = fs::copy(&svg_path, docs_dir.join(format!("{}.svg", name)));
     let _ = fs::copy(&png_path, docs_dir.join(format!("{}.png", name)));
     let _ = fs::copy(&png_path, docs_dir.join(format!("kde_{}.png", name)));
-    println!("  ✓ Saved {}.png & synced to docs/assets/screenshots/", name);
+    println!(
+        "  ✓ Saved {}.png & synced to docs/assets/screenshots/",
+        name
+    );
 }
 
 fn main() {
