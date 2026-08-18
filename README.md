@@ -249,22 +249,24 @@ cd Termodoro
 Choose the installation option that fits your preference:
 
 #### Option A: Global Installation via Cargo (Recommended)
-This automatically builds an optimized binary and installs it into `~/.cargo/bin/termodoro`:
+This compiles an optimized, standalone binary (~4 MB) and installs it into `~/.cargo/bin/termodoro`:
 ```bash
 cargo install --path .
 ```
-Once this finishes, you can launch Termodoro from **any terminal folder** on your system:
+Once installed, you can launch Termodoro from **any terminal folder** on your system:
 ```bash
 termodoro
 ```
 
-#### Option B: Running Directly from Source (Testing)
-If you want to quickly test the application without installing it globally:
+> **💡 Disk Space Tip**: After running `cargo install --path .`, you can safely run `cargo clean` inside this repository folder. The installed `termodoro` binary in `~/.cargo/bin/` will continue to launch instantly (0.01s) without needing any recompilation, keeping your local project folder at a lean **~3.9 MB** without generating temporary compiler cache files!
+
+#### Option B: Running Directly from Source (Testing / Development)
+If you are developing or want to test source code edits without installing globally:
 ```bash
-# Debug mode (rapid compilation)
+# Debug mode (creates local target/ build cache)
 cargo run
 
-# Optimized release mode (smooth UI rendering and lowest memory usage)
+# Optimized release mode
 cargo run --release
 ```
 
