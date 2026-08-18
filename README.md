@@ -96,7 +96,7 @@ Termodoro/
 ├── README.md              # Main user manual and project overview
 ├── IMPLEMENTATION.md      # In-depth engineering specification and algorithms
 ├── WALKTHROUGH.md         # Operational workflows, code tour, and test benchmarks
-├── test_report.md         # Comprehensive 93-test QA audit & test suite report
+├── test_report.md         # Comprehensive 154-test QA audit & test suite report
 └── src/
     ├── main.rs            # Terminal runtime initialization, event loop, panic hook
     ├── app.rs             # Central application state, keyboard event dispatcher
