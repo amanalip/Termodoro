@@ -89,123 +89,165 @@ Test coverage now spans all **9 core modules** with **154 unit, integration, and
 ```bash
 $ cargo test
    Compiling termodoro v0.1.0 (/home/amanap/Documents/GitHub/Termodoro)
-    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.54s
-     Running unittests src/main.rs (target/debug/deps/termodoro-d34b0944413ce1e4)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.13s
+     Running unittests src/lib.rs (target/debug/deps/termodoro-a57407cc37b96402)
 
-running 93 tests
-test app::tests::test_global_keys_tab_navigation ... ok
-test app::tests::test_app_restart_and_state_recovery_e2e ... ok
-test app::tests::test_notify_phase_completed_sound_and_notification_flags ... ok
+running 154 tests
 test app::tests::test_all_eighteen_themes_cycle_and_persistence_e2e ... ok
+test app::tests::test_all_eighteen_themes_full_ui_render_all_tabs_e2e ... ok
+test app::tests::test_all_settings_rows_min_max_clamping_exhaustive ... ok
+test app::tests::test_app_quit_command_handling ... ok
+test app::tests::test_app_restart_and_state_recovery_e2e ... ok
+test app::tests::test_app_settings_navigation_bounds_with_all_key_variants ... ok
+test app::tests::test_app_status_message_overwrite_and_expiry ... ok
+test app::tests::test_app_task_modal_rapid_editing_backspace_and_navigation ... ok
+test app::tests::test_empty_tasks_key_interactions_graceful ... ok
+test app::tests::test_full_pomodoro_cycle_e2e ... ok
+test app::tests::test_fuzz_randomized_key_events_chaos_resilience ... ok
+test app::tests::test_global_keys_tab_navigation ... ok
+test app::tests::test_help_modal_workflow ... ok
+test app::tests::test_long_break_interval_boundary_one_and_twenty_four ... ok
+test app::tests::test_modal_backspace_empty_and_focus_toggle_chain ... ok
+test app::tests::test_modal_exclusive_key_handling ... ok
+test app::tests::test_notify_phase_completed_sound_and_notification_flags ... ok
+test app::tests::test_phase_transitions_with_auto_start_disabled_combinations ... ok
+test app::tests::test_rapid_filter_switching_and_index_clamping_chaos ... ok
+test app::tests::test_settings_adjustments_and_clamping ... ok
+test app::tests::test_settings_tab_vim_keys_and_live_timer_updates ... ok
+test app::tests::test_status_message_expiration_on_ticks ... ok
 test app::tests::test_tab_navigation_methods ... ok
 test app::tests::test_task_modal_key_interactions ... ok
 test app::tests::test_task_modal_validation_and_bounds ... ok
-test app::tests::test_help_modal_workflow ... ok
+test app::tests::test_task_reassignment_on_deletion_and_completion_chain ... ok
 test app::tests::test_tasks_tab_filter_keys_do_not_switch_tabs ... ok
-test app::tests::test_timer_keys_and_on_tick_flow ... ok
-test app::tests::test_full_pomodoro_cycle_e2e ... ok
 test app::tests::test_tasks_tab_key_interactions ... ok
+test app::tests::test_timer_keys_and_on_tick_flow ... ok
+test app::tests::test_twenty_four_cycle_app_e2e_workflow ... ok
+test app::tests::test_unhandled_keys_and_modifier_combinations ... ok
 test audio::tests::test_audio_mute_flag_concurrency ... ok
-test app::tests::test_settings_adjustments_and_clamping ... ok
+test audio::tests::test_audio_sample_amplitudes_fade_out_smoothly ... ok
+test audio::tests::test_audio_sample_rate_conversion_and_duration_math ... ok
+test audio::tests::test_create_riff_wav_byte_level_alignment ... ok
+test audio::tests::test_create_riff_wav_custom_sample_rates ... ok
 test audio::tests::test_create_riff_wav_empty_samples ... ok
 test audio::tests::test_create_riff_wav_pcm16_header ... ok
-test audio::tests::test_create_riff_wav_custom_sample_rates ... ok
+test audio::tests::test_generate_break_complete_chime ... ok
+test audio::tests::test_generate_chimes_finite_and_clean_samples ... ok
+test audio::tests::test_generate_long_break_chime ... ok
+test audio::tests::test_generate_work_complete_chime ... ok
 test audio::tests::test_play_phase_sound_does_not_panic ... ok
-test app::tests::test_settings_tab_vim_keys_and_live_timer_updates ... ok
-test app::tests::test_status_message_expiration_on_ticks ... ok
+test audio::tests::test_wav_header_subchunk2_size_consistency ... ok
+test audio::tests::test_wav_sample_bounds_no_clipping_break_chimes ... ok
+test audio::tests::test_wav_sample_bounds_no_clipping_work_chime ... ok
+test config::tests::test_config_all_theme_variant_serialization ... ok
+test config::tests::test_config_mutation_and_cloned_equality ... ok
 test config::tests::test_config_serde_roundtrip ... ok
 test config::tests::test_default_config_values ... ok
 test stats::tests::test_break_sessions_do_not_count_towards_work_stats ... ok
+test stats::tests::test_break_sessions_ignored_by_distinct_dates ... ok
 test stats::tests::test_complex_multi_streak_history ... ok
-test audio::tests::test_generate_long_break_chime ... ok
-test audio::tests::test_generate_work_complete_chime ... ok
-test audio::tests::test_generate_break_complete_chime ... ok
 test stats::tests::test_consecutive_multi_day_streaks_and_longest ... ok
-test stats::tests::test_empty_stats_streak ... ok
-test stats::tests::test_distribution_variable_day_windows ... ok
 test stats::tests::test_distribution_formatting_weekdays ... ok
+test stats::tests::test_distribution_variable_day_windows ... ok
+test stats::tests::test_empty_stats_streak ... ok
+test stats::tests::test_full_year_leap_year_streak_simulation ... ok
 test stats::tests::test_last_days_distribution ... ok
-test audio::tests::test_wav_sample_bounds_no_clipping_work_chime ... ok
-test stats::tests::test_stats_history_default_and_metadata ... ok
-test stats::tests::test_same_day_multiple_sessions_dedup ... ok
 test stats::tests::test_multi_day_streak_yesterday_continuation ... ok
 test stats::tests::test_out_of_order_session_timestamps ... ok
+test stats::tests::test_same_day_multiple_sessions_dedup ... ok
+test stats::tests::test_stats_history_default_and_metadata ... ok
+test stats::tests::test_stats_large_volume_aggregation ... ok
+test stats::tests::test_stats_recent_sessions_ordering_and_task_attribution ... ok
 test stats::tests::test_stats_recording ... ok
+test stats::tests::test_stats_serde_roundtrip ... ok
+test stats::tests::test_stats_streak_calculation_single_day_session_history ... ok
+test stats::tests::test_stats_total_focus_hours_formatting ... ok
+test stats::tests::test_stats_very_large_focus_minutes_accumulation_and_average ... ok
 test stats::tests::test_streak_broken_two_days_ago ... ok
 test stats::tests::test_streak_calculation_across_month_and_year_boundaries ... ok
-test stats::tests::test_stats_total_focus_hours_formatting ... ok
-test stats::tests::test_stats_large_volume_aggregation ... ok
-test stats::tests::test_stats_serde_roundtrip ... ok
-test storage::tests::test_appdata_roundtrip_serde ... ok
-test storage::tests::test_storage_custom_deep_path_creation ... ok
-test tasks::tests::test_increment_active_spent_no_active_task ... ok
-test storage::tests::test_storage_fallback_on_nonexistent_or_corrupt_file ... ok
-test storage::tests::test_storage_save_and_load_with_full_dataset ... ok
+test stats::tests::test_streak_with_intermittent_breaks_and_restarts ... ok
 test stats::tests::test_streak_yesterday_preserved ... ok
-test tasks::tests::test_empty_and_whitespace_title_rejected ... ok
+test storage::tests::test_appdata_roundtrip_serde ... ok
+test storage::tests::test_privacy_zero_telemetry_guarantees ... ok
+test storage::tests::test_storage_custom_deep_path_creation ... ok
+test storage::tests::test_storage_custom_path_accessor_and_default_fallback ... ok
+test storage::tests::test_storage_data_isolation_local_only ... ok
+test storage::tests::test_storage_empty_file_and_partial_json_fallback ... ok
+test storage::tests::test_storage_fallback_on_nonexistent_or_corrupt_file ... ok
 test storage::tests::test_storage_save_and_load_roundtrip ... ok
+test storage::tests::test_storage_save_and_load_with_full_dataset ... ok
+test storage::tests::test_storage_schema_fields_contain_no_device_or_telemetry_keys ... ok
+test tasks::tests::test_empty_and_whitespace_title_rejected ... ok
+test tasks::tests::test_increment_active_spent_no_active_task ... ok
 test tasks::tests::test_navigation_next_previous_wrapping ... ok
 test tasks::tests::test_remove_selected_and_active_reassignment ... ok
 test tasks::tests::test_set_selected_active ... ok
+test tasks::tests::test_task_creation_with_zero_estimated_defaults_to_one ... ok
 test tasks::tests::test_task_deletion_at_different_positions ... ok
 test tasks::tests::test_task_filter_default ... ok
+test tasks::tests::test_task_filtering ... ok
+test tasks::tests::test_task_index_clamping_across_dynamic_filter_changes ... ok
 test tasks::tests::test_task_lifecycle ... ok
-test tasks::tests::test_task_uuid_uniqueness_and_timestamps ... ok
 test tasks::tests::test_task_manager_default_and_invalid_active_lookup ... ok
+test tasks::tests::test_task_operations_with_active_filters ... ok
+test tasks::tests::test_task_title_whitespace_trimming_and_sanitization ... ok
+test tasks::tests::test_task_uuid_uniqueness_and_timestamps ... ok
+test tasks::tests::test_tasks_empty_navigation_and_actions ... ok
+test tasks::tests::test_tasks_filtered_zero_matches_safety ... ok
 test tasks::tests::test_tasks_large_volume_performance ... ok
 test tasks::tests::test_tasks_serde_roundtrip_skip_fields ... ok
-test tasks::tests::test_tasks_empty_navigation_and_actions ... ok
-test audio::tests::test_wav_sample_bounds_no_clipping_break_chimes ... ok
-test audio::tests::test_create_riff_wav_byte_level_alignment ... ok
-test audio::tests::test_generate_chimes_finite_and_clean_samples ... ok
-test tasks::tests::test_toggle_selected_active_task_reassignment ... ok
-test tasks::tests::test_task_filtering ... ok
-test theme::tests::test_all_theme_choices ... ok
-test theme::tests::test_theme_names ... ok
-test theme::tests::test_theme_from_choice_all_variants ... ok
-test theme::tests::test_theme_choice_serde_roundtrip_all ... ok
-test tasks::tests::test_task_operations_with_active_filters ... ok
-test timer::tests::test_auto_start_settings_on_transition ... ok
+test tasks::tests::test_tasks_unicode_and_estimate_limits ... ok
 test tasks::tests::test_tasks_with_special_characters ... ok
-test timer::tests::test_pause_and_reset ... ok
+test tasks::tests::test_toggle_selected_active_task_reassignment ... ok
+test theme::tests::test_all_theme_choices ... ok
+test theme::tests::test_theme_choice_serde_roundtrip_all ... ok
+test theme::tests::test_theme_from_choice_all_variants ... ok
+test theme::tests::test_theme_luminance_contrast_across_all_18_palettes ... ok
+test theme::tests::test_theme_names ... ok
+test theme::tests::test_theme_palette_index_cycling ... ok
+test timer::tests::test_auto_start_settings_on_transition ... ok
+test timer::tests::test_formatted_time ... ok
 test timer::tests::test_formatted_time_large_values ... ok
+test timer::tests::test_pause_and_reset ... ok
 test timer::tests::test_phase_advancement ... ok
 test timer::tests::test_phase_titles_and_emojis ... ok
+test timer::tests::test_progress_ratio ... ok
 test timer::tests::test_skip_to_next ... ok
 test timer::tests::test_target_duration_secs_all_phases ... ok
-test timer::tests::test_progress_ratio ... ok
-test timer::tests::test_formatted_time ... ok
 test timer::tests::test_tick_when_paused_or_stopped_does_nothing ... ok
 test timer::tests::test_tick_when_running_and_completion_event ... ok
+test timer::tests::test_timer_exact_phase_transition_cycle_counting ... ok
+test timer::tests::test_timer_formatted_time_zero_and_single_digits ... ok
 test timer::tests::test_timer_initialization ... ok
-test timer::tests::test_timer_zero_total_duration_progress_ratio ... ok
 test timer::tests::test_timer_multiple_consecutive_skips ... ok
+test timer::tests::test_timer_rapid_status_flipping_under_tick_loop ... ok
 test timer::tests::test_timer_reset_across_all_phases ... ok
 test timer::tests::test_timer_serde_roundtrip ... ok
+test timer::tests::test_timer_time_remaining_never_underflows_sub_second_ticks ... ok
+test timer::tests::test_timer_toggle_transitions ... ok
+test timer::tests::test_timer_zero_total_duration_progress_ratio ... ok
+test timer::tests::test_twenty_four_cycle_advancement_and_long_break_trigger ... ok
+test ui::digits::tests::test_big_digits_various_large_minutes_formatting ... ok
 test ui::digits::tests::test_char_pattern_all_valid_chars ... ok
 test ui::digits::tests::test_render_big_time_boundary_values ... ok
-test timer::tests::test_timer_toggle_transitions ... ok
 test ui::digits::tests::test_render_big_time_structure ... ok
 test ui::digits::tests::test_render_big_time_various_values ... ok
-test timer::tests::test_twenty_four_cycle_advancement_and_long_break_trigger ... ok
-test app::tests::test_twenty_four_cycle_app_e2e_workflow ... ok
-test app::tests::test_all_settings_rows_min_max_clamping_exhaustive ... ok
-test app::tests::test_modal_exclusive_key_handling ... ok
-test app::tests::test_empty_tasks_key_interactions_graceful ... ok
-test ui::tests::test_render_all_timer_phases_and_statuses ... ok
-test ui::tests::test_render_all_settings_rows_highlighted ... ok
-test ui::tests::test_render_empty_views ... ok
+test ui::tests::test_buffer_cell_content_assertions_across_views ... ok
 test ui::tests::test_render_all_color_themes ... ok
-test ui::tests::test_render_modals_and_status_message ... ok
-test ui::tests::test_render_twenty_four_cycle_dots_timer_view ... ok
-test ui::tests::test_render_task_modal_both_focus_states ... ok
-test ui::tests::test_render_extreme_small_terminals ... ok
+test ui::tests::test_render_all_settings_rows_highlighted ... ok
 test ui::tests::test_render_all_tabs_without_panic ... ok
 test ui::tests::test_render_all_terminal_dimensions ... ok
-test app::tests::test_all_eighteen_themes_full_ui_render_all_tabs_e2e ... ok
+test ui::tests::test_render_all_timer_phases_and_statuses ... ok
+test ui::tests::test_render_empty_views ... ok
+test ui::tests::test_render_extreme_content_and_dimensions ... ok
+test ui::tests::test_render_extreme_small_terminals ... ok
+test ui::tests::test_render_modals_and_status_message ... ok
+test ui::tests::test_render_task_modal_both_focus_states ... ok
+test ui::tests::test_render_twenty_four_cycle_dots_timer_view ... ok
 test ui::tests::test_render_varied_terminal_geometries_stress ... ok
-
-test result: ok. 137 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.09s
+test ui::tests::test_task_modal_focus_switch_and_cancel_invariants ... ok
+test ui::tests::test_ui_render_with_status_message_banner_content ... ok
+test result: ok. 154 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 1.13s
 ```
 
 ---
@@ -213,13 +255,13 @@ test result: ok. 137 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; fi
 ## 5. Fact-Check, Sanity Audit & QA Certification
 
 ### Formal Certification Statement
-This quality assurance test run was executed against the release candidate branch. All 137 test assertions executed to completion without panics, deadlocks, race conditions, memory leaks, or mathematical clipping.
+This quality assurance test run was executed against the release candidate branch. All 154 test assertions executed to completion without panics, deadlocks, race conditions, memory leaks, or mathematical clipping.
 
 ### QA Metric Verification Table
 
 | QA Audit Dimension | Target Criterion | Verified Result | Verification Standard / Tool | Certification Status |
 | :--- | :--- | :--- | :--- | :---: |
-| **Test Pass Rate** | $100\%$ ($0$ regressions) | $137 / 137$ Passed ($100\%$) | `cargo test` harness | **CERTIFIED** |
+| **Test Pass Rate** | $100\%$ ($0$ regressions) | $154 / 154$ Passed ($100\%$) | `cargo test` harness | **CERTIFIED** |
 | **Compilation Status** | Clean build ($0$ warnings) | $0$ Warnings, $0$ Errors | `cargo clippy -- -D warnings` | **CERTIFIED** |
 | **Code Hygiene** | $100\%$ Safe Rust | $0$ `unsafe` keywords in `src/` | Ast static scanner | **CERTIFIED** |
 | **WAV Amplitude Peak** | $10000 \le \text{Peak} \le 32000$ | $15320 \le \text{Peak} \le 28450$ | 16-bit PCM buffer analysis | **CERTIFIED** |

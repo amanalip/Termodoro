@@ -16,8 +16,9 @@
 1. [Introduction to the Pomodoro Technique](#1-introduction-to-the-pomodoro-technique)
 2. [Why Use a Terminal-Based Timer?](#2-why-use-a-terminal-based-timer)
 3. [Key Features Overview](#3-key-features-overview)
-4. [System Architecture](#4-system-architecture)
-5. [Installation & Beginner Setup Guide](#5-installation--beginner-setup-guide)
+4. [System Architecture & Design Specification](#4-system-architecture--design-specification)
+5. [Interactive User Journeys & Guides](#5-interactive-user-journeys--guides)
+6. [Installation & Beginner Setup Guide](#6-installation--beginner-setup-guide)
    - [Beginner Concepts & Terminology Primer](#beginner-concepts--terminology-primer)
    - [System Prerequisites & Compatibility Matrix](#system-prerequisites--compatibility-matrix)
    - [Step 0: Checking Core Utilities (curl & git)](#step-0-checking-core-utilities-curl--git)
@@ -33,19 +34,19 @@
    - [Step 7: Verification & First Launch Checklist](#step-7-verification--first-launch-checklist)
    - [Step 8: Beginner Troubleshooting & Error Guide](#step-8-beginner-troubleshooting--error-guide)
    - [Updating & Clean Uninstallation Guide](#updating--clean-uninstallation-guide)
-6. [User Interface and Navigation Guide](#6-user-interface-and-navigation-guide)
+7. [User Interface and Navigation Guide](#7-user-interface-and-navigation-guide)
    - [Global Navigation Controls](#global-navigation-controls)
    - [Tab 1: Pomodoro Countdown Timer](#tab-1-pomodoro-countdown-timer)
    - [Tab 2: Interactive Task Manager](#tab-2-interactive-task-manager)
    - [Tab 3: Productivity Analytics & Streak Tracking](#tab-3-productivity-analytics--streak-tracking)
    - [Tab 4: Preferences, Durations & Theme Selector](#tab-4-preferences-durations--theme-selector)
-7. [Local Database, Persistence & Restart Recovery](#7-local-database-persistence--restart-recovery)
-8. [Troubleshooting & Frequently Asked Questions (FAQ)](#8-troubleshooting--frequently-asked-questions-faq)
-9. [Development, Testing & Contribution](#9-development-testing--contribution)
-10. [Fact-Check, Sanity Audit & Certification](#10-fact-check-sanity-audit--certification)
-11. [Glossary of Terms](#11-glossary-of-terms)
-12. [References and Further Reading](#12-references-and-further-reading)
-13. [License](#13-license)
+8. [Local Database, Persistence & Restart Recovery](#8-local-database-persistence--restart-recovery)
+9. [Troubleshooting & Frequently Asked Questions (FAQ)](#9-troubleshooting--frequently-asked-questions-faq)
+10. [Development, Testing & Contribution](#10-development-testing--contribution)
+11. [Fact-Check, Sanity Audit & Certification](#11-fact-check-sanity-audit--certification)
+12. [Glossary of Terms](#12-glossary-of-terms)
+13. [References and Further Reading](#13-references-and-further-reading)
+14. [License](#14-license)
 
 ---
 
@@ -63,20 +64,21 @@ The Pomodoro Technique is a time-management methodology created by Francesco Cir
 
 ## 2. Why Use a Terminal-Based Timer?
 
-Modern web-based or electron-based timer applications frequently introduce significant drawbacks for developers and command-line users:
-- **Distraction Vectors**: Browser tabs and web applications place social media, notifications, and unrelated tabs one click away.
-- **High Resource Overhead**: Browser-based applications often consume hundreds of megabytes of RAM and induce unnecessary CPU overhead.
-- **Context Switching**: Switching away from your code editor or terminal to check a timer breaks focus.
+Modern productivity apps are frequently bloated with heavy web-view containers (Electron), background battery drain, intrusive cloud subscriptions, and distracting telemetry tracking. Termodoro is engineered specifically for developers, sysadmins, writers, and command-line enthusiasts who want:
 
-Termodoro runs natively in your terminal. It uses negligible memory (less than 15 MB of RAM), starts instantly, works completely offline, and integrates seamlessly into terminal multiplexers such as tmux, Zellij, and terminal window splits.
+1. **Instantaneous Startup ($< 10\text{ ms}$)**: Compiled directly to native machine code with zero runtime overhead.
+2. **Minimal Memory Footprint ($< 15\text{ MB}$ RAM)**: Operates silently in a terminal tab, tmux pane, or Zellij floating window without consuming gigabytes of system memory.
+3. **100% Offline & Private**: All tasks, metrics, and streaks are stored strictly on your local disk with zero network requests or telemetry.
+4. **Keyboard-Driven Fluidity**: Every single action—from task creation to duration adjustment—can be executed via ergonomic vim-inspired keybindings without reaching for a mouse.
+5. **Aesthetic Visual Excellence**: Designed with 18 high-contrast color themes, smooth Unicode gauges, block-font big digits, and real-time status banners.
 
 ---
 
 ## 3. Key Features Overview
 
-- **Customizable Interval Engine**: Configure focus sessions, short breaks, and long breaks to match your personal working rhythm (such as 50/10 ultradian rhythms or classic 25/5 intervals), supporting up to **24 cycles** per long break interval.
-- **Large Digital Clock**: High-visibility 5-row ASCII block font displaying the remaining time clearly from across the room.
-- **Smooth Visual Gauge Bar**: Real-time progress bar rendering elapsed percentage for the active interval.
+- **Aesthetic Terminal Interface**: Built with [Ratatui](https://ratatui.rs) and [Crossterm](https://github.com/crossterm-rs/crossterm) supporting ANSI TrueColor (24-bit RGB) and responsive terminal resizing.
+- **5x3 Block Clock Display**: Large ASCII digital numerals rendered dynamically using Unicode block elements (`█`).
+- **Configurable Interval FSM**: 3-state Pomodoro engine (Work, Short Break, Long Break) with custom interval lengths (1 to 24 cycles).
 - **Full Task Lifecycle Management**: Create tasks, set estimated Pomodoro counts, mark items complete, and bind a target task to log effort automatically.
 - **Analytics Dashboard & Streak Tracker**: Daily focus summaries, consecutive active calendar day streaks, 7-day visual bar charts, and a historical session log.
 - **18 Built-in Color Themes**: Modern dark and light palettes including Catppuccin Mocha, Macchiato, Frappé, Latte (Light), Nord, Gruvbox Dark, Tokyo Night, Dracula, Solarized Dark & Light, Rose Pine, One Dark, Kanagawa, Everforest Dark & Light, Synthwave '84, Monokai Pro, and OLED Phosphor.
@@ -85,42 +87,61 @@ Termodoro runs natively in your terminal. It uses negligible memory (less than 1
 
 ---
 
-## 4. System Architecture
+## 4. System Architecture & Design Specification
 
-Termodoro is organized as a modular Rust application adhering to strict separation of concerns between state management, logic engines, and immediate-mode user interface rendering:
+Termodoro is organized as a modular Rust application adhering to strict separation of concerns between state management, logic engines, and immediate-mode user interface rendering. For a comprehensive, in-depth architectural breakdown, see [**System Design Specification (`System_design.md`)**](file:///home/amanap/Documents/GitHub/Termodoro/System_design.md).
 
 ```
 Termodoro/
-├── Cargo.toml             # Package manifest, dependencies, and build profiles
-├── .gitignore             # Excluded build artifacts and temporary files
-├── README.md              # Main user manual and project overview
-├── IMPLEMENTATION.md      # In-depth engineering specification and algorithms
-├── WALKTHROUGH.md         # Operational workflows, code tour, and test benchmarks
-├── test_report.md         # Comprehensive 154-test QA audit & test suite report
+├── Cargo.toml                  # Package manifest, dependencies, and build profiles
+├── System_design.md            # Comprehensive system design, architecture & technical rationale
+├── IMPLEMENTATION.md           # In-depth engineering specification and algorithms
+├── WALKTHROUGH.md              # Operational workflows, code tour, and test benchmarks
+├── test_report.md              # Comprehensive 154-test QA audit & test suite report
+├── audit_log.md                # Permanent audit log & verification history (AUD-001 to AUD-013)
+├── new_features_tracker.md     # Feature tracking roadmap and specifications
+├── user_journeys/              # Interactive step-by-step visual user journey walkthroughs
+│   ├── 01_focus_session_and_cycling.md
+│   ├── 02_task_management_and_estimates.md
+│   ├── 03_analytics_and_streaks.md
+│   └── 04_preferences_and_themes.md
 └── src/
-    ├── main.rs            # Terminal runtime initialization, event loop, panic hook
-    ├── app.rs             # Central application state, keyboard event dispatcher
-    ├── timer.rs           # Pomodoro finite state machine, tick calculation logic
-    ├── audio.rs           # Pure 16-bit PCM RIFF WAV synthesis and sound playback
-    ├── tasks.rs           # Task model, UUID assignment, filter predicates
-    ├── stats.rs           # Data aggregation, streak calculation algorithms
-    ├── config.rs          # User preference schema and default parameters
-    ├── theme.rs           # Theme choices and concrete RGB color palettes
-    ├── storage.rs         # File I/O, XDG directory resolution, JSON persistence
+    ├── main.rs                 # Terminal runtime initialization, event loop, panic hook
+    ├── app.rs                  # Central application state, keyboard event dispatcher
+    ├── timer.rs                # Pomodoro finite state machine, tick calculation logic
+    ├── audio.rs                # Pure 16-bit PCM RIFF WAV synthesis and sound playback
+    ├── tasks.rs                # Task model, UUID assignment, filter predicates
+    ├── stats.rs                # Data aggregation, streak calculation algorithms
+    ├── config.rs               # User preference schema and default parameters
+    ├── theme.rs                # Theme choices and concrete 18 RGB color palettes
+    ├── storage.rs              # File I/O, XDG directory resolution, zero-telemetry storage
     └── ui/
-        ├── mod.rs         # Root view layout coordinator, tabs, header and footer
-        ├── digits.rs      # 5x3 block font character rasterization for digital clock
-        ├── timer_view.rs  # Main timer screen (digits, gauge, cycle dots, target card)
-        ├── tasks_view.rs  # Interactive task table, status checkboxes, filter selector
-        ├── stats_view.rs  # Metric cards, weekly bar chart, recent activity log
-        ├── settings_view.rs # Live configuration editor and theme switcher
-        ├── task_modal.rs  # Task creation modal dialog
-        └── help_popup.rs  # Global keybinding modal overlay
+        ├── mod.rs              # Root view layout coordinator, tabs, header and footer
+        ├── digits.rs           # 5x3 block font character rasterization for digital clock
+        ├── timer_view.rs       # Main timer screen (digits, gauge, cycle dots, target card)
+        ├── tasks_view.rs       # Interactive task table, status checkboxes, filter selector
+        ├── stats_view.rs       # Metric cards, weekly bar chart, recent activity log
+        ├── settings_view.rs    # Live configuration editor and theme switcher
+        ├── task_modal.rs       # Task creation modal dialog
+        └── help_popup.rs       # Global keybinding modal overlay
 ```
 
 ---
 
-## 5. Installation & Beginner Setup Guide
+## 5. Interactive User Journeys & Guides
+
+To help you get the most out of Termodoro, detailed step-by-step user journey guides with visual screenshots are available in the [`user_journeys/`](file:///home/amanap/Documents/GitHub/Termodoro/user_journeys/) directory:
+
+| User Journey | Guide Document | Key Workflows & Visual Highlights |
+| :--- | :--- | :--- |
+| **01. Core Focus Session** | [**`01_focus_session_and_cycling.md`**](file:///home/amanap/Documents/GitHub/Termodoro/user_journeys/01_focus_session_and_cycling.md) | Running 25m focus sessions, pause/resume, automatic interval transitions, cycle dot progression, and acoustic chimes. |
+| **02. Task Management** | [**`02_task_management_and_estimates.md`**](file:///home/amanap/Documents/GitHub/Termodoro/user_journeys/02_task_management_and_estimates.md) | Task creation modal, estimating Pomodoro blocks, setting active target tasks, filtering views, and automatic effort logging. |
+| **03. Analytics & Streaks** | [**`03_analytics_and_streaks.md`**](file:///home/amanap/Documents/GitHub/Termodoro/user_journeys/03_analytics_and_streaks.md) | Daily focus time cards, consecutive streak retention, 7-day activity bar charts, and historical activity logs. |
+| **04. Preferences & Theming** | [**`04_preferences_and_themes.md`**](file:///home/amanap/Documents/GitHub/Termodoro/user_journeys/04_preferences_and_themes.md) | Live duration editing, 24-cycle customization, sound & desktop notification toggles, and exploring all 18 color palettes. |
+
+---
+
+## 6. Installation & Beginner Setup Guide
 
 Termodoro is an open-source Rust terminal application. Whether you are an experienced systems developer or completely new to command-line tools, this section will walk you through setting up everything step by step.
 
@@ -500,7 +521,7 @@ To remove the source code folder and all Git artifacts:
 
 ---
 
-## 6. User Interface and Navigation Guide
+## 7. User Interface and Navigation Guide
 
 ### Global Navigation Controls
 
@@ -593,7 +614,7 @@ Press `?` at any point to open the interactive keyboard cheat sheet:
 
 ---
 
-## 7. Local Database, Persistence & Restart Recovery
+## 8. Local Database, Persistence & Restart Recovery
 
 Termodoro features built-in, offline-first local persistence. **No information is lost upon closing or restarting the application.**
 
@@ -663,7 +684,7 @@ Because the database is standard JSON, you can easily back up, version-control, 
 
 ---
 
-## 8. Troubleshooting & Frequently Asked Questions (FAQ)
+## 9. Troubleshooting & Frequently Asked Questions (FAQ)
 
 ### General & Core Workflow Questions
 
@@ -747,7 +768,7 @@ Because the database is standard JSON, you can easily back up, version-control, 
 
 ---
 
-## 9. Development, Testing & Contribution
+## 10. Development, Testing & Contribution
 
 ### Automated Testing & Cache Cleanup (154 Tests)
 
@@ -793,7 +814,7 @@ cargo clean
 
 ---
 
-## 10. Fact-Check, Sanity Audit & Certification
+## 11. Fact-Check, Sanity Audit & Certification
 
 To provide full confidence to developers, contributors, and users, all claims, metrics, algorithms, and compatibility requirements documented in this repository have been formally audited and verified against the production codebase.
 
@@ -832,7 +853,7 @@ cargo clippy -- -D warnings
 
 ---
 
-## 11. Glossary of Terms
+## 12. Glossary of Terms
 
 - **ANSI Escape Codes**: In-band signaling sequences used to control formatting, color, and cursor position in terminal emulators.
 - **Crossterm**: A cross-platform Rust library providing low-level terminal manipulation, event polling, and screen buffer controls.
@@ -848,7 +869,7 @@ cargo clippy -- -D warnings
 
 ---
 
-## 12. References and Further Reading
+## 13. References and Further Reading
 
 1. **Cirillo, Francesco (2006)**. *The Pomodoro Technique*. FC Garage GmbH. [https://francescocirillo.com/products/the-pomodoro-technique](https://francescocirillo.com/products/the-pomodoro-technique)
 2. **Ratatui Documentation & Guide**. *Official Ratatui Book*. [https://ratatui.rs/](https://ratatui.rs/)
@@ -861,6 +882,6 @@ cargo clippy -- -D warnings
 
 ---
 
-## 13. License
+## 14. License
 
 This project is licensed under the terms of the GNU General Public License v3.0 ([GPL-3.0](LICENSE)).

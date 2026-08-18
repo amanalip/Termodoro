@@ -344,7 +344,7 @@ fn main() {
         app.tasks.tasks[3].pomodoros_spent = 0;
 
         app.tasks.add(
-            "🚀 Write CI/CD GitHub Actions Workflow (151 Tests)".to_string(),
+            "🚀 Write CI/CD GitHub Actions Workflow (154 Tests)".to_string(),
             1,
         );
         app.tasks.tasks[4].pomodoros_spent = 0;
