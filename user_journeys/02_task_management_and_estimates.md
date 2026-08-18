@@ -28,7 +28,7 @@ A timer alone provides cadence, but pairing cadence with discrete task objective
 This user journey demonstrates how a practitioner uses Termodoro to manage their daily task backlog, assign workload estimates, and automatically log focus intervals against specific goals:
 
 ```
-[Press 'a' (New Task)] ──> [Set Title & Estimate (1-20)] ──> [Press 't' to Target] ──> [Run Timer on Tab 1] ──> [Auto-Increment 🍅]
+[Press 'a' (New Task)] ──> [Set Title & Estimate (1-20)] ──> [Press 't' to Target] ──> [Run Timer on Tab 1] ──> [Auto-Increment ]
 ```
 
 ---
@@ -42,7 +42,7 @@ From anywhere in Termodoro, press `2` (or press `Tab`) to navigate to **Tab 2: T
 
 ### Step 2: Creating a New Task via Modal Dialog
 1. Press `a` to bring up the **New Task Modal**.
-2. Type your task title (e.g., `⚡ Refactor Storage Engine with Zero-Telemetry Invariants`).
+2. Type your task title (e.g., `Refactor Storage Engine with Zero-Telemetry Invariants`).
 3. Press `Tab` or `↓` to move focus to the **Estimated Pomodoros** input field.
 4. Adjust your estimated effort:
    - Press `+` / `=` / `Right` to increment (up to 20 Pomodoros).
@@ -55,14 +55,14 @@ From anywhere in Termodoro, press `2` (or press `Tab`) to navigate to **Tab 2: T
 ### Step 3: Setting an Active Target Task
 1. Use `j` / `k` (or `↑` / `↓` arrow keys) to navigate through your task list.
 2. Press `t` on the selected task.
-3. A glowing `🎯 [ACTIVE]` badge instantly appears on the row, and a confirmation banner alerts: *"Target set to: ⚡ Refactor Storage Engine..."*.
+3. A glowing `[ACTIVE]` badge instantly appears on the row, and a confirmation banner alerts: *"Target set to: Refactor Storage Engine..."*.
 4. Switch to **Tab 1 (`1`)**: Notice the task is now pinned in the active target card directly beneath the big digital countdown clock!
 
 ---
 
 ### Step 4: Real-Time Focus Binding & Automatic Effort Logging
 - Start your focus timer on Tab 1 with `Space`.
-- When the 25-minute work session completes, Termodoro automatically increments the active task's spent counter: `🍅 1 / 3` $\rightarrow$ `🍅 2 / 3` via `TaskManager::increment_active_spent()`.
+- When the 25-minute work session completes, Termodoro automatically increments the active task's spent counter: `1 / 3` $\rightarrow$ `2 / 3` via `TaskManager::increment_active_spent()`.
 - Once `pomodoros_spent >= pomodoros_estimated`, the counter dynamically shifts from primary theme color to amber/green, signaling that your estimated threshold has been reached.
 
 ---
@@ -94,9 +94,9 @@ From anywhere in Termodoro, press `2` (or press `Tab`) to navigate to **Tab 2: T
 1. **Filter Selector Bar**: Visual badges showing `[● All (1)]`, `[  Active (2)]`, `[  Completed (3)]`.
 2. **Interactive Table Rows**:
    - **Status Checkbox**: `[ ]` (Pending) or `[x]` (Completed).
-   - **Active Badge**: `🎯 [ACTIVE]` indicating timer binding.
+   - **Active Badge**: `[ACTIVE]` indicating timer binding.
    - **Task Title**: Left-aligned with automatic Unicode cell-width truncation on narrow screens.
-   - **Pomodoro Counters**: Visual emoji counter (`🍅 2 / 3`).
+   - **Pomodoro Counters**: Visual emoji counter (`2 / 3`).
 3. **Modal Input Overlay**: Dual-field dialog with high-visibility input cursors and validation bounds ($1 \le \text{Estimate} \le 20$).
 
 ---

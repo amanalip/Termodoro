@@ -2,9 +2,9 @@
 
 This document provides a comprehensive architectural and systems engineering specification for **Termodoro**, a terminal-native Pomodoro productivity timer, task lifecycle coordinator, and streak analytics platform written in pure Safe Rust.
 Official Project Website & Knowledge Base:
-- 🌐 **Interactive Portal**: [https://amanalip.github.io/Termodoro/](https://amanalip.github.io/Termodoro/)
-- 📖 **Feature Tour**: [https://amanalip.github.io/Termodoro/features.html](https://amanalip.github.io/Termodoro/features.html)
-- ❓ **32-Question FAQs Hub**: [https://amanalip.github.io/Termodoro/faqs.html](https://amanalip.github.io/Termodoro/faqs.html)
+- **Interactive Portal**: [https://amanalip.github.io/Termodoro/](https://amanalip.github.io/Termodoro/)
+- **Feature Tour**: [https://amanalip.github.io/Termodoro/features.html](https://amanalip.github.io/Termodoro/features.html)
+- **32-Question FAQs Hub**: [https://amanalip.github.io/Termodoro/faqs.html](https://amanalip.github.io/Termodoro/faqs.html)
 
 ---
 
@@ -79,7 +79,7 @@ graph TD
 | **OS Paths** | **`directories`** | `5.0.1` | Cross-platform standard directories | Adheres strictly to XDG Base Directory specification on Linux (`~/.local/share`), Standard Application Support on macOS, and `%APPDATA%` on Windows. |
 | **Time & Analytics** | **`chrono`** | `0.4.45` | Datetime arithmetic & ISO strings | Reliable date/time manipulation, leap year calculations, calendar day streak continuities, and ISO 8601 UTC timestamps. |
 | **Notifications** | **`notify-rust`** | `4.18.0` | Desktop system alert notifications | Native desktop notification triggers via Linux D-Bus / Desktop Portal, macOS notification center, and Windows toast subsystem. |
-| **Unicode Layout** | **`unicode-width`** | `0.2.0` | Accurate cell-width metrics | Correctly measures single-width vs wide double-width (2-column) Unicode emoji glyphs (`🎯`, `🍅`, `🚀`), preventing text overlap and table misalignment. |
+| **Unicode Layout** | **`unicode-width`** | `0.2.0` | Accurate cell-width metrics | Correctly measures single-width vs wide double-width (2-column) Unicode emoji glyphs (``, ``, ``), preventing text overlap and table misalignment. |
 
 ---
 
@@ -306,7 +306,7 @@ To eliminate annoying digital pops or DAC clicks at the end of sounds, all wavef
 
 Termodoro provides native operational parity across all major desktop operating systems:
 
-| Dimension | 🐧 Linux & BSD | 🍎 macOS (Darwin) | 🪟 Windows (10 / 11) |
+| Dimension | Linux & BSD | macOS (Darwin) | Windows (10 / 11) |
 | :--- | :--- | :--- | :--- |
 | **Storage Directory** | `~/.local/share/termodoro/` | `~/Library/Application Support/com.termodoro.termodoro/` | `C:\Users\<User>\AppData\Roaming\termodoro\termodoro\` |
 | **Audio Backend** | ALSA / PulseAudio / PipeWire | CoreAudio | WASAPI / DirectSound |

@@ -4,9 +4,9 @@ This document provides a detailed, beginner-friendly walkthrough of **Termodoro*
 
 > [!NOTE]
 > **Interactive Showcase & Documentation**:
-> - 🌐 **Interactive Portal**: [https://amanalip.github.io/Termodoro/](https://amanalip.github.io/Termodoro/)
-> - 📖 **Feature Tour**: [https://amanalip.github.io/Termodoro/features.html](https://amanalip.github.io/Termodoro/features.html)
-> - ❓ **32-Question FAQs Hub**: [https://amanalip.github.io/Termodoro/faqs.html](https://amanalip.github.io/Termodoro/faqs.html)
+> - **Interactive Portal**: [https://amanalip.github.io/Termodoro/](https://amanalip.github.io/Termodoro/)
+> - **Feature Tour**: [https://amanalip.github.io/Termodoro/features.html](https://amanalip.github.io/Termodoro/features.html)
+> - **32-Question FAQs Hub**: [https://amanalip.github.io/Termodoro/faqs.html](https://amanalip.github.io/Termodoro/faqs.html)
 
 ---
 
@@ -57,18 +57,18 @@ Termodoro divides the terminal window into three main regions:
    ```bash
    cargo run --release
    ```
-2. **View the Timer**: By default, Termodoro opens on Tab 1 (**Timer**). The header indicates `🍅 FOCUS SESSION [■ READY] Cycle 1/4 [◉ ○ ○ ○]`.
+2. **View the Timer**: By default, Termodoro opens on Tab 1 (**Timer**). The header indicates `FOCUS SESSION [■ READY] Cycle 1/4 [◉ ○ ○ ○]`.
 
    ![Focus Timer Screen](assets/screenshots/kde_01_timer_view.png)
 
 3. **Begin Focus Interval**: Press `Space`. The status changes to `[● RUNNING]`, and the 5-row digital clock begins counting down from `25:00`. The progress gauge fills smoothly as time elapses.
-4. **Pausing When Interrupted**: If you need to step away, press `Space` to pause the countdown (`[❚❚ PAUSED]`). Press `Space` again to resume.
+4. **Pausing When Interrupted**: If you need to step away, press `Space` to pause the countdown (`[|| PAUSED]`). Press `Space` again to resume.
 5. **Phase Completion**: When the timer reaches `00:00`:
    - An acoustic audio chime sounds in the background (e.g. Zen Tibetan Singing Bowl bell for Focus completion, energizing two-tone alert for Short Break, or celebratory major triad for Long Break).
    - A native desktop notification pops up.
    - An ASCII terminal bell sounds as fallback.
    - The cycle counter advances.
-   - The phase transitions to `☕ SHORT BREAK [■ READY] (5 mins)`.
+   - The phase transitions to `SHORT BREAK [■ READY] (5 mins)`.
    - The completed session is automatically recorded in your statistics.
 
 ---
@@ -87,10 +87,10 @@ Termodoro divides the terminal window into three main regions:
    - Press `Tab` to move to the estimated Pomodoros field.
    - Use `←` / `→`, `h` / `l`, `+` / `-`, or `_` / `=` to set an estimated session count (clamped 1 to 20).
    - Press `Enter` to save.
-3. **Set Active Focus Target**: Highlight the newly created task using `↑` / `k` or `↓` / `j` and press `t`. A `🎯 ACTIVE` badge appears next to the item.
-4. **Work on the Task**: Return to Tab 1 (`1` or `Tab`). Notice the active task card now displays `Active Focus: Write unit tests (🍅 0/3)`.
-5. **Completing Sessions**: Each time a 25-minute work session finishes, the task's completed Pomodoro count increments automatically (`🍅 1/3`, `🍅 2/3`, etc.).
-6. **Marking Done**: Once finished, return to Tasks (`2`), highlight the task, and press `Space` or `Enter` to mark it complete (`✔`).
+3. **Set Active Focus Target**: Highlight the newly created task using `↑` / `k` or `↓` / `j` and press `t`. A `ACTIVE` badge appears next to the item.
+4. **Work on the Task**: Return to Tab 1 (`1` or `Tab`). Notice the active task card now displays `Active Focus: Write unit tests (0/3)`.
+5. **Completing Sessions**: Each time a 25-minute work session finishes, the task's completed Pomodoro count increments automatically (`1/3`, `2/3`, etc.).
+6. **Marking Done**: Once finished, return to Tasks (`2`), highlight the task, and press `Space` or `Enter` to mark it complete (``).
 
 ---
 

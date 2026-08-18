@@ -60,7 +60,7 @@ user_journeys/
   - Opening the dual-input task creation modal with `a`.
   - Estimating effort in discrete 25-minute Pomodoro blocks ($1 \le N \le 20$).
   - Binding the active target task to the countdown timer with `t`.
-  - Automatic effort accounting upon interval completion (`🍅 1 / 3` $\rightarrow$ `🍅 2 / 3`).
+  - Automatic effort accounting upon interval completion (`1 / 3` $\rightarrow$ `2 / 3`).
   - Filtering between All (`1`), Active (`2`), and Completed (`3`) tasks.
   - Reassigning targets and deleting obsolete tasks with `d` / `x`.
 

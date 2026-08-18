@@ -20,7 +20,7 @@
 
 ---
 
-### ⚡ 30-Second Quick Start
+### 30-Second Quick Start
 
 ```bash
 # 1. Clone the repository
@@ -33,9 +33,9 @@ cargo run --release
 
 > [!TIP]
 > **Explore the Official Website & Showcase**:
-> - 🌐 **Interactive Portal**: [https://amanalip.github.io/Termodoro/](https://amanalip.github.io/Termodoro/)
-> - 📖 **Feature Tour**: [https://amanalip.github.io/Termodoro/features.html](https://amanalip.github.io/Termodoro/features.html)
-> - ❓ **32-Question FAQs Hub**: [https://amanalip.github.io/Termodoro/faqs.html](https://amanalip.github.io/Termodoro/faqs.html)
+> - **Interactive Portal**: [https://amanalip.github.io/Termodoro/](https://amanalip.github.io/Termodoro/)
+> - **Feature Tour**: [https://amanalip.github.io/Termodoro/features.html](https://amanalip.github.io/Termodoro/features.html)
+> - **32-Question FAQs Hub**: [https://amanalip.github.io/Termodoro/faqs.html](https://amanalip.github.io/Termodoro/faqs.html)
 
 ---
 
@@ -324,7 +324,7 @@ termodoro
 | **Compiler Cache** | `target/` | **0 MB** *(after `cargo clean`)* | Temporary build cache can be deleted anytime without impacting the app |
 | **Total System Footprint** | Global System Installation | **~5.1 MB** | Ultra-lightweight (smaller than a single MP3 audio file!) |
 
-> **💡 Disk Space Tip**: After running `cargo install --path .`, you can safely run `cargo clean` inside this repository folder. The installed `termodoro` binary in `~/.cargo/bin/` will continue to launch instantly (0.01s) without needing any recompilation, keeping your local project folder at a lean **~3.9 MB** without generating temporary compiler cache files!
+> **Disk Space Tip**: After running `cargo install --path .`, you can safely run `cargo clean` inside this repository folder. The installed `termodoro` binary in `~/.cargo/bin/` will continue to launch instantly (0.01s) without needing any recompilation, keeping your local project folder at a lean **~3.9 MB** without generating temporary compiler cache files!
 
 #### Option B: Running Directly from Source (Testing / Development)
 If you are developing or want to test source code edits without installing globally:
@@ -423,7 +423,7 @@ Add these keybindings to your `~/.tmux.conf`:
 bind-key P display-popup -w 85% -h 80% -E "termodoro"
 
 # Or spawn Termodoro in a new dedicated background window
-bind-key T new-window -n "🍅 Termodoro" "termodoro"
+bind-key T new-window -n "Termodoro" "termodoro"
 ```
 
 #### Zellij Floating Pane
@@ -507,7 +507,7 @@ Termodoro leaves no persistent background services, system daemons, or registry 
 
 If you wish to perform a 100% complete purge and remove your historical tasks, streak records, and custom settings:
 
-- 🐧 **Linux & BSD**:
+- **Linux and BSD**:
   ```bash
   # Remove data files and configuration directories
   rm -rf ~/.local/share/termodoro ~/.config/termodoro
@@ -516,13 +516,13 @@ If you wish to perform a 100% complete purge and remove your historical tasks, s
   rm -f ~/.local/share/applications/termodoro.desktop
   ```
 
-- 🍎 **macOS**:
+- **macOS**:
   ```bash
   # Remove application support directory
   rm -rf ~/Library/Application\ Support/com.termodoro.termodoro
   ```
 
-- 🪟 **Windows (Command Prompt / PowerShell)**:
+- **Windows (Command Prompt / PowerShell)**:
   - **PowerShell**:
     ```powershell
     # Remove AppData roaming database folder
@@ -686,9 +686,9 @@ Termodoro features built-in, offline-first local persistence. **No information i
 1. **Automatic Loading on Launch**: When `termodoro` boots up, it automatically locates and loads your `data.json` database. If launching for the first time, it initializes the database with clean default settings.
 2. **Real-Time & Exit Synchronization**: Whenever you create or complete a task, adjust preferences, change a theme, finish a focus interval, or quit (`q`), the application automatically serializes and writes the state to disk using atomic file writing.
 3. **What is Persisted**:
-   - 📋 **Interactive Tasks**: Task titles, completion marks (`✔` / `○`), spent Pomodoro counts, estimated Pomodoro counts, creation timestamps, and designated active target IDs.
-   - ⚙️ **User Configuration**: Focus durations, break durations, long break intervals (1 to 24 cycles), automation toggles, alert preferences, and active color themes.
-   - 📊 **Productivity Statistics & Streaks**: Complete chronological history of focus sessions, used to calculate daily focus minutes, current daily streaks, personal best streaks, and weekly activity distribution charts.
+   - **Interactive Tasks**: Task titles, completion marks (`[x]` / `[ ]`), spent Pomodoro counts, estimated Pomodoro counts, creation timestamps, and designated active target IDs.
+   - **User Configuration**: Focus durations, break durations, long break intervals (1 to 24 cycles), automation toggles, alert preferences, and active color themes.
+   - **Productivity Statistics and Streaks**: Complete chronological history of focus sessions, used to calculate daily focus minutes, current daily streaks, personal best streaks, and weekly activity distribution charts.
 
 ### Database File Location by Operating System
 

@@ -41,10 +41,10 @@ From any tab in Termodoro, press `3` (or press `Tab`) to jump directly into **Ta
 ### Step 2: Inspecting Quantitative Metric Cards
 The top metrics banner gives you an instantaneous summary of your focus output:
 
-1. ⏱️ **Total Focus Time**: Cumulative focused work time formatted as hours and minutes (e.g., `42h 30m` or `125m` via `StatsHistory::total_focus_minutes()`).
-2. 🍅 **Total Pomodoros**: Exact count of fully completed 25-minute focus intervals via `StatsHistory::total_work_sessions()`.
-3. 🔥 **Current Streak**: Number of consecutive calendar days where at least one focus session was completed (`StatsHistory::current_streak_days()`).
-4. 🏆 **Longest Streak**: Your all-time personal best continuous daily streak record (`StatsHistory::longest_streak_days()`).
+1. **Total Focus Time**: Cumulative focused work time formatted as hours and minutes (e.g., `42h 30m` or `125m` via `StatsHistory::total_focus_minutes()`).
+2. **Total Pomodoros**: Exact count of fully completed 25-minute focus intervals via `StatsHistory::total_work_sessions()`.
+3. **Current Streak**: Number of consecutive calendar days where at least one focus session was completed (`StatsHistory::current_streak_days()`).
+4. **Longest Streak**: Your all-time personal best continuous daily streak record (`StatsHistory::longest_streak_days()`).
 
 ---
 
@@ -68,7 +68,7 @@ Termodoro's streak tracker motivates continuous daily discipline:
 The bottom panel displays an activity history table detailing your recent sessions in reverse chronological order:
 - **Timestamp**: Local completion time (`14:25 UTC` / `09:30 Local`).
 - **Phase & Length**: Mode and duration logged (`Work (25m)`).
-- **Target Task**: Title of the specific task associated with the session (e.g. `[⚡ Refactor Storage Engine]`).
+- **Target Task**: Title of the specific task associated with the session (e.g. `[Refactor Storage Engine]`).
 
 ---
 
