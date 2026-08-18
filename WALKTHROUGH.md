@@ -77,7 +77,7 @@ Termodoro divides the terminal window into three main regions:
 
 1. **Open Tasks View**: Press `2` or `Tab` to navigate to the **Tasks** tab.
 
-   ![Task Manager Screen](assets/screenshots/kde_02_tasks_view.png)
+   ![Task Manager Screen](assets/screenshots/kde_02_task_manager.png)
 
 2. **Create a Task**: Press `a` to open the task creation dialog:
 

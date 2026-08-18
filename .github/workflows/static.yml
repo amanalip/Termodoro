@@ -37,6 +37,7 @@ jobs:
           test -f ./docs/favicon.svg
           test -f ./docs/assets/screenshots/01_timer_view.svg
           test -f ./docs/assets/screenshots/02_tasks_view.svg
+          test -f ./docs/assets/screenshots/02_task_manager.svg
           test -f ./docs/assets/screenshots/03_stats_view.svg
           test -f ./docs/assets/screenshots/04_settings_view.svg
           test -f ./docs/assets/screenshots/05_task_modal.svg

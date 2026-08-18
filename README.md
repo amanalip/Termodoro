@@ -589,7 +589,7 @@ The Timer view is the central hub for running focus sessions and breaks.
 
 The Tasks view provides a structured environment for managing tasks, estimating workload, and tracking completed Pomodoro sessions against specific goals.
 
-![Tab 2: Task Management & Targets](assets/screenshots/kde_02_tasks_view.png)
+![Tab 2: Task Management & Targets](assets/screenshots/kde_02_task_manager.png)
 
 #### Controls in Tasks View
 - `a`: Open the **Add Task** dialog.

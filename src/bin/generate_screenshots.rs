@@ -385,6 +385,7 @@ fn main() {
             app.config.theme,
         );
         save_screenshot(&svg, out_dir, "02_tasks_view");
+        save_screenshot(&svg, out_dir, "02_task_manager");
 
         let _ = fs::remove_dir_all(temp_dir);
     }

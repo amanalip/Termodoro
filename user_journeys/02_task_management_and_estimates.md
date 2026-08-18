@@ -85,7 +85,7 @@ From anywhere in Termodoro, press `2` (or press `Tab`) to navigate to **Tab 2: T
 ## 3. Visual Layout & Interface Details
 
 ### Interactive Tasks Table View
-![Termodoro Tasks View](../assets/screenshots/02_tasks_view.png)
+![Termodoro Tasks View](../assets/screenshots/02_task_manager.png)
 
 ### Task Creation Modal Dialog
 ![Termodoro Task Modal](../assets/screenshots/05_task_modal.png)
