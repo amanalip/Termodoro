@@ -1,85 +1,120 @@
 # User Journey 02: Task Creation, Estimation & Target Tracking
 
-This guide walks you through the task management workflows in **Termodoro**: creating actionable tasks, estimating effort in Pomodoros, filtering items, and binding target tasks to active focus sessions.
+Organize your projects, estimate effort in discrete Pomodoro blocks, bind active target tasks to your timer, and track completed workload with **Termodoro**'s interactive Task Manager.
 
 ---
 
 ## Table of Contents
 
-1. [Overview & Objective](#1-overview--objective)
-2. [Step-by-Step Walkthrough](#2-step-by-step-walkthrough)
-   - [Step 1: Navigating to Tasks View](#step-1-navigating-to-tasks-view)
-   - [Step 2: Creating a New Task with Modal Dialog](#step-2-creating-a-new-task-with-modal-dialog)
+1. [Journey Narrative & Persona](#1-journey-narrative--persona)
+2. [Step-by-Step Interactive Walkthrough](#2-step-by-step-interactive-walkthrough)
+   - [Step 1: Navigating to the Tasks Workstation](#step-1-navigating-to-the-tasks-workstation)
+   - [Step 2: Creating a New Task via Modal Dialog](#step-2-creating-a-new-task-via-modal-dialog)
    - [Step 3: Setting an Active Target Task](#step-3-setting-an-active-target-task)
-   - [Step 4: Automatic Effort Logging on Timer Completion](#step-4-automatic-effort-logging-on-timer-completion)
-   - [Step 5: Filtering & Completing Tasks](#step-5-filtering--completing-tasks)
-   - [Step 6: Deleting or Adjusting Estimates](#step-6-deleting-or-adjusting-estimates)
-3. [Visual References & Layouts](#3-visual-references--layouts)
-4. [Tasks View Keybindings](#4-tasks-view-keybindings)
+   - [Step 4: Real-Time Focus Binding & Automatic Effort Logging](#step-4-real-time-focus-binding--automatic-effort-logging)
+   - [Step 5: Filtering Views & Toggling Completion](#step-5-filtering-views--toggling-completion)
+   - [Step 6: Adjusting Estimates & Task Pruning](#step-6-adjusting-estimates--task-pruning)
+3. [Visual Layout & Interface Deep Dive](#3-visual-layout--interface-deep-dive)
+4. [Pro Tips & Power Workflows](#4-pro-tips--power-workflows)
+5. [Complete Keybinding Reference](#5-complete-keybinding-reference)
 
 ---
 
-## 1. Overview & Objective
+## 1. Journey Narrative & Persona
 
-Working with a timer is most effective when paired with a clear, discrete objective. Termodoro includes an interactive Task Manager that lets you plan your day's work into estimated Pomodoro blocks and automatically track your progress without leaving your terminal.
+> **Meet Maya, a Full-Stack Engineer and Technical Lead.**  
+> Maya starts her morning planning today's goals: writing API documentation, fixing a caching race condition, and conducting two PR reviews. Instead of opening a heavy browser-based project board, Maya organizes her work directly in Termodoro by estimating each item in 25-minute Pomodoro intervals.
 
 ---
 
-## 2. Step-by-Step Walkthrough
+## 2. Step-by-Step Interactive Walkthrough
 
-### Step 1: Navigating to Tasks View
-From any screen in Termodoro, press `2` (or press `Tab` to cycle tabs) to enter **Tab 2: Tasks View**.
+### Step 1: Navigating to the Tasks Workstation
+From anywhere in Termodoro, press `2` (or press `Tab`) to navigate to **Tab 2: Tasks View**.
 
-### Step 2: Creating a New Task with Modal Dialog
-1. Press `a` (or `n`) to open the **New Task Modal**.
-2. Type your task title (e.g., `"🚀 Implement OAuth Authentication"`).
-3. Press `Tab` or `Down` to navigate to the **Estimated Pomodoros** input field.
-4. Type the number of 25-minute Pomodoros you expect this task to take (e.g., `4`).
-5. Press `Enter` to save the task. (Press `Esc` to cancel).
+---
+
+### Step 2: Creating a New Task via Modal Dialog
+1. Press `a` (or `n`) to bring up the **New Task Modal**.
+2. Type your task title (e.g., `⚡ Refactor Storage Engine with Zero-Telemetry Invariants`).
+3. Press `Tab` or `↓` to move focus to the **Estimated Pomodoros** input field.
+4. Enter your estimated effort in Pomodoro blocks (e.g., `3`).
+5. Press `Enter` to commit the task. (Press `Esc` anytime to cancel).
+
+---
 
 ### Step 3: Setting an Active Target Task
-1. Use `j` / `k` (or `Up` / `Down` arrow keys) to highlight a task in your table.
-2. Press `Enter` to mark it as the **Active Target Task**.
-3. A bright `🎯 [ACTIVE]` badge appears on the row, and a confirmation toast banner notifies: *"Target set to: 🚀 Implement OAuth Authentication"*.
-4. Switch back to **Tab 1** (`1`), and notice the task is now prominently highlighted in the active target card under the timer clock!
-
-### Step 4: Automatic Effort Logging on Timer Completion
-- When you run and complete a 25-minute work interval on Tab 1, Termodoro automatically increments the active task's spent counter: `🍅 1 / 4` $\rightarrow$ `🍅 2 / 4`.
-- When `pomodoros_spent >= pomodoros_estimated`, the counter turns amber/green indicating progress milestones.
-
-### Step 5: Filtering & Completing Tasks
-- Finished your work? Press `Space` on any selected task row to toggle its completion status (`[ ]` $\rightarrow$ `[x]`).
-- Press `f` to cycle through filter modes:
-  - **All**: Displays all tasks.
-  - **Active**: Hides completed items to keep your view distraction-free.
-  - **Completed**: Reviews finished tasks for end-of-day retrospectives.
-
-### Step 6: Deleting or Adjusting Estimates
-- Need to adjust an estimate on the fly? Press `+` / `=` to increment the estimate or `-` / `_` to decrement.
-- To remove an obsolete task, select it and press `d` (or `Delete` / `x`).
+1. Use `j` / `k` (or `↑` / `↓` arrow keys) to navigate through your task list.
+2. Press `Enter` (or `t`) on a selected task.
+3. A glowing `🎯 [ACTIVE]` badge instantly appears on the row, and a confirmation banner alerts: *"Target set to: ⚡ Refactor Storage Engine..."*.
+4. Switch to **Tab 1 (`1`)**: Notice the task is now pinned in the prominent active target card directly beneath the big digital countdown clock!
 
 ---
 
-## 3. Visual References & Layouts
+### Step 4: Real-Time Focus Binding & Automatic Effort Logging
+- Start your focus timer on Tab 1 with `Space`.
+- When the 25-minute session completes, Termodoro automatically increments the active task's spent counter: `🍅 1 / 3` $\rightarrow$ `🍅 2 / 3`.
+- Once `pomodoros_spent >= pomodoros_estimated`, the counter dynamically shifts from primary theme color to amber/green, signaling that your estimated threshold has been reached.
+
+---
+
+### Step 5: Filtering Views & Toggling Completion
+- When you finish an objective, highlight the task on Tab 2 and press `Space` to toggle its checkbox (`[ ]` $\rightarrow$ `[x]`).
+- Press `f` to cycle through filter views:
+  - **All Tasks**: Shows everything in your queue.
+  - **Active Only**: Hides completed items for a clean, distraction-free backlog.
+  - **Completed Only**: Displays finished items for end-of-day retrospectives and standup notes.
+
+---
+
+### Step 6: Adjusting Estimates & Task Pruning
+- Underestimated a tricky bug? Press `+` / `=` on the selected task to increment its estimate (`3` $\rightarrow$ `4`).
+- Overestimated? Press `-` / `_` to decrement.
+- Completed or obsolete task? Press `d` (or `x` / `Delete`) to remove it. If you delete the currently active target task, Termodoro gracefully unbinds the target without breaking timer state.
+
+---
+
+## 3. Visual Layout & Interface Deep Dive
 
 ### Interactive Tasks Table View
-![Termodoro Tasks View](file:///home/amanap/Documents/GitHub/Termodoro/assets/screenshots/02_tasks_view.png)
+![Termodoro Tasks View](../assets/screenshots/02_tasks_view.png)
 
 ### Task Creation Modal Dialog
-![Termodoro Task Modal](file:///home/amanap/Documents/GitHub/Termodoro/assets/screenshots/05_task_modal.png)
+![Termodoro Task Modal](../assets/screenshots/05_task_modal.png)
+
+### Tasks View Components:
+1. **Filter Selector Bar**: Visual badges showing `[● All]`, `[  Active]`, `[  Completed]`.
+2. **Interactive Table Rows**:
+   - **Status Checkbox**: `[ ]` (Pending) or `[x]` (Completed).
+   - **Active Badge**: `🎯 [ACTIVE]` indicating timer binding.
+   - **Task Title**: Left-aligned with automatic Unicode truncation on narrow screens.
+   - **Pomodoro Counters**: Visual emoji counter (`🍅 2 / 3`).
+3. **Modal Input Overlay**: Dual-field dialog with high-visibility input cursors and validation bounds.
 
 ---
 
-## 4. Tasks View Keybindings
+## 4. Pro Tips & Power Workflows
 
-| Key | Action | Description |
+> [!TIP]
+> **Quick Add from Timer View**: You don't need to switch tabs to add a task! Press `a` while on Tab 1 (Timer View) to pop up the task creation modal instantly.
+
+> [!IMPORTANT]
+> **Atomic Persistence**: Every task edit, completion toggle, and estimate change is saved immediately to `~/.local/share/termodoro/data.json` with zero risk of state loss upon closing.
+
+---
+
+## 5. Complete Keybinding Reference
+
+| Keybinding | Action | Context / Behavior |
 | :---: | :--- | :--- |
-| `j` / `↓` | **Select Next** | Move selection down |
-| `k` / `↑` | **Select Previous** | Move selection up |
-| `a` / `n` | **Add Task** | Open task creation modal dialog |
-| `Space` | **Toggle Complete** | Toggle `[ ]` / `[x]` completion checkbox |
-| `Enter` | **Set Active Target** | Bind highlighted task to countdown timer |
-| `d` / `x` | **Delete Task** | Remove highlighted task |
-| `f` | **Cycle Filter** | Switch between All, Active, and Completed |
-| `+` / `=` | **Increment Estimate** | Increase estimated pomodoro count |
-| `-` / `_` | **Decrement Estimate** | Decrease estimated pomodoro count |
+| `j` / `↓` | **Select Next** | Move selection cursor down |
+| `k` / `↑` | **Select Previous** | Move selection cursor up |
+| `a` / `n` | **Add Task** | Open task creation modal overlay |
+| `Space` | **Toggle Done** | Toggle completion checkmark (`[ ]` / `[x]`) |
+| `Enter` / `t` | **Set Active Target** | Bind highlighted task to countdown timer |
+| `d` / `x` | **Delete Task** | Remove highlighted task permanently |
+| `f` | **Cycle Filter** | Cycle between All, Active, and Completed views |
+| `+` / `=` | **Increase Estimate** | Increment estimated Pomodoros |
+| `-` / `_` | **Decrease Estimate** | Decrement estimated Pomodoros |
+| `1` - `4` | **Switch Tab** | Jump directly to Timer, Tasks, Stats, or Settings |
+| `?` | **Help Overlay** | View global keybinding reference dialog |
