@@ -118,7 +118,7 @@ Every theme in Termodoro is handcrafted with balanced WCAG contrast ratios and 2
 
 ## 5. Under the Hood: Real-Time Configuration Architecture
 
-In [`src/app.rs`](file:///home/amanap/Documents/GitHub/Termodoro/src/app.rs), configuration changes propagate immediately:
+In [`src/app.rs`](../src/app.rs), configuration changes propagate immediately:
 - **Live Timer Reset**: When changing `work_duration_mins` or break durations while the timer is stopped, the active phase timer resets instantly to match the new duration without requiring manual resets.
 - **Atomic Persistence**: Every row modification or toggle automatically invokes `self.save_state()` to synchronize with `data.json`.
 - **Serde Serialization**: The `Config` struct is fully serializable across all 18 theme choices with backward-compatible defaults.
@@ -129,12 +129,12 @@ In [`src/app.rs`](file:///home/amanap/Documents/GitHub/Termodoro/src/app.rs), co
 
 | Keybinding | Action | Codebase Handler & Behavior |
 | :---: | :--- | :--- |
-| `j` / `↓` | **Next Setting** | [`src/app.rs:579`](file:///home/amanap/Documents/GitHub/Termodoro/src/app.rs#L579) (`settings_index += 1`) |
-| `k` / `↑` | **Previous Setting** | [`src/app.rs:590`](file:///home/amanap/Documents/GitHub/Termodoro/src/app.rs#L590) (`settings_index -= 1`) |
-| `h` / `←` / `-` | **Decrease / Prev Theme** | [`src/app.rs:606`](file:///home/amanap/Documents/GitHub/Termodoro/src/app.rs#L606) (`adjust_setting(-1)`) |
-| `l` / `→` / `+` | **Increase / Next Theme** | [`src/app.rs:601`](file:///home/amanap/Documents/GitHub/Termodoro/src/app.rs#L601) (`adjust_setting(1)`) |
-| `Space` / `Enter` | **Toggle State** | [`src/app.rs:611`](file:///home/amanap/Documents/GitHub/Termodoro/src/app.rs#L611) (`toggle_setting()`) |
-| `1` - `4` | **Switch Tab** | [`src/app.rs:288-311`](file:///home/amanap/Documents/GitHub/Termodoro/src/app.rs#L288-L311) (`active_tab = ActiveTab::...`) |
-| `Tab` / `Shift+Tab` | **Cycle Tabs** | [`src/app.rs:268-286`](file:///home/amanap/Documents/GitHub/Termodoro/src/app.rs#L268-L286) (`next_tab()` / `previous_tab()`) |
-| `?` | **Help Overlay** | [`src/app.rs:261`](file:///home/amanap/Documents/GitHub/Termodoro/src/app.rs#L261) (`show_help = true`) |
-| `q` / `Esc` | **Quit** | [`src/app.rs:254`](file:///home/amanap/Documents/GitHub/Termodoro/src/app.rs#L254) (`should_quit = true`) |
+| `j` / `↓` | **Next Setting** | [`src/app.rs:579`](../src/app.rs#L579) (`settings_index += 1`) |
+| `k` / `↑` | **Previous Setting** | [`src/app.rs:590`](../src/app.rs#L590) (`settings_index -= 1`) |
+| `h` / `←` / `-` | **Decrease / Prev Theme** | [`src/app.rs:606`](../src/app.rs#L606) (`adjust_setting(-1)`) |
+| `l` / `→` / `+` | **Increase / Next Theme** | [`src/app.rs:601`](../src/app.rs#L601) (`adjust_setting(1)`) |
+| `Space` / `Enter` | **Toggle State** | [`src/app.rs:611`](../src/app.rs#L611) (`toggle_setting()`) |
+| `1` - `4` | **Switch Tab** | [`src/app.rs:288-311`](../src/app.rs#L288-L311) (`active_tab = ActiveTab::...`) |
+| `Tab` / `Shift+Tab` | **Cycle Tabs** | [`src/app.rs:268-286`](../src/app.rs#L268-L286) (`next_tab()` / `previous_tab()`) |
+| `?` | **Help Overlay** | [`src/app.rs:261`](../src/app.rs#L261) (`show_help = true`) |
+| `q` / `Esc` | **Quit** | [`src/app.rs:254`](../src/app.rs#L254) (`should_quit = true`) |

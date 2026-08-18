@@ -87,7 +87,7 @@ Below is the live operational layout of Tab 3:
 
 ## 4. Under the Hood: Streak Algorithms & Mathematical Guarantees
 
-In [`src/stats.rs`](file:///home/amanap/Documents/GitHub/Termodoro/src/stats.rs), the analytics engine guarantees mathematical correctness across calendar boundaries:
+In [`src/stats.rs`](../src/stats.rs), the analytics engine guarantees mathematical correctness across calendar boundaries:
 - **`distinct_work_dates()`**: Normalizes all completed session timestamps into local dates (`chrono::Local.date_naive()`), deduplicating multiple sessions on the same calendar day.
 - **Consecutive Day Continuity**: Backward iteration using `NaiveDate::pred_opt()` bridges month transitions (Feb 28 $\rightarrow$ Mar 1) and year transitions (Dec 31 $\rightarrow$ Jan 1).
 - **366-Day Leap Year Resilience**: Tested against full 366-day leap year histories.
@@ -99,10 +99,10 @@ In [`src/stats.rs`](file:///home/amanap/Documents/GitHub/Termodoro/src/stats.rs)
 
 | Keybinding | Action | Codebase Handler & Behavior |
 | :---: | :--- | :--- |
-| `1` | **Switch to Timer** | [`src/app.rs:288`](file:///home/amanap/Documents/GitHub/Termodoro/src/app.rs#L288) (`active_tab = ActiveTab::Timer`) |
-| `2` | **Switch to Tasks** | [`src/app.rs:295`](file:///home/amanap/Documents/GitHub/Termodoro/src/app.rs#L295) (`active_tab = ActiveTab::Tasks`) |
-| `3` | **Switch to Stats** | [`src/app.rs:302`](file:///home/amanap/Documents/GitHub/Termodoro/src/app.rs#L302) (`active_tab = ActiveTab::Stats`) |
-| `4` | **Switch to Settings** | [`src/app.rs:308`](file:///home/amanap/Documents/GitHub/Termodoro/src/app.rs#L308) (`active_tab = ActiveTab::Settings`) |
-| `Tab` / `Shift+Tab` | **Cycle Tabs** | [`src/app.rs:268-286`](file:///home/amanap/Documents/GitHub/Termodoro/src/app.rs#L268-L286) (`next_tab()` / `previous_tab()`) |
-| `?` | **Help Overlay** | [`src/app.rs:261`](file:///home/amanap/Documents/GitHub/Termodoro/src/app.rs#L261) (`show_help = true`) |
-| `q` / `Esc` | **Quit** | [`src/app.rs:254`](file:///home/amanap/Documents/GitHub/Termodoro/src/app.rs#L254) (`should_quit = true`) |
+| `1` | **Switch to Timer** | [`src/app.rs:288`](../src/app.rs#L288) (`active_tab = ActiveTab::Timer`) |
+| `2` | **Switch to Tasks** | [`src/app.rs:295`](../src/app.rs#L295) (`active_tab = ActiveTab::Tasks`) |
+| `3` | **Switch to Stats** | [`src/app.rs:302`](../src/app.rs#L302) (`active_tab = ActiveTab::Stats`) |
+| `4` | **Switch to Settings** | [`src/app.rs:308`](../src/app.rs#L308) (`active_tab = ActiveTab::Settings`) |
+| `Tab` / `Shift+Tab` | **Cycle Tabs** | [`src/app.rs:268-286`](../src/app.rs#L268-L286) (`next_tab()` / `previous_tab()`) |
+| `?` | **Help Overlay** | [`src/app.rs:261`](../src/app.rs#L261) (`show_help = true`) |
+| `q` / `Esc` | **Quit** | [`src/app.rs:254`](../src/app.rs#L254) (`should_quit = true`) |

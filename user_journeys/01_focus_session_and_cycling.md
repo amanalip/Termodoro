@@ -43,7 +43,7 @@ termodoro
 ```
 
 Termodoro boots instantaneously in less than **10 milliseconds**, presenting **Tab 1: Timer View**.
-- The large 5-row digital block clock is initialized at `25:00` (driven by [`src/timer.rs`](file:///home/amanap/Documents/GitHub/Termodoro/src/timer.rs)).
+- The large 5-row digital block clock is initialized at `25:00` (driven by [`src/timer.rs`](../src/timer.rs)).
 - The cycle counter shows `Cycle 1/4`.
 - The status indicator displays `[STOPPED]`.
 
@@ -111,7 +111,7 @@ Below is the live operational layout of Tab 1 during an active focus session:
 
 ## 4. Under the Hood: Engineering & Logic Architecture
 
-- **Sub-Second Tick Accuracy**: In [`src/timer.rs`](file:///home/amanap/Documents/GitHub/Termodoro/src/timer.rs), ticks are processed on a 100ms interval loop. Time remaining calculation avoids integer underflow with saturating subtraction.
+- **Sub-Second Tick Accuracy**: In [`src/timer.rs`](../src/timer.rs), ticks are processed on a 100ms interval loop. Time remaining calculation avoids integer underflow with saturating subtraction.
 - **Pure In-Memory Audio**: Audio is not loaded from `.wav` files. Sample buffers are generated mathematically into standard 16-bit PCM RIFF WAV headers in `std::io::Cursor` and decoded via `rodio` on a dedicated background thread.
 - **Terminal Raw Mode Protection**: A custom panic hook in `src/main.rs` guarantees the terminal raw mode and alternate screen buffer are restored even if the process crashes.
 
@@ -135,11 +135,11 @@ Below is the live operational layout of Tab 1 during an active focus session:
 
 | Keybinding | Action | Codebase Handler & Behavior |
 | :---: | :--- | :--- |
-| `Space` | **Start / Pause** | [`src/app.rs:468`](file:///home/amanap/Documents/GitHub/Termodoro/src/app.rs#L468) (`timer.toggle()`) |
-| `r` | **Reset** | [`src/app.rs:473`](file:///home/amanap/Documents/GitHub/Termodoro/src/app.rs#L473) (`timer.reset()`) |
-| `s` | **Skip** | [`src/app.rs:480`](file:///home/amanap/Documents/GitHub/Termodoro/src/app.rs#L480) (`timer.skip_to_next()`) |
-| `a` | **Quick Add Task** | [`src/app.rs:487`](file:///home/amanap/Documents/GitHub/Termodoro/src/app.rs#L487) (`open_task_modal()`) |
-| `1` - `4` | **Switch Tab** | [`src/app.rs:288-311`](file:///home/amanap/Documents/GitHub/Termodoro/src/app.rs#L288-L311) (`active_tab = ActiveTab::...`) |
-| `Tab` / `Shift+Tab` | **Cycle Tabs** | [`src/app.rs:268-286`](file:///home/amanap/Documents/GitHub/Termodoro/src/app.rs#L268-L286) (`next_tab()` / `previous_tab()`) |
-| `?` | **Help Overlay** | [`src/app.rs:261`](file:///home/amanap/Documents/GitHub/Termodoro/src/app.rs#L261) (`show_help = true`) |
-| `q` / `Esc` | **Quit** | [`src/app.rs:254`](file:///home/amanap/Documents/GitHub/Termodoro/src/app.rs#L254) (`should_quit = true`) |
+| `Space` | **Start / Pause** | [`src/app.rs:468`](../src/app.rs#L468) (`timer.toggle()`) |
+| `r` | **Reset** | [`src/app.rs:473`](../src/app.rs#L473) (`timer.reset()`) |
+| `s` | **Skip** | [`src/app.rs:480`](../src/app.rs#L480) (`timer.skip_to_next()`) |
+| `a` | **Quick Add Task** | [`src/app.rs:487`](../src/app.rs#L487) (`open_task_modal()`) |
+| `1` - `4` | **Switch Tab** | [`src/app.rs:288-311`](../src/app.rs#L288-L311) (`active_tab = ActiveTab::...`) |
+| `Tab` / `Shift+Tab` | **Cycle Tabs** | [`src/app.rs:268-286`](../src/app.rs#L268-L286) (`next_tab()` / `previous_tab()`) |
+| `?` | **Help Overlay** | [`src/app.rs:261`](../src/app.rs#L261) (`show_help = true`) |
+| `q` / `Esc` | **Quit** | [`src/app.rs:254`](../src/app.rs#L254) (`should_quit = true`) |

@@ -39,7 +39,7 @@ user_journeys/
 ## 2. User Journey Catalog
 
 ### 01. Core Pomodoro Focus Session & Interval Cycling
-- **Guide**: [**`01_focus_session_and_cycling.md`**](file:///home/amanap/Documents/GitHub/Termodoro/user_journeys/01_focus_session_and_cycling.md)
+- **Guide**: [**`01_focus_session_and_cycling.md`**](01_focus_session_and_cycling.md)
 - **Primary Tab**: `Tab 1: Timer View`
 - **Core Workflows**:
   - Launching the app with $<10\text{ms}$ startup time.
@@ -51,7 +51,7 @@ user_journeys/
 ---
 
 ### 02. Task Creation, Estimation & Target Tracking
-- **Guide**: [**`02_task_management_and_estimates.md`**](file:///home/amanap/Documents/GitHub/Termodoro/user_journeys/02_task_management_and_estimates.md)
+- **Guide**: [**`02_task_management_and_estimates.md`**](02_task_management_and_estimates.md)
 - **Primary Tab**: `Tab 2: Tasks View`
 - **Core Workflows**:
   - Opening the dual-input task creation modal with `a` (or `n`).
@@ -64,7 +64,7 @@ user_journeys/
 ---
 
 ### 03. Analytics, Daily Streaks & Productivity Insights
-- **Guide**: [**`03_analytics_and_streaks.md`**](file:///home/amanap/Documents/GitHub/Termodoro/user_journeys/03_analytics_and_streaks.md)
+- **Guide**: [**`03_analytics_and_streaks.md`**](03_analytics_and_streaks.md)
 - **Primary Tab**: `Tab 3: Stats View`
 - **Core Workflows**:
   - Inspecting high-level focus metrics: Total Focus Time, Total Pomodoros, Current Streak, and Longest Streak.
@@ -75,7 +75,7 @@ user_journeys/
 ---
 
 ### 04. Customizing Durations, Acoustic Audio & 18 Color Themes
-- **Guide**: [**`04_preferences_and_themes.md`**](file:///home/amanap/Documents/GitHub/Termodoro/user_journeys/04_preferences_and_themes.md)
+- **Guide**: [**`04_preferences_and_themes.md`**](04_preferences_and_themes.md)
 - **Primary Tab**: `Tab 4: Settings View`
 - **Core Workflows**:
   - Modifying focus durations ($1 \le \text{Work} \le 120\text{m}$, $1 \le \text{Short Break} \le 60\text{m}$, $1 \le \text{Long Break} \le 90\text{m}$).

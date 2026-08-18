@@ -89,7 +89,7 @@ Modern productivity apps are frequently bloated with heavy web-view containers (
 
 ## 4. System Architecture & Design Specification
 
-Termodoro is organized as a modular Rust application adhering to strict separation of concerns between state management, logic engines, and immediate-mode user interface rendering. For a comprehensive, in-depth architectural breakdown, see [**System Design Specification (`System_design.md`)**](file:///home/amanap/Documents/GitHub/Termodoro/System_design.md).
+Termodoro is organized as a modular Rust application adhering to strict separation of concerns between state management, logic engines, and immediate-mode user interface rendering. For a comprehensive, in-depth architectural breakdown, see [**System Design Specification (`System_design.md`)**](System_design.md).
 
 ```
 Termodoro/
@@ -131,15 +131,15 @@ Termodoro/
 
 ## 5. Interactive User Journeys & Guides
 
-To help you get the most out of Termodoro, detailed step-by-step user journey guides with visual screenshots are available in the [`user_journeys/`](file:///home/amanap/Documents/GitHub/Termodoro/user_journeys/) directory (see [**`user_journeys/README.md`**](file:///home/amanap/Documents/GitHub/Termodoro/user_journeys/README.md) for the full catalog):
+To help you get the most out of Termodoro, detailed step-by-step user journey guides with visual screenshots are available in the [`user_journeys/`](user_journeys/) directory (see [**`user_journeys/README.md`**](user_journeys/README.md) for the full catalog):
 
 | User Journey | Guide Document | Key Workflows & Visual Highlights |
 | :--- | :--- | :--- |
-| **Catalog & Overview** | [**`user_journeys/README.md`**](file:///home/amanap/Documents/GitHub/Termodoro/user_journeys/README.md) | User journeys overview, workflow directory index, design architecture, and master keybinding reference cheatsheet. |
-| **01. Core Focus Session** | [**`01_focus_session_and_cycling.md`**](file:///home/amanap/Documents/GitHub/Termodoro/user_journeys/01_focus_session_and_cycling.md) | Running 25m focus sessions, pause/resume, automatic interval transitions, cycle dot progression, and acoustic chimes. |
-| **02. Task Management** | [**`02_task_management_and_estimates.md`**](file:///home/amanap/Documents/GitHub/Termodoro/user_journeys/02_task_management_and_estimates.md) | Task creation modal, estimating Pomodoro blocks, setting active target tasks, filtering views, and automatic effort logging. |
-| **03. Analytics & Streaks** | [**`03_analytics_and_streaks.md`**](file:///home/amanap/Documents/GitHub/Termodoro/user_journeys/03_analytics_and_streaks.md) | Daily focus time cards, consecutive streak retention, 7-day activity bar charts, and historical activity logs. |
-| **04. Preferences & Theming** | [**`04_preferences_and_themes.md`**](file:///home/amanap/Documents/GitHub/Termodoro/user_journeys/04_preferences_and_themes.md) | Live duration editing, 24-cycle customization, sound & desktop notification toggles, and exploring all 18 color palettes. |
+| **Catalog & Overview** | [**`user_journeys/README.md`**](user_journeys/README.md) | User journeys overview, workflow directory index, design architecture, and master keybinding reference cheatsheet. |
+| **01. Core Focus Session** | [**`01_focus_session_and_cycling.md`**](user_journeys/01_focus_session_and_cycling.md) | Running 25m focus sessions, pause/resume, automatic interval transitions, cycle dot progression, and acoustic chimes. |
+| **02. Task Management** | [**`02_task_management_and_estimates.md`**](user_journeys/02_task_management_and_estimates.md) | Task creation modal, estimating Pomodoro blocks, setting active target tasks, filtering views, and automatic effort logging. |
+| **03. Analytics & Streaks** | [**`03_analytics_and_streaks.md`**](user_journeys/03_analytics_and_streaks.md) | Daily focus time cards, consecutive streak retention, 7-day activity bar charts, and historical activity logs. |
+| **04. Preferences & Theming** | [**`04_preferences_and_themes.md`**](user_journeys/04_preferences_and_themes.md) | Live duration editing, 24-cycle customization, sound & desktop notification toggles, and exploring all 18 color palettes. |
 
 ---
 
@@ -830,11 +830,11 @@ To provide full confidence to developers, contributors, and users, all claims, m
 | **Static Analysis Compliance** | 0 Warnings, 0 Errors | Entire workspace | `cargo clippy -- -D warnings` | **VERIFIED** |
 | **Code Formatting Standard** | 100% Rustfmt Compliant | Code formatting rules | `cargo fmt -- --check` | **VERIFIED** |
 | **Memory Footprint** | $< 15\text{ MB}$ Resident RAM | Runtime metrics via `/proc/[pid]/statm` | Ratatui zero-copy immediate mode rendering | **VERIFIED** |
-| **Audio Generation Method** | Pure In-Memory PCM RIFF WAV | [`src/audio.rs`](file:///home/amanap/Documents/GitHub/Termodoro/src/audio.rs#L80-L150) | Byte buffer analysis, $f = 44.1\text{ kHz}$, 16-bit signed | **VERIFIED** |
-| **Max Long Break Cycles** | $1 \le N \le 24$ Cycles | [`src/config.rs`](file:///home/amanap/Documents/GitHub/Termodoro/src/config.rs#L12-L28) & [`src/timer.rs`](file:///home/amanap/Documents/GitHub/Termodoro/src/timer.rs#L85-L105) | Unit test `test_twenty_four_cycle_advancement_and_long_break_trigger` | **VERIFIED** |
-| **Streak Calculation Invariant** | Preservation across Month/Year | [`src/stats.rs`](file:///home/amanap/Documents/GitHub/Termodoro/src/stats.rs#L120-L190) | Unit test `test_streak_calculation_across_month_and_year_boundaries` | **VERIFIED** |
-| **Storage Architecture** | Atomic Write & XDG Compliance | [`src/storage.rs`](file:///home/amanap/Documents/GitHub/Termodoro/src/storage.rs#L40-L110) | Atomic tempfile rename; XDG Base Directory specification | **VERIFIED** |
-| **Color Palettes** | 18 Built-In Palettes | [`src/theme.rs`](file:///home/amanap/Documents/GitHub/Termodoro/src/theme.rs#L6-L42) | Unit test `test_theme_from_choice_all_variants` | **VERIFIED** |
+| **Audio Generation Method** | Pure In-Memory PCM RIFF WAV | [`src/audio.rs`](src/audio.rs#L80-L150) | Byte buffer analysis, $f = 44.1\text{ kHz}$, 16-bit signed | **VERIFIED** |
+| **Max Long Break Cycles** | $1 \le N \le 24$ Cycles | [`src/config.rs`](src/config.rs#L12-L28) & [`src/timer.rs`](src/timer.rs#L85-L105) | Unit test `test_twenty_four_cycle_advancement_and_long_break_trigger` | **VERIFIED** |
+| **Streak Calculation Invariant** | Preservation across Month/Year | [`src/stats.rs`](src/stats.rs#L120-L190) | Unit test `test_streak_calculation_across_month_and_year_boundaries` | **VERIFIED** |
+| **Storage Architecture** | Atomic Write & XDG Compliance | [`src/storage.rs`](src/storage.rs#L40-L110) | Atomic tempfile rename; XDG Base Directory specification | **VERIFIED** |
+| **Color Palettes** | 18 Built-In Palettes | [`src/theme.rs`](src/theme.rs#L6-L42) | Unit test `test_theme_from_choice_all_variants` | **VERIFIED** |
 
 ### Independent Reproducibility Commands
 Any user can independently reproduce and verify this entire audit report on their local machine by executing:

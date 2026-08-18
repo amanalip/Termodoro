@@ -18,16 +18,16 @@ Test coverage now spans all **9 core modules** with **192 unit, integration, and
 
 | Module | Test File | Test Cases | Category | Status |
 | :--- | :--- | :---: | :---: | :---: |
-| **Application State & End-to-End** | [`src/app.rs`](file:///home/amanap/Documents/GitHub/Termodoro/src/app.rs) | 35 | Key Matrix, Chaos Fuzzing, Auto-start, Direct Tabs & Reassignment | PASS |
-| **Productivity Analytics & Streaks** | [`src/stats.rs`](file:///home/amanap/Documents/GitHub/Termodoro/src/stats.rs) | 29 | 366-Day Leap Year, Multi-Streak, Deduplication & Histograms | PASS |
-| **Timer Engine** | [`src/timer.rs`](file:///home/amanap/Documents/GitHub/Termodoro/src/timer.rs) | 27 | 24-Cycle State Machine, Sub-Second Ticks & Formats | PASS |
-| **Task Management** | [`src/tasks.rs`](file:///home/amanap/Documents/GitHub/Termodoro/src/tasks.rs) | 27 | UUIDs, Unicode, Boundaries, Filter Clamps & Target Rebinding | PASS |
-| **Audio Engine & Chimes** | [`src/audio.rs`](file:///home/amanap/Documents/GitHub/Termodoro/src/audio.rs) | 19 | Acoustic QA, WAV Signals, Headroom & DAC Click Prevention | PASS |
-| **Terminal UI Rendering** | [`src/ui/mod.rs`](file:///home/amanap/Documents/GitHub/Termodoro/src/ui/mod.rs) | 18 | Buffer Content, Extreme Geometries (350x120), Filter Views & 24 Dots | PASS |
-| **Persistence & File Storage** | [`src/storage.rs`](file:///home/amanap/Documents/GitHub/Termodoro/src/storage.rs) | 14 | Zero Telemetry, Privacy Invariants, Atomic .tmp Cleanups & Recovery | PASS |
-| **Themes & Color Palettes** | [`src/theme.rs`](file:///home/amanap/Documents/GitHub/Termodoro/src/theme.rs) | 10 | 18 Palettes, Contrast, RGB Bounds & Serde | PASS |
-| **Configuration & Preferences** | [`src/config.rs`](file:///home/amanap/Documents/GitHub/Termodoro/src/config.rs) | 8 | Serde, Extreme Values, Boolean Flags & Defaults | PASS |
-| **ASCII Big Digits Graphic UI** | [`src/ui/digits.rs`](file:///home/amanap/Documents/GitHub/Termodoro/src/ui/digits.rs) | 5 | Glyphs & Block Typography Bounds | PASS |
+| **Application State & End-to-End** | [`src/app.rs`](src/app.rs) | 35 | Key Matrix, Chaos Fuzzing, Auto-start, Direct Tabs & Reassignment | PASS |
+| **Productivity Analytics & Streaks** | [`src/stats.rs`](src/stats.rs) | 29 | 366-Day Leap Year, Multi-Streak, Deduplication & Histograms | PASS |
+| **Timer Engine** | [`src/timer.rs`](src/timer.rs) | 27 | 24-Cycle State Machine, Sub-Second Ticks & Formats | PASS |
+| **Task Management** | [`src/tasks.rs`](src/tasks.rs) | 27 | UUIDs, Unicode, Boundaries, Filter Clamps & Target Rebinding | PASS |
+| **Audio Engine & Chimes** | [`src/audio.rs`](src/audio.rs) | 19 | Acoustic QA, WAV Signals, Headroom & DAC Click Prevention | PASS |
+| **Terminal UI Rendering** | [`src/ui/mod.rs`](src/ui/mod.rs) | 18 | Buffer Content, Extreme Geometries (350x120), Filter Views & 24 Dots | PASS |
+| **Persistence & File Storage** | [`src/storage.rs`](src/storage.rs) | 14 | Zero Telemetry, Privacy Invariants, Atomic .tmp Cleanups & Recovery | PASS |
+| **Themes & Color Palettes** | [`src/theme.rs`](src/theme.rs) | 10 | 18 Palettes, Contrast, RGB Bounds & Serde | PASS |
+| **Configuration & Preferences** | [`src/config.rs`](src/config.rs) | 8 | Serde, Extreme Values, Boolean Flags & Defaults | PASS |
+| **ASCII Big Digits Graphic UI** | [`src/ui/digits.rs`](src/ui/digits.rs) | 5 | Glyphs & Block Typography Bounds | PASS |
 | **Total** | | **192** | **ALL PASSED** | **100%** |
 
 ---

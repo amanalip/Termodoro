@@ -103,7 +103,7 @@ From anywhere in Termodoro, press `2` (or press `Tab`) to navigate to **Tab 2: T
 
 ## 4. Under the Hood: Engineering & Logic Architecture
 
-- **UUID Identification**: In [`src/tasks.rs`](file:///home/amanap/Documents/GitHub/Termodoro/src/tasks.rs), every task is assigned a globally unique V4 UUID (`uuid::Uuid::new_v4()`) and an ISO-8601 UTC creation timestamp.
+- **UUID Identification**: In [`src/tasks.rs`](../src/tasks.rs), every task is assigned a globally unique V4 UUID (`uuid::Uuid::new_v4()`) and an ISO-8601 UTC creation timestamp.
 - **Dynamic Filter Clamping**: When toggling between filters (`All`, `Active`, `Completed`), `selected_index` is automatically clamped to the filtered slice length to prevent index-out-of-bounds panics.
 - **Atomic Persistence**: Every task mutation triggers an atomic JSON serialization to `~/.local/share/termodoro/data.json` via a `.tmp` file swap pattern.
 
@@ -123,15 +123,15 @@ From anywhere in Termodoro, press `2` (or press `Tab`) to navigate to **Tab 2: T
 
 | Keybinding | Action | Codebase Handler & Behavior |
 | :---: | :--- | :--- |
-| `j` / `↓` | **Select Next** | [`src/app.rs:535`](file:///home/amanap/Documents/GitHub/Termodoro/src/app.rs#L535) (`tasks.next()`) |
-| `k` / `↑` | **Select Previous** | [`src/app.rs:540`](file:///home/amanap/Documents/GitHub/Termodoro/src/app.rs#L540) (`tasks.previous()`) |
-| `a` | **Add Task** | [`src/app.rs:502`](file:///home/amanap/Documents/GitHub/Termodoro/src/app.rs#L502) (`open_task_modal()`) |
-| `Space` / `Enter` | **Toggle Done** | [`src/app.rs:507`](file:///home/amanap/Documents/GitHub/Termodoro/src/app.rs#L507) (`tasks.toggle_selected()`) |
-| `t` | **Set Active Target** | [`src/app.rs:514`](file:///home/amanap/Documents/GitHub/Termodoro/src/app.rs#L514) (`tasks.set_selected_active()`) |
-| `d` / `x` | **Delete Task** | [`src/app.rs:526`](file:///home/amanap/Documents/GitHub/Termodoro/src/app.rs#L526) (`tasks.remove_selected()`) |
-| `1` | **Filter: All** | [`src/app.rs:545`](file:///home/amanap/Documents/GitHub/Termodoro/src/app.rs#L545) (`tasks.filter = TaskFilter::All`) |
-| `2` | **Filter: Active** | [`src/app.rs:552`](file:///home/amanap/Documents/GitHub/Termodoro/src/app.rs#L552) (`tasks.filter = TaskFilter::Active`) |
-| `3` | **Filter: Completed** | [`src/app.rs:559`](file:///home/amanap/Documents/GitHub/Termodoro/src/app.rs#L559) (`tasks.filter = TaskFilter::Completed`) |
-| `Tab` / `BackTab` | **Switch Tabs** | [`src/app.rs:268-286`](file:///home/amanap/Documents/GitHub/Termodoro/src/app.rs#L268-L286) (`next_tab()` / `previous_tab()`) |
-| `?` | **Help Overlay** | [`src/app.rs:261`](file:///home/amanap/Documents/GitHub/Termodoro/src/app.rs#L261) (`show_help = true`) |
-| `q` / `Esc` | **Quit** | [`src/app.rs:254`](file:///home/amanap/Documents/GitHub/Termodoro/src/app.rs#L254) (`should_quit = true`) |
+| `j` / `↓` | **Select Next** | [`src/app.rs:535`](../src/app.rs#L535) (`tasks.next()`) |
+| `k` / `↑` | **Select Previous** | [`src/app.rs:540`](../src/app.rs#L540) (`tasks.previous()`) |
+| `a` | **Add Task** | [`src/app.rs:502`](../src/app.rs#L502) (`open_task_modal()`) |
+| `Space` / `Enter` | **Toggle Done** | [`src/app.rs:507`](../src/app.rs#L507) (`tasks.toggle_selected()`) |
+| `t` | **Set Active Target** | [`src/app.rs:514`](../src/app.rs#L514) (`tasks.set_selected_active()`) |
+| `d` / `x` | **Delete Task** | [`src/app.rs:526`](../src/app.rs#L526) (`tasks.remove_selected()`) |
+| `1` | **Filter: All** | [`src/app.rs:545`](../src/app.rs#L545) (`tasks.filter = TaskFilter::All`) |
+| `2` | **Filter: Active** | [`src/app.rs:552`](../src/app.rs#L552) (`tasks.filter = TaskFilter::Active`) |
+| `3` | **Filter: Completed** | [`src/app.rs:559`](../src/app.rs#L559) (`tasks.filter = TaskFilter::Completed`) |
+| `Tab` / `BackTab` | **Switch Tabs** | [`src/app.rs:268-286`](../src/app.rs#L268-L286) (`next_tab()` / `previous_tab()`) |
+| `?` | **Help Overlay** | [`src/app.rs:261`](../src/app.rs#L261) (`show_help = true`) |
+| `q` / `Esc` | **Quit** | [`src/app.rs:254`](../src/app.rs#L254) (`should_quit = true`) |

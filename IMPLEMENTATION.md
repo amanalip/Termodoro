@@ -385,14 +385,14 @@ To ensure strict engineering correctness and technical veracity, the implementat
 
 | Component Layer | Mathematical / Technical Invariant | Source Code Implementation | Test Verification Reference | Status |
 | :--- | :--- | :--- | :--- | :---: |
-| **Audio Synthesis** | Exponential Damping: $y(t) = A e^{-t/\tau} \sin(2\pi f t)$ | [`src/audio.rs`](file:///home/amanap/Documents/GitHub/Termodoro/src/audio.rs#L80-L150) | `test_wav_sample_bounds_no_clipping_work_chime` | **VERIFIED** |
-| **WAV Serialization** | RFC 2361 / RIFF Header Compliance (44-byte format chunk) | [`src/audio.rs`](file:///home/amanap/Documents/GitHub/Termodoro/src/audio.rs#L140-L180) | `test_create_riff_wav_pcm16_header` | **VERIFIED** |
-| **Cycle Invariant** | $(C \pmod{M}) = 0 \implies \text{LongBreak}$ for $M \in [1, 24]$ | [`src/timer.rs`](file:///home/amanap/Documents/GitHub/Termodoro/src/timer.rs#L80-L115) | `test_twenty_four_cycle_advancement_and_long_break_trigger` | **VERIFIED** |
-| **Streak Invariant** | Consecutive day continuity across month/year edges | [`src/stats.rs`](file:///home/amanap/Documents/GitHub/Termodoro/src/stats.rs#L125-L185) | `test_streak_calculation_across_month_and_year_boundaries` | **VERIFIED** |
-| **Atomic File I/O** | Write-to-tempfile $\to$ Atomic `rename` ($\text{ACID}$) | [`src/storage.rs`](file:///home/amanap/Documents/GitHub/Termodoro/src/storage.rs#L40-L90) | `test_storage_save_and_load_roundtrip` | **VERIFIED** |
-| **UUID Uniqueness** | RFC 4122 v4 Collision Probability $< 10^{-18}$ | [`src/tasks.rs`](file:///home/amanap/Documents/GitHub/Termodoro/src/tasks.rs#L30-L50) | `test_task_uuid_uniqueness_and_timestamps` | **VERIFIED** |
-| **Theme Contrast** | WCAG 2.1 AA Compliant Contrast ($R \ge 4.5:1$) across all 18 themes | [`src/theme.rs`](file:///home/amanap/Documents/GitHub/Termodoro/src/theme.rs#L8-L280) | `test_all_eighteen_themes_cycle_and_persistence_e2e` | **VERIFIED** |
-| **UI Geometry Safety** | Minimum bounds checking ($W \ge 80, H \ge 24$) with fallback | [`src/ui/mod.rs`](file:///home/amanap/Documents/GitHub/Termodoro/src/ui/mod.rs#L40-L100) | `test_render_extreme_small_terminals` | **VERIFIED** |
+| **Audio Synthesis** | Exponential Damping: $y(t) = A e^{-t/\tau} \sin(2\pi f t)$ | [`src/audio.rs`](src/audio.rs#L80-L150) | `test_wav_sample_bounds_no_clipping_work_chime` | **VERIFIED** |
+| **WAV Serialization** | RFC 2361 / RIFF Header Compliance (44-byte format chunk) | [`src/audio.rs`](src/audio.rs#L140-L180) | `test_create_riff_wav_pcm16_header` | **VERIFIED** |
+| **Cycle Invariant** | $(C \pmod{M}) = 0 \implies \text{LongBreak}$ for $M \in [1, 24]$ | [`src/timer.rs`](src/timer.rs#L80-L115) | `test_twenty_four_cycle_advancement_and_long_break_trigger` | **VERIFIED** |
+| **Streak Invariant** | Consecutive day continuity across month/year edges | [`src/stats.rs`](src/stats.rs#L125-L185) | `test_streak_calculation_across_month_and_year_boundaries` | **VERIFIED** |
+| **Atomic File I/O** | Write-to-tempfile $\to$ Atomic `rename` ($\text{ACID}$) | [`src/storage.rs`](src/storage.rs#L40-L90) | `test_storage_save_and_load_roundtrip` | **VERIFIED** |
+| **UUID Uniqueness** | RFC 4122 v4 Collision Probability $< 10^{-18}$ | [`src/tasks.rs`](src/tasks.rs#L30-L50) | `test_task_uuid_uniqueness_and_timestamps` | **VERIFIED** |
+| **Theme Contrast** | WCAG 2.1 AA Compliant Contrast ($R \ge 4.5:1$) across all 18 themes | [`src/theme.rs`](src/theme.rs#L8-L280) | `test_all_eighteen_themes_cycle_and_persistence_e2e` | **VERIFIED** |
+| **UI Geometry Safety** | Minimum bounds checking ($W \ge 80, H \ge 24$) with fallback | [`src/ui/mod.rs`](src/ui/mod.rs#L40-L100) | `test_render_extreme_small_terminals` | **VERIFIED** |
 
 ---
 

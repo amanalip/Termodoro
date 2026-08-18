@@ -58,7 +58,7 @@ This document maintains a transparent, permanent, and structured audit log of re
 - **Root Cause:** Staging and committing files prior to creating a root `.gitignore`.
 - **Remediation & Action Taken:**
   1. Executed `git rm -r --cached target/` to purge all 2,439 build artifacts from Git tracking while preserving local compilation caches.
-  2. Updated [`.gitignore`](file:///home/amanap/Documents/GitHub/Termodoro/.gitignore) to explicitly ignore `target/` and `/target/`.
+  2. Updated [`.gitignore`](.gitignore) to explicitly ignore `target/` and `/target/`.
   3. Verified `git ls-tree -r HEAD target/` returns **0 files tracked**.
 - **Resolution Status:** **CLEANED & RESOLVED**
 
@@ -180,9 +180,9 @@ This document maintains a transparent, permanent, and structured audit log of re
 - **Severity:** Enhancement / Storage Efficiency
 - **Description:**
   - Resolved local developer disk bloat caused by intermediate unstripped debug symbols and test runner binaries in `target/` (~1.8 GB).
-  - Added [`scripts/test_and_clean.sh`](file:///home/amanap/Documents/GitHub/Termodoro/scripts/test_and_clean.sh) to execute the complete test suite and automatically run `cargo clean` upon exit.
-  - Added root [`Makefile`](file:///home/amanap/Documents/GitHub/Termodoro/Makefile) with targets: `make test`, `make check`, `make build`, `make run`, `make clean`, `make fmt`, `make clippy`.
-  - Added build cache cleanup step to GitHub Actions CI workflow [`.github/workflows/rust.yml`](file:///home/amanap/Documents/GitHub/Termodoro/.github/workflows/rust.yml).
+  - Added [`scripts/test_and_clean.sh`](scripts/test_and_clean.sh) to execute the complete test suite and automatically run `cargo clean` upon exit.
+  - Added root [`Makefile`](Makefile) with targets: `make test`, `make check`, `make build`, `make run`, `make clean`, `make fmt`, `make clippy`.
+  - Added build cache cleanup step to GitHub Actions CI workflow [`.github/workflows/rust.yml`](.github/workflows/rust.yml).
   - Confirmed persistent user settings and tasks (`~/.local/share/termodoro/data.json`) are completely decoupled and safe from `cargo clean`.
 - **Resolution Status:** **RESOLVED (Reclaims ~1.8GB disk space automatically)**
 
@@ -243,9 +243,9 @@ This document maintains a transparent, permanent, and structured audit log of re
 - **Description:** 
   In terminal SVG/PNG screenshot rendering and table cells, 2-column wide Unicode emoji glyphs (such as `🎯`, `🚀`, `🍅`, `📝`, `⚡`) exhibited visual misalignment relative to adjacent single-width text and left cell border boundaries.
 - **Root Cause & Technical Remediation:**
-  1. **Unicode Cell Width Calculation**: Integrated `unicode-width` crate (`UnicodeWidthStr::width(sym)`) into [`src/bin/generate_screenshots.rs`](file:///home/amanap/Documents/GitHub/Termodoro/src/bin/generate_screenshots.rs) to compute dynamic cell widths for background highlights and skip empty zero-width continuation cells.
+  1. **Unicode Cell Width Calculation**: Integrated `unicode-width` crate (`UnicodeWidthStr::width(sym)`) into [`src/bin/generate_screenshots.rs`](src/bin/generate_screenshots.rs) to compute dynamic cell widths for background highlights and skip empty zero-width continuation cells.
   2. **Font Stack & Baseline Alignment**: Configured `.emoji-icon` font fallback hierarchy (`Noto Color Emoji`, `Apple Color Emoji`, `Segoe UI Emoji`, `JetBrains Mono`) with `dominant-baseline: alphabetic` and precise vertical font baseline coordinates (`text_y = cell_y + 14.0px`).
-  3. **Internal Cell Padding**: Added consistent 1-character left padding to table cells in [`src/ui/tasks_view.rs`](file:///home/amanap/Documents/GitHub/Termodoro/src/ui/tasks_view.rs) and input fields in [`src/ui/task_modal.rs`](file:///home/amanap/Documents/GitHub/Termodoro/src/ui/task_modal.rs) preventing glyphs from colliding with borders.
+  3. **Internal Cell Padding**: Added consistent 1-character left padding to table cells in [`src/ui/tasks_view.rs`](src/ui/tasks_view.rs) and input fields in [`src/ui/task_modal.rs`](src/ui/task_modal.rs) preventing glyphs from colliding with borders.
 - **Resolution Status:** **VERIFIED & CERTIFIED**
 
 ---
@@ -258,8 +258,8 @@ This document maintains a transparent, permanent, and structured audit log of re
 - **Description:** 
   Formally audited and certified Termodoro's core privacy guarantees: zero network calls, zero telemetry, zero tracking identifiers, and 100% local-first data isolation.
 - **Root Cause & Technical Remediation:**
-  1. **Zero-Telemetry Schema Invariant Test**: Added `test_privacy_zero_telemetry_guarantees` in [`src/storage.rs`](file:///home/amanap/Documents/GitHub/Termodoro/src/storage.rs) asserting that top-level database keys only contain `config`, `tasks`, and `stats`, and verifying absence of all tracking/network keys (`telemetry`, `api_key`, `server`, `device_id`, `cookie`, `token`, etc.).
-  2. **Plaintext Network Tracker Rejection**: Added `test_storage_schema_fields_contain_no_device_or_telemetry_keys` in [`src/storage.rs`](file:///home/amanap/Documents/GitHub/Termodoro/src/storage.rs) verifying that serialized data contains no HTTP/HTTPS URLs, Sentry, Mixpanel, Amplitude, or Google Analytics identifiers.
+  1. **Zero-Telemetry Schema Invariant Test**: Added `test_privacy_zero_telemetry_guarantees` in [`src/storage.rs`](src/storage.rs) asserting that top-level database keys only contain `config`, `tasks`, and `stats`, and verifying absence of all tracking/network keys (`telemetry`, `api_key`, `server`, `device_id`, `cookie`, `token`, etc.).
+  2. **Plaintext Network Tracker Rejection**: Added `test_storage_schema_fields_contain_no_device_or_telemetry_keys` in [`src/storage.rs`](src/storage.rs) verifying that serialized data contains no HTTP/HTTPS URLs, Sentry, Mixpanel, Amplitude, or Google Analytics identifiers.
   3. **Local Filesystem Isolation Test**: Added `test_storage_data_isolation_local_only` ensuring storage paths resolve strictly to local user folders conforming to XDG/OS standards.
   4. **GitHub Actions CI Security Step**: Added dedicated CI step `Verify Zero Network Dependencies & Zero Unsafe Blocks` running automated AST regex grep scans against `src/` and `Cargo.lock` to fail CI if network crates (reqwest, ureq, hyper, curl, tungstenite, sentry, posthog) or `unsafe` blocks are introduced.
 - **Resolution Status:** **VERIFIED & CERTIFIED (All 192 Tests Passing)**

@@ -200,14 +200,14 @@ To verify that the documented operational workflows match runtime reality, the s
 
 | User Workflow / Feature | Documented Behavior | Verified Implementation Code | Automated Test Reference | Audit Status |
 | :--- | :--- | :--- | :--- | :---: |
-| **Timer Start & Pause** | Space toggles `Running` $\leftrightarrow$ `Paused` | [`src/app.rs`](file:///home/amanap/Documents/GitHub/Termodoro/src/app.rs#L120-L160) | `test_timer_keys_and_on_tick_flow` | **VERIFIED** |
-| **Phase Skipping** | `s` skips remaining duration | [`src/timer.rs`](file:///home/amanap/Documents/GitHub/Termodoro/src/timer.rs#L70-L100) | `test_skip_to_next` | **VERIFIED** |
-| **Quick Task Creation** | `a` modal opens with input validation | [`src/app.rs`](file:///home/amanap/Documents/GitHub/Termodoro/src/app.rs#L190-L240) | `test_task_modal_validation_and_bounds` | **VERIFIED** |
-| **Target Task Binding** | `t` marks target & credits finished focus | [`src/tasks.rs`](file:///home/amanap/Documents/GitHub/Termodoro/src/tasks.rs#L60-L90) | `test_set_selected_active` | **VERIFIED** |
-| **Streak Integrity** | Active if session completed today/yesterday | [`src/stats.rs`](file:///home/amanap/Documents/GitHub/Termodoro/src/stats.rs#L100-L160) | `test_multi_day_streak_yesterday_continuation` | **VERIFIED** |
-| **Theme Cycling** | `l`/`h` cycles across 18 palettes with wrap | [`src/theme.rs`](file:///home/amanap/Documents/GitHub/Termodoro/src/theme.rs#L1-L150) | `test_all_eighteen_themes_cycle_and_persistence_e2e` | **VERIFIED** |
-| **Live Settings Update** | Adjusting durations instantly updates timer | [`src/app.rs`](file:///home/amanap/Documents/GitHub/Termodoro/src/app.rs#L310-L360) | `test_settings_tab_vim_keys_and_live_timer_updates` | **VERIFIED** |
-| **Terminal Clean Exit** | `q` or `Esc` restores raw mode cleanly | [`src/main.rs`](file:///home/amanap/Documents/GitHub/Termodoro/src/main.rs#L25-L65) | `test_app_restart_and_state_recovery_e2e` | **VERIFIED** |
+| **Timer Start & Pause** | Space toggles `Running` $\leftrightarrow$ `Paused` | [`src/app.rs`](src/app.rs#L120-L160) | `test_timer_keys_and_on_tick_flow` | **VERIFIED** |
+| **Phase Skipping** | `s` skips remaining duration | [`src/timer.rs`](src/timer.rs#L70-L100) | `test_skip_to_next` | **VERIFIED** |
+| **Quick Task Creation** | `a` modal opens with input validation | [`src/app.rs`](src/app.rs#L190-L240) | `test_task_modal_validation_and_bounds` | **VERIFIED** |
+| **Target Task Binding** | `t` marks target & credits finished focus | [`src/tasks.rs`](src/tasks.rs#L60-L90) | `test_set_selected_active` | **VERIFIED** |
+| **Streak Integrity** | Active if session completed today/yesterday | [`src/stats.rs`](src/stats.rs#L100-L160) | `test_multi_day_streak_yesterday_continuation` | **VERIFIED** |
+| **Theme Cycling** | `l`/`h` cycles across 18 palettes with wrap | [`src/theme.rs`](src/theme.rs#L1-L150) | `test_all_eighteen_themes_cycle_and_persistence_e2e` | **VERIFIED** |
+| **Live Settings Update** | Adjusting durations instantly updates timer | [`src/app.rs`](src/app.rs#L310-L360) | `test_settings_tab_vim_keys_and_live_timer_updates` | **VERIFIED** |
+| **Terminal Clean Exit** | `q` or `Esc` restores raw mode cleanly | [`src/main.rs`](src/main.rs#L25-L65) | `test_app_restart_and_state_recovery_e2e` | **VERIFIED** |
 
 ---
 
