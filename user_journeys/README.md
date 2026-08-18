@@ -54,7 +54,7 @@ user_journeys/
 - **Guide**: [**`02_task_management_and_estimates.md`**](02_task_management_and_estimates.md)
 - **Primary Tab**: `Tab 2: Tasks View`
 - **Core Workflows**:
-  - Opening the dual-input task creation modal with `a` (or `n`).
+  - Opening the dual-input task creation modal with `a`.
   - Estimating effort in discrete 25-minute Pomodoro blocks ($1 \le N \le 20$).
   - Binding the active target task to the countdown timer with `t`.
   - Automatic effort accounting upon interval completion (`🍅 1 / 3` $\rightarrow$ `🍅 2 / 3`).
@@ -106,7 +106,7 @@ All user journeys in this directory adhere to the strict design invariants of Te
 | `q` / `Esc` | Global | Save state atomically and exit application |
 | `Space` | Tab 1 / Tab 2 / Tab 4 | Start/Pause timer (Tab 1), Toggle task done (Tab 2), Toggle setting (Tab 4) |
 | `r` / `s` | Tab 1 (Timer) | Reset countdown timer (`r`) or Skip to next phase (`s`) |
-| `a` / `n` | Tab 1 & Tab 2 | Open New Task modal overlay from anywhere |
+| `a` | Tab 1 & Tab 2 | Open New Task modal overlay from anywhere |
 | `t` | Tab 2 (Tasks) | Set highlighted task as active timer target |
 | `d` / `x` | Tab 2 (Tasks) | Delete highlighted task permanently |
 | `1` / `2` / `3` | Tab 2 (Tasks) | Filter list by All (`1`), Active (`2`), or Completed (`3`) |

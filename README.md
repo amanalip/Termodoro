@@ -572,7 +572,7 @@ The Timer view is the central hub for running focus sessions and breaks.
 - `Space`: Toggle timer state between Running and Paused.
 - `r`: Reset timer back to its initial full duration for the current phase.
 - `s`: Skip the remaining time in the active phase and advance to the next interval.
-- `a` or `n`: Open the task creation dialog to quickly add a new item without leaving the timer.
+- `a`: Open the task creation dialog to quickly add a new item without leaving the timer.
 
 ---
 
@@ -583,7 +583,7 @@ The Tasks view provides a structured environment for managing tasks, estimating 
 ![Tab 2: Task Management & Targets](assets/screenshots/kde_02_tasks_view.png)
 
 #### Controls in Tasks View
-- `a` or `n`: Open the **Add Task** dialog.
+- `a`: Open the **Add Task** dialog.
 - `Space` or `Enter`: Toggle completion status on the selected task.
 - `t`: Mark the selected task as the active focus target. As work sessions finish, Pomodoros are automatically credited to this item.
 - `d` or `x`: Delete the selected task.
