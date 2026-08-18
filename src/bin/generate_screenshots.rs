@@ -100,17 +100,28 @@ fn render_buffer_to_svg(
     svg.push_str("  <rect x=\"14\" y=\"9\" width=\"18\" height=\"18\" rx=\"4\" fill=\"#232629\" stroke=\"#31363b\" stroke-width=\"1\"/>\n");
     svg.push_str("  <text x=\"17\" y=\"20.5\" font-family=\"'JetBrains Mono', monospace\" font-size=\"9.5\" font-weight=\"bold\" fill=\"#3daee9\">&gt;_</text>\n");
 
-    // Window title (Clean KDE Breeze window title without host/username)
-    let escaped_title = title
+    // Window title (Clean KDE Breeze window title without em dashes or repetitive prefixes)
+    let clean_subtitle = title
+        .trim_start_matches("Termodoro - ")
+        .trim_start_matches("Termodoro — ")
+        .trim_start_matches("Termodoro : ")
+        .trim_start_matches("Termodoro")
+        .trim();
+
+    let escaped_subtitle = clean_subtitle
         .replace('&', "&amp;")
         .replace('<', "&lt;")
         .replace('>', "&gt;")
         .replace('"', "&quot;");
 
-    svg.push_str(&format!(
-        "  <text x=\"40\" y=\"19\" class=\"window-title\"><tspan font-weight=\"600\">Termodoro</tspan><tspan class=\"window-title-muted\" dx=\"8\">|</tspan><tspan class=\"window-title-muted\" dx=\"8\">{}</tspan></text>\n\n",
-        escaped_title
-    ));
+    if escaped_subtitle.is_empty() {
+        svg.push_str("  <text x=\"40\" y=\"19\" class=\"window-title\"><tspan font-weight=\"600\">Termodoro</tspan></text>\n\n");
+    } else {
+        svg.push_str(&format!(
+            "  <text x=\"40\" y=\"19\" class=\"window-title\"><tspan font-weight=\"600\">Termodoro</tspan><tspan class=\"window-title-muted\" dx=\"10\">{}</tspan></text>\n\n",
+            escaped_subtitle
+        ));
+    }
 
     // KDE Plasma / Breeze Window Controls (Top Right: Minimize, Maximize, Close)
     let btn_y = 18.0;
@@ -301,7 +312,7 @@ fn main() {
         let (mut app, temp_dir) = make_app(ThemeChoice::CatppuccinMocha);
         app.active_tab = ActiveTab::Timer;
         app.tasks
-            .add("⚡ Implement Core TUI State Machine in Rust".to_string(), 4);
+            .add("⚡ Implement Core TUI State Machine".to_string(), 4);
         app.tasks.tasks[0].pomodoros_spent = 1;
         app.timer.status = termodoro::timer::TimerStatus::Running;
         app.timer.phase = PomodoroPhase::Work;
@@ -316,7 +327,7 @@ fn main() {
 
         let svg = render_buffer_to_svg(
             terminal.backend().buffer(),
-            "Termodoro - Pomodoro Focus Timer",
+            "Pomodoro Focus Timer",
             app.config.theme,
         );
         save_screenshot(&svg, out_dir, "01_timer_view");
@@ -329,40 +340,40 @@ fn main() {
         let (mut app, temp_dir) = make_app(ThemeChoice::TokyoNight);
         app.active_tab = ActiveTab::Tasks;
         app.tasks.add(
-            "🦀 Build High-Performance Ratatui TUI Framework".to_string(),
+            "🦀 Build Ratatui TUI Framework".to_string(),
             3,
         );
         app.tasks.tasks[0].pomodoros_spent = 3;
         app.tasks.tasks[0].completed = true;
 
         app.tasks.add(
-            "🎵 Synthesize High-Fidelity 16-Bit Audio Chimes".to_string(),
+            "🎵 Synthesize 16-Bit Audio Chimes".to_string(),
             2,
         );
         app.tasks.tasks[1].pomodoros_spent = 2;
         app.tasks.tasks[1].completed = true;
 
         app.tasks.add(
-            "🎨 Implement 18 Section A Color Schemes & WCAG Contrast".to_string(),
+            "🎨 Implement 18 Built-in Themes".to_string(),
             4,
         );
         app.tasks.tasks[2].pomodoros_spent = 2;
 
         app.tasks.add(
-            "📊 Design Productivity Heatmap & Streak Analytics".to_string(),
+            "📊 Track Daily Focus Goals".to_string(),
             2,
         );
         app.tasks.tasks[3].pomodoros_spent = 0;
 
         app.tasks.add(
-            "🚀 Write CI/CD GitHub Actions Workflow (192 Tests)".to_string(),
+            "🚀 Write CI/CD GitHub Workflows".to_string(),
             1,
         );
         app.tasks.tasks[4].pomodoros_spent = 0;
 
         app.tasks.selected_index = 2;
         app.tasks.set_selected_active();
-        app.set_status_message("Target set to: Implement 18 Section A Color Schemes".to_string());
+        app.set_status_message("Target set to: Implement 18 Built-in Themes".to_string());
 
         let backend = TestBackend::new(width, height);
         let mut terminal = Terminal::new(backend).unwrap();
@@ -370,7 +381,7 @@ fn main() {
 
         let svg = render_buffer_to_svg(
             terminal.backend().buffer(),
-            "Termodoro - Task Management & Targets",
+            "Task Management & Targets",
             app.config.theme,
         );
         save_screenshot(&svg, out_dir, "02_tasks_view");
@@ -420,7 +431,7 @@ fn main() {
 
         let svg = render_buffer_to_svg(
             terminal.backend().buffer(),
-            "Termodoro - Productivity Analytics & Streaks",
+            "Productivity Analytics & Streaks",
             app.config.theme,
         );
         save_screenshot(&svg, out_dir, "03_stats_view");
@@ -441,7 +452,7 @@ fn main() {
 
         let svg = render_buffer_to_svg(
             terminal.backend().buffer(),
-            "Termodoro - Preferences & Color Themes",
+            "Preferences & Color Themes",
             app.config.theme,
         );
         save_screenshot(&svg, out_dir, "04_settings_view");
@@ -455,7 +466,7 @@ fn main() {
         app.active_tab = ActiveTab::Tasks;
         app.tasks.add("Sample Task".to_string(), 2);
         app.open_task_modal();
-        app.task_input_title = "🚀 Ship Termodoro v0.1.0 to Cargo Crates".to_string();
+        app.task_input_title = "🚀 Ship Termodoro to Crates.io".to_string();
         app.task_input_estimated = 3;
         app.task_modal_focus = 0;
 
@@ -465,7 +476,7 @@ fn main() {
 
         let svg = render_buffer_to_svg(
             terminal.backend().buffer(),
-            "Termodoro - Add Task Modal Dialog",
+            "Add Task Modal Dialog",
             app.config.theme,
         );
         save_screenshot(&svg, out_dir, "05_task_modal");
@@ -485,7 +496,7 @@ fn main() {
 
         let svg = render_buffer_to_svg(
             terminal.backend().buffer(),
-            "Termodoro - Keyboard Shortcuts & Navigation",
+            "Keyboard Shortcuts & Navigation",
             app.config.theme,
         );
         save_screenshot(&svg, out_dir, "06_help_modal");
