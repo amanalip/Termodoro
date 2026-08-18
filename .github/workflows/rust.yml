@@ -24,7 +24,7 @@ jobs:
   # Multi-platform matrix build, lint, and test validation job
   test:
     # Human-readable job name displayed in GitHub UI with OS name
-    name: Test Suite (151 Tests) on ${{ matrix.os }}
+    name: Test Suite (154 Tests) on ${{ matrix.os }}
     # Matrix strategy testing across all 3 major desktop operating systems
     strategy:
       fail-fast: false
@@ -68,17 +68,25 @@ jobs:
         # Execute clippy analyzer across all targets and treat warnings as fatal errors
         run: cargo clippy --all-targets --all-features -- -D warnings
 
-      # Step 6: Compile the application binary and all test harnesses
+      # Step 6: Security & Privacy Audit: Verify zero network crates and zero unsafe code
+      - name: Verify Zero Network Dependencies & Zero Unsafe Blocks
+        run: |
+          # 1. Ensure zero unsafe code blocks across all source files
+          ! grep -rn "unsafe" src/
+          # 2. Verify Cargo.lock contains zero HTTP/network client libraries (reqwest, ureq, hyper, curl, tungstenite, tokio-tungstenite)
+          ! grep -E "^name = \"(reqwest|ureq|hyper|curl|tungstenite|tokio-tungstenite|sentry|datadog|posthog)\"" Cargo.lock
+
+      # Step 7: Compile the application binary and all test harnesses
       - name: Compile application binary and test suite
         # Build binary with verbose compiler output
         run: cargo build --verbose --all-targets
 
-      # Step 7: Execute the complete 151-test QA suite across all 9 modules
-      - name: Run all 151 unit, integration, and E2E test cases
+      # Step 8: Execute the complete 154-test QA suite across all 9 modules
+      - name: Run all 154 unit, integration, and E2E test cases
         # Execute cargo test harness with full backtraces
         run: cargo test --verbose -- --nocapture --show-output
 
-      # Step 8: Automatically clean target build cache to maintain runner disk hygiene
+      # Step 9: Automatically clean target build cache to maintain runner disk hygiene
       - name: Clean build cache
         # Reclaim build cache storage
         run: cargo clean

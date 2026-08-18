@@ -312,4 +312,120 @@ mod tests {
         let storage_custom = Storage::with_path(custom_p.clone());
         assert_eq!(storage_custom.custom_path, Some(custom_p));
     }
+
+    #[test]
+    fn test_privacy_zero_telemetry_guarantees() {
+        // Formally verify that default AppData and serializations contain zero telemetry or tracking identifiers
+        let mut app_data = AppData {
+            config: Config::default(),
+            tasks: TaskManager::new(),
+            stats: StatsHistory::new(),
+        };
+        app_data.tasks.add("Audit privacy".to_string(), 2);
+        app_data
+            .stats
+            .record(crate::timer::PomodoroPhase::Work, 25, None, None);
+
+        let json = serde_json::to_string_pretty(&app_data).expect("Serialization failed");
+        let value: serde_json::Value = serde_json::from_str(&json).expect("JSON parse failed");
+
+        // Verify top-level structure contains ONLY the 3 expected local-first state objects
+        let root_obj = value.as_object().expect("Root should be an object");
+        let allowed_root_keys = ["config", "tasks", "stats"];
+        for key in root_obj.keys() {
+            assert!(
+                allowed_root_keys.contains(&key.as_str()),
+                "Found unexpected root key: '{}' in database schema!",
+                key
+            );
+        }
+
+        // Verify config keys contain no telemetry endpoints, API keys, or user tracking IDs
+        let config_obj = value["config"]
+            .as_object()
+            .expect("Config must be an object");
+        let forbidden_keywords = [
+            "telemetry",
+            "tracking",
+            "analytics_endpoint",
+            "api_key",
+            "remote_url",
+            "cloud",
+            "server",
+            "ip_address",
+            "device_id",
+            "mac_address",
+            "host",
+            "port",
+            "network",
+            "cookie",
+            "token",
+        ];
+
+        for key in config_obj.keys() {
+            for forbidden in &forbidden_keywords {
+                assert!(
+                    !key.to_lowercase().contains(forbidden),
+                    "Found forbidden telemetry/network key in config schema: '{}'",
+                    key
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn test_storage_data_isolation_local_only() {
+        // Verify database paths resolve exclusively to local user filesystem directories
+        let storage = Storage::new();
+        let default_path = storage.data_file_path();
+        let path_str = default_path.to_string_lossy();
+
+        // Must never target cloud storage, external network shares, or global shared tmp
+        assert!(
+            path_str.ends_with("data.json"),
+            "Database filename must be data.json"
+        );
+        assert!(
+            !path_str.starts_with("http://")
+                && !path_str.starts_with("https://")
+                && !path_str.starts_with("ftp://"),
+            "Database path must be local filesystem, found network URL: {}",
+            path_str
+        );
+    }
+
+    #[test]
+    fn test_storage_schema_fields_contain_no_device_or_telemetry_keys() {
+        let app_data = AppData {
+            config: Config::default(),
+            tasks: TaskManager::new(),
+            stats: StatsHistory::new(),
+        };
+        let raw_json = serde_json::to_string(&app_data).unwrap();
+        // Plaintext inspection of serialized format
+        assert!(
+            !raw_json.contains("http://"),
+            "Serialized state must never contain HTTP urls"
+        );
+        assert!(
+            !raw_json.contains("https://"),
+            "Serialized state must never contain HTTPS urls"
+        );
+        assert!(
+            !raw_json.contains("amplitude"),
+            "Must not contain analytics trackers"
+        );
+        assert!(
+            !raw_json.contains("mixpanel"),
+            "Must not contain analytics trackers"
+        );
+        assert!(
+            !raw_json.contains("sentry"),
+            "Must not contain crash-reporting network identifiers"
+        );
+        assert!(
+            !raw_json.contains("google-analytics"),
+            "Must not contain Google Analytics trackers"
+        );
+    }
 }

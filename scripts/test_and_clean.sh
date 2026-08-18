@@ -9,12 +9,12 @@
 
 set -o pipefail
 
-echo "🧪 Running Termodoro 151-test automated suite..."
+echo "🧪 Running Termodoro 154-test automated suite..."
 cargo test "$@"
 TEST_STATUS=$?
 
 if [ $TEST_STATUS -eq 0 ]; then
-    echo "✅ All 151 tests passed successfully!"
+    echo "✅ All 154 tests passed successfully!"
     echo "🧹 Automatically cleaning 'target/' directory to reclaim disk space..."
     cargo clean
     echo "✨ Workspace cleaned! Disk space reclaimed while keeping data.json and source files intact."
