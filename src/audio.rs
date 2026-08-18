@@ -353,4 +353,33 @@ mod tests {
             assert_eq!(chunk_size, 36 + (size * 2) as u32);
         }
     }
+
+    #[test]
+    fn test_audio_sample_amplitudes_fade_out_smoothly() {
+        let work_wav = generate_work_complete_chime();
+        let break_wav = generate_break_complete_chime();
+        let long_wav = generate_long_break_chime();
+
+        for wav in [work_wav, break_wav, long_wav] {
+            // Extract raw PCM 16-bit samples after the 44-byte RIFF header
+            let pcm_data = &wav[44..];
+            let sample_count = pcm_data.len() / 2;
+            assert!(sample_count > 1000);
+
+            // Read the last 100 samples
+            let mut last_samples = Vec::new();
+            for i in (sample_count - 100)..sample_count {
+                let sample = i16::from_le_bytes([pcm_data[i * 2], pcm_data[i * 2 + 1]]);
+                last_samples.push(sample.abs());
+            }
+
+            // Average amplitude of the final tail must be very small (< 2500) to prevent pop/click on audio DAC
+            let avg_tail_amp: i32 = last_samples.iter().map(|&s| s as i32).sum::<i32>() / 100;
+            assert!(
+                avg_tail_amp < 2500,
+                "Audio tail amplitude too high: {}",
+                avg_tail_amp
+            );
+        }
+    }
 }

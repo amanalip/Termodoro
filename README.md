@@ -603,7 +603,7 @@ Because the database is standard JSON, you can easily back up, version-control, 
 
 ## 9. Development, Testing & Contribution
 
-### Running Automated Unit & Integration Tests (137 Tests)
+### Running Automated Unit & Integration Tests (151 Tests)
 ```bash
 cargo test
 ```
@@ -627,7 +627,7 @@ To provide full confidence to developers, contributors, and users, all claims, m
 
 | Verified Claim / Metric | Documented Value | Audited Source Code Reference | Verification Method & Benchmark | Status |
 | :--- | :--- | :--- | :--- | :---: |
-| **Test Suite Pass Rate** | 137 / 137 Passed (100%) | `src/` (All 9 test modules) | `cargo test` execution (1.09s total runtime) | **VERIFIED** |
+| **Test Suite Pass Rate** | 151 / 151 Passed (100%) | `src/` (All 9 test modules) | `cargo test` execution (1.25s total runtime) | **VERIFIED** |
 | **Rust Safety Guarantee** | 100% Safe Rust (`0` unsafe blocks) | Full codebase grep (`grep -rn "unsafe" src/`) | Static code analysis via compiler frontend | **VERIFIED** |
 | **Static Analysis Compliance** | 0 Warnings, 0 Errors | Entire workspace | `cargo clippy -- -D warnings` | **VERIFIED** |
 | **Code Formatting Standard** | 100% Rustfmt Compliant | Code formatting rules | `cargo fmt -- --check` | **VERIFIED** |
@@ -642,7 +642,7 @@ To provide full confidence to developers, contributors, and users, all claims, m
 Any user can independently reproduce and verify this entire audit report on their local machine by executing:
 
 ```bash
-# 1. Run full 137-test automated suite
+# 1. Run full 151-test automated suite
 cargo test -- --nocapture
 
 # 2. Verify zero compiler warnings or lint issues

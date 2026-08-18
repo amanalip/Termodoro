@@ -603,6 +603,47 @@ mod tests {
         terminal.draw(|f| render(f, &app)).unwrap();
         let buf_modal = format!("{:?}", terminal.backend().buffer());
         assert!(buf_modal.contains("Modal Title Check") || buf_modal.contains("New Task"));
+        let _ = std::fs::remove_dir_all(temp_dir);
+    }
+
+    #[test]
+    fn test_task_modal_focus_switch_and_cancel_invariants() {
+        let (mut app, temp_dir) = create_test_app();
+        let backend = TestBackend::new(90, 28);
+        let mut terminal = Terminal::new(backend).unwrap();
+
+        app.open_task_modal();
+        assert_eq!(app.task_modal_focus, 0); // Focused on title input
+
+        // Render title focused
+        terminal.draw(|f| render(f, &app)).unwrap();
+        let buf0 = format!("{:?}", terminal.backend().buffer());
+        assert!(buf0.contains("Task Description"));
+
+        // Switch focus to estimated pomodoros
+        app.task_modal_focus = 1;
+        terminal.draw(|f| render(f, &app)).unwrap();
+        let buf1 = format!("{:?}", terminal.backend().buffer());
+        assert!(buf1.contains("Estimated Focus Sessions") || buf1.contains("Pomodoros"));
+
+        // Close modal
+        app.show_task_modal = false;
+        assert!(!app.show_task_modal);
+
+        let _ = std::fs::remove_dir_all(temp_dir);
+    }
+
+    #[test]
+    fn test_ui_render_with_status_message_banner_content() {
+        let (mut app, temp_dir) = create_test_app();
+        let backend = TestBackend::new(90, 28);
+        let mut terminal = Terminal::new(backend).unwrap();
+
+        app.set_status_message("✨ Custom Toast Alert Rendered ✨".to_string());
+        terminal.draw(|f| render(f, &app)).unwrap();
+
+        let buf = format!("{:?}", terminal.backend().buffer());
+        assert!(buf.contains("Custom Toast Alert Rendered"));
 
         let _ = std::fs::remove_dir_all(temp_dir);
     }

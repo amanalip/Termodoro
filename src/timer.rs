@@ -699,4 +699,31 @@ mod tests {
             }
         }
     }
+
+    #[test]
+    fn test_timer_time_remaining_never_underflows_sub_second_ticks() {
+        let config = Config::default();
+        let mut timer = PomodoroTimer::new(&config);
+        timer.time_remaining_secs = 0;
+        timer.status = TimerStatus::Paused;
+
+        // Ticking when paused at 0 must not underflow u32
+        timer.tick(&config);
+        assert_eq!(timer.time_remaining_secs, 0);
+    }
+
+    #[test]
+    fn test_timer_formatted_time_zero_and_single_digits() {
+        let config = Config::default();
+        let mut timer = PomodoroTimer::new(&config);
+
+        timer.time_remaining_secs = 0;
+        assert_eq!(timer.formatted_time(), (0, 0));
+
+        timer.time_remaining_secs = 7;
+        assert_eq!(timer.formatted_time(), (0, 7));
+
+        timer.time_remaining_secs = 65;
+        assert_eq!(timer.formatted_time(), (1, 5));
+    }
 }

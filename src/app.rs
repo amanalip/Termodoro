@@ -1933,4 +1933,43 @@ mod tests {
 
         let _ = std::fs::remove_dir_all(temp_dir);
     }
+
+    #[test]
+    fn test_app_task_modal_rapid_editing_backspace_and_navigation() {
+        let (mut app, temp_dir) = create_test_app();
+        app.open_task_modal();
+
+        // Type characters "Hello"
+        for c in "Hello".chars() {
+            app.on_key_event(make_key(KeyCode::Char(c)));
+        }
+        assert_eq!(app.task_input_title, "Hello");
+
+        // Backspace twice -> "Hel"
+        app.on_key_event(make_key(KeyCode::Backspace));
+        app.on_key_event(make_key(KeyCode::Backspace));
+        assert_eq!(app.task_input_title, "Hel");
+
+        // Navigate down to estimated pomodoros
+        app.on_key_event(make_key(KeyCode::Tab));
+        assert_eq!(app.task_modal_focus, 1);
+
+        // Tab back up
+        app.on_key_event(make_key(KeyCode::BackTab));
+        assert_eq!(app.task_modal_focus, 0);
+
+        let _ = std::fs::remove_dir_all(temp_dir);
+    }
+
+    #[test]
+    fn test_app_quit_command_handling() {
+        let (mut app, temp_dir) = create_test_app();
+        assert!(!app.should_quit);
+
+        // 'q' sets should_quit
+        app.on_key_event(make_key(KeyCode::Char('q')));
+        assert!(app.should_quit);
+
+        let _ = std::fs::remove_dir_all(temp_dir);
+    }
 }

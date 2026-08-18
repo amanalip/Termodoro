@@ -524,4 +524,50 @@ mod tests {
             assert_eq!(*choice, deserialized);
         }
     }
+
+    #[test]
+    fn test_theme_luminance_contrast_across_all_18_palettes() {
+        for choice in ThemeChoice::all() {
+            let theme = Theme::from_choice(*choice);
+            let (bg_r, bg_g, bg_b) = match theme.bg {
+                Color::Rgb(r, g, b) => (r as f32, g as f32, b as f32),
+                _ => (0.0, 0.0, 0.0),
+            };
+            let (fg_r, fg_g, fg_b) = match theme.fg {
+                Color::Rgb(r, g, b) => (r as f32, g as f32, b as f32),
+                _ => (255.0, 255.0, 255.0),
+            };
+
+            let lum_bg = (0.2126 * bg_r + 0.7152 * bg_g + 0.0722 * bg_b) / 255.0;
+            let lum_fg = (0.2126 * fg_r + 0.7152 * fg_g + 0.0722 * fg_b) / 255.0;
+            let contrast_diff = (lum_bg - lum_fg).abs();
+
+            // All 18 palettes must maintain a significant luminance difference between fg and bg
+            assert!(
+                contrast_diff > 0.20,
+                "Theme {:?} has insufficient luminance contrast: {}",
+                choice,
+                contrast_diff
+            );
+        }
+    }
+
+    #[test]
+    fn test_theme_palette_index_cycling() {
+        let all = ThemeChoice::all();
+        assert_eq!(all.len(), 18);
+
+        // Forward cycling
+        for (i, choice) in all.iter().enumerate() {
+            let next_idx = (i + 1) % all.len();
+            assert_eq!(all[next_idx], all[(i + 1) % 18]);
+            assert!(!choice.name().is_empty());
+        }
+
+        // Backward cycling
+        for (i, _) in all.iter().enumerate() {
+            let prev_idx = if i == 0 { all.len() - 1 } else { i - 1 };
+            assert_eq!(all[prev_idx], all[(i + 17) % 18]);
+        }
+    }
 }

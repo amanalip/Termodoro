@@ -302,4 +302,14 @@ mod tests {
 
         let _ = fs::remove_dir_all(temp_dir);
     }
+
+    #[test]
+    fn test_storage_custom_path_accessor_and_default_fallback() {
+        let storage_default = Storage::new();
+        assert!(storage_default.custom_path.is_none());
+
+        let custom_p = PathBuf::from("/tmp/custom_test_path.json");
+        let storage_custom = Storage::with_path(custom_p.clone());
+        assert_eq!(storage_custom.custom_path, Some(custom_p));
+    }
 }

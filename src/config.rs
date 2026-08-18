@@ -91,4 +91,33 @@ mod tests {
             serde_json::from_str(&serialized).expect("Deserialization failed");
         assert_eq!(config, deserialized);
     }
+
+    #[test]
+    fn test_config_mutation_and_cloned_equality() {
+        let mut config1 = Config {
+            work_duration_mins: 45,
+            long_break_interval: 6,
+            theme: ThemeChoice::TokyoNight,
+            ..Default::default()
+        };
+
+        let config2 = config1.clone();
+        assert_eq!(config1, config2);
+
+        config1.sound_enabled = false;
+        assert_ne!(config1, config2);
+    }
+
+    #[test]
+    fn test_config_all_theme_variant_serialization() {
+        for theme in ThemeChoice::all() {
+            let config = Config {
+                theme: *theme,
+                ..Default::default()
+            };
+            let json = serde_json::to_string(&config).unwrap();
+            let parsed: Config = serde_json::from_str(&json).unwrap();
+            assert_eq!(parsed.theme, *theme);
+        }
+    }
 }

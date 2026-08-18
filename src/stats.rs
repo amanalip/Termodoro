@@ -860,4 +860,44 @@ mod tests {
         assert_eq!(stats.longest_streak_days(), 0);
         assert_eq!(stats.total_work_sessions(), 0);
     }
+
+    #[test]
+    fn test_stats_very_large_focus_minutes_accumulation_and_average() {
+        let mut stats = StatsHistory::new();
+        // Record 1000 sessions of 60 mins = 60,000 mins (1,000 hours)
+        for _ in 0..1000 {
+            stats.record(
+                PomodoroPhase::Work,
+                60,
+                Some("task-id".to_string()),
+                Some("Big Project".to_string()),
+            );
+        }
+        assert_eq!(stats.total_work_sessions(), 1000);
+        assert_eq!(stats.total_focus_minutes(), 60000);
+        assert_eq!(stats.total_focus_minutes() / 60, 1000);
+    }
+
+    #[test]
+    fn test_stats_recent_sessions_ordering_and_task_attribution() {
+        let mut stats = StatsHistory::new();
+        stats.record(
+            PomodoroPhase::Work,
+            25,
+            Some("t1".to_string()),
+            Some("Task One".to_string()),
+        );
+        stats.record(PomodoroPhase::ShortBreak, 5, None, None);
+        stats.record(
+            PomodoroPhase::Work,
+            30,
+            Some("t2".to_string()),
+            Some("Task Two".to_string()),
+        );
+
+        assert_eq!(stats.sessions.len(), 3);
+        assert_eq!(stats.sessions[0].task_title.as_deref(), Some("Task One"));
+        assert_eq!(stats.sessions[1].task_title, None);
+        assert_eq!(stats.sessions[2].task_title.as_deref(), Some("Task Two"));
+    }
 }
