@@ -14,11 +14,26 @@ This document maintains a transparent, permanent audit log of repository hygiene
 | **AUD-004** | 2026-08-17 | Documentation & ASCII Art Alignment | `0e29688` | **RESOLVED** |
 | **AUD-005** | 2026-08-17 | Installation Guide & Repository-Wide Sanity Audit | `7df65c7` | **CERTIFIED** |
 | **AUD-006** | 2026-08-17 | Section A: 18 Color Themes & End-to-End Suite | `6f28217` | **VERIFIED** |
-| **AUD-007** | 2026-08-17 | Comprehensive Security & Threat Vector Audit | `6f28217` | **CERTIFIED** |
+| **AUD-007** | 2026-08-17 | Comprehensive Security & Threat Vector Audit | `20d8e2b` | **CERTIFIED** |
+| **AUD-008** | 2026-08-17 | Automated Build Cache Cleanup & Makefile Automation | Current | **RESOLVED** |
 
 ---
 
 ## Detailed Audit Entries
+
+### [AUD-008] Automated Build Cache Cleanup & Makefile Disk Optimization
+- **Date:** August 17, 2026
+- **Category:** Developer Experience & Disk Storage Hygiene
+- **Severity:** Enhancement / Storage Efficiency
+- **Description:**
+  - Resolved local developer disk bloat caused by intermediate unstripped debug symbols and 151 test runner binaries in `target/` (~1.8 GB).
+  - Added [`scripts/test_and_clean.sh`](file:///home/amanap/Documents/GitHub/Termodoro/scripts/test_and_clean.sh) to execute the complete 151-test suite and automatically run `cargo clean` upon exit.
+  - Added root [`Makefile`](file:///home/amanap/Documents/GitHub/Termodoro/Makefile) with targets: `make test`, `make check`, `make build`, `make run`, `make clean`, `make fmt`, `make clippy`.
+  - Added Step 8 (`cargo clean`) to GitHub Actions CI workflow [`.github/workflows/rust.yml`](file:///home/amanap/Documents/GitHub/Termodoro/.github/workflows/rust.yml).
+  - Confirmed persistent user settings and tasks (`~/.local/share/termodoro/data.json`) are completely decoupled and safe from `cargo clean`.
+- **Resolution Status:** **RESOLVED (Reclaims ~1.8GB disk space automatically)**
+
+---
 
 ### [AUD-007] Comprehensive Security, Threat Vector & Vulnerability Audit
 - **Date:** August 17, 2026

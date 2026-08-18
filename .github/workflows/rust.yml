@@ -70,3 +70,9 @@ jobs:
       - name: Run all 151 unit, integration, and E2E test cases
         # Execute cargo test harness with full backtraces
         run: cargo test --verbose -- --nocapture --show-output
+
+      # Step 8: Automatically clean target build cache to maintain runner disk hygiene
+      - name: Clean build cache
+        # Reclaim build cache storage
+        run: cargo clean
+

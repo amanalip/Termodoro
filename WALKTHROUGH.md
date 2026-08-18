@@ -162,10 +162,17 @@ If you are new to Rust or TUI development, here is how the code flows:
 
 ## 4. Verification, Testing & Quality Assurance
 
-### Running the Test Suite (151 Tests)
-Termodoro includes a comprehensive suite of **151 automated unit, integration, and UI rendering tests**:
+### Running the Test Suite & Auto-Cleaning Build Cache (151 Tests)
+Termodoro includes a comprehensive suite of **151 automated unit, integration, and UI rendering tests**. You can execute them with automated cache cleanup to keep your disk usage slim:
 
 ```bash
+# Option 1: Using Makefile (Runs 151 tests + auto-cleans ~1.8GB target cache)
+make test
+
+# Option 2: Using the automated script directly
+./scripts/test_and_clean.sh
+
+# Option 3: Standard cargo test
 cargo test
 ```
 

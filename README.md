@@ -603,19 +603,47 @@ Because the database is standard JSON, you can easily back up, version-control, 
 
 ## 9. Development, Testing & Contribution
 
-### Running Automated Unit & Integration Tests (151 Tests)
+### Automated Testing & Cache Cleanup (151 Tests)
+
+To run the complete test suite and **automatically clean compiler build cache** (preventing `target/` directory bloat and reclaiming ~1.8 GB of disk space):
+
 ```bash
+# Option A: Using Makefile (Recommended)
+make test
+
+# Option B: Using the automated shell script
+./scripts/test_and_clean.sh
+
+# Option C: Standard Cargo Test
 cargo test
 ```
 
-### Static Analysis and Code Formatting
+### Static Analysis, Lints & Hygiene
 ```bash
-# Check formatting
+# Run full verification (fmt + clippy + 151 tests + auto-clean)
+make check
+
+# Check code formatting compliance
 cargo fmt -- --check
 
-# Run compiler linter
+# Run compiler linter with strict warning enforcement
 cargo clippy -- -D warnings
+
+# Manually reclaim disk space anytime
+cargo clean
 ```
+
+### Makefile Reference Cheatsheet
+
+| Command | Action |
+| :--- | :--- |
+| `make test` | Run 151-test suite and automatically clean `target/` cache |
+| `make check` | Execute `fmt`, `clippy`, full 151-test suite, and clean up |
+| `make build` | Compile optimized release binary in `target/release/termodoro` |
+| `make run` | Launch Termodoro in release mode |
+| `make clean` | Reclaim local disk space immediately via `cargo clean` |
+| `make fmt` | Automatically format all Rust source files |
+| `make clippy` | Run Clippy static analysis with warnings as errors |
 
 ---
 
