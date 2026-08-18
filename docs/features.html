@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="catppuccin_mocha">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Features &amp; Architecture — Termodoro</title>
+  <meta name="description" content="Detailed features breakdown and architecture of Termodoro: Pomodoro countdown, task backlog management, productivity analytics, 18 themes, audio synthesis, and offline privacy." />
+  
+  <!-- Open Graph -->
+  <meta property="og:title" content="Termodoro Features — Terminal Pomodoro & Task Manager in Pure Rust" />
+  <meta property="og:description" content="In-depth guide to all features in Termodoro: precision countdown, task targeting, streak analytics, 18 themes, and sound synthesis." />
+  <meta property="og:image" content="assets/screenshots/01_timer_view.png" />
+  
+  <!-- Favicon & Stylesheet -->
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="stylesheet" href="style.css?v=20260818d" />
+</head>
+<body>
+
+  <!-- ========================================================================
+       Site Header
+       ======================================================================== -->
+  <header class="site-header" id="site-header">
+    <div class="container header-inner">
+      <a href="index.html" class="brand" id="brand-link">
+        <div class="brand-icon">
+          <svg viewBox="0 0 32 32" width="28" height="28">
+            <circle cx="16" cy="18" r="11" fill="var(--color-work)" />
+            <path d="M16 6 C16 4 19 3 20 4 C19 6 18 7 16 8 Z" fill="var(--color-short-break)" />
+            <path d="M16 6 C15 4 12 3 11 4 C12 6 14 7 16 8 Z" fill="var(--color-short-break)" />
+            <path d="M12 15 L15 18 L12 21" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+            <line x1="17" y1="21" x2="20" y2="21" stroke="var(--color-primary)" stroke-width="1.8" stroke-linecap="round" />
+          </svg>
+        </div>
+        <span>Termodoro</span>
+        <span class="brand-badge">v0.1.0</span>
+      </a>
+
+      <nav class="nav-menu" aria-label="Main Navigation">
+        <a href="index.html" class="nav-link">Overview</a>
+        <a href="features.html" class="nav-link active">Features</a>
+        <a href="index.html#themes" class="nav-link">18 Themes</a>
+        <a href="index.html#install" class="nav-link">Install</a>
+        <a href="index.html#keybindings" class="nav-link">Keybindings</a>
+      </nav>
+
+      <div class="nav-actions">
+        <a href="https://github.com/amanalip/Termodoro" target="_blank" rel="noopener noreferrer" class="btn btn-secondary" id="github-repo-btn">
+          <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
+            <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+          </svg>
+          <span>GitHub</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- ========================================================================
+         Features Hero
+         ======================================================================== -->
+    <section class="hero" style="padding-bottom: 2rem;">
+      <div class="container">
+        
+        <div class="badge-strip">
+          <span class="badge-item">📖 In-Depth Feature Tour</span>
+          <span class="badge-item">🦀 Pure Rust Architecture</span>
+          <span class="badge-item">🛡️ 100% Offline &amp; Local</span>
+        </div>
+
+        <h1 class="hero-title">
+          Every Feature Engineered for <span>Deep Focus</span>
+        </h1>
+
+        <p class="hero-subtitle">
+          Explore the design, mechanics, and keyboard workflows of Termodoro. Everything you see is rendered in genuine KDE Konsole terminal captures.
+        </p>
+
+      </div>
+    </section>
+
+    <!-- ========================================================================
+         Feature 1: Precision Pomodoro Countdown & Cycle Engine
+         ======================================================================== -->
+    <section class="section" id="timer-feature">
+      <div class="container">
+        
+        <div class="feature-deep-dive">
+          <div class="feature-deep-info">
+            <div class="section-tag">Tab 1 &bull; Focus Engine</div>
+            <h2 class="feature-deep-title">1. Precision Countdown &amp; Cycle Progression</h2>
+            <p class="feature-deep-lead">
+              A distraction-free, 1-second accurate Pomodoro timer with big 5-line ASCII block digits, dynamic progress gauge, and 4-phase cycle tracking.
+            </p>
+            <ul class="feature-bullets">
+              <li><strong>Big Block Font Clock</strong>: 5-row tall ASCII rasterizer rendered in character cells, instantly readable from across the room.</li>
+              <li><strong>Full Cycle Loop</strong>: Automatic progression through Work Sessions &rarr; Short Breaks &rarr; Long Breaks after configurable intervals (default: 4 sessions).</li>
+              <li><strong>Cycle Tracker Dots</strong>: Visual indicator showing progress through the current set (e.g. <code>Cycle 2/4 [● ◉ ○ ○]</code>).</li>
+              <li><strong>Active Target Integration</strong>: Displays the active task title and Pomodoro count right beneath the progress bar.</li>
+              <li><strong>Contextual Keybindings</strong>: <code>[Space]</code> Start/Pause &bull; <code>[r]</code> Reset &bull; <code>[s]</code> Skip Phase &bull; <code>[a]</code> Quick Add Task.</li>
+            </ul>
+          </div>
+          <div class="feature-deep-media">
+            <img src="assets/screenshots/01_timer_view.svg" alt="Termodoro KDE Focus Countdown Timer" class="feature-img-card" />
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ========================================================================
+         Feature 2: Task Backlog & Active Target Focus
+         ======================================================================== -->
+    <section class="section" id="tasks-feature" style="background: rgba(255, 255, 255, 0.01);">
+      <div class="container">
+        
+        <div class="feature-deep-dive reverse">
+          <div class="feature-deep-info">
+            <div class="section-tag">Tab 2 &bull; Task Management</div>
+            <h2 class="feature-deep-title">2. Task Backlog &amp; Active Target Linking</h2>
+            <p class="feature-deep-lead">
+              A built-in task manager tightly integrated into your focus workflow. Assign estimated Pomodoro goals and mark tasks as active targets.
+            </p>
+            <ul class="feature-bullets">
+              <li><strong>Target Linking (<code>[t]</code>)</strong>: Set any task as the <code>🎯 ACTIVE</code> target for your current countdown interval.</li>
+              <li><strong>Visual Progress Blocks</strong>: Track completed Pomodoros against estimates in character cells: <code>[■■□□] 2/4 🍅</code>.</li>
+              <li><strong>Status Toggling (<code>[Space/Enter]</code>)</strong>: Instantly mark items completed (<code>✔</code>) with strikethrough typography or reopen active items (<code>○</code>).</li>
+              <li><strong>Fast Filtering (<code>[1] / [2] / [3]</code>)</strong>: Switch filter tabs between <code>All (N)</code>, <code>Active (N)</code>, and <code>Completed (N)</code>.</li>
+              <li><strong>Instant Creation Dialog (<code>[a]</code>)</strong>: Floating modal with title input and Pomodoro estimate adjustment (1 &ndash; 20).</li>
+            </ul>
+          </div>
+          <div class="feature-deep-media">
+            <img src="assets/screenshots/02_tasks_view.svg" alt="Termodoro Tasks Backlog Screen" class="feature-img-card" />
+            <img src="assets/screenshots/05_task_modal.svg" alt="Termodoro Add Task Modal Dialog" class="feature-img-card" style="margin-top: 1.25rem;" />
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ========================================================================
+         Feature 3: Productivity Analytics & Streak Engine
+         ======================================================================== -->
+    <section class="section" id="stats-feature">
+      <div class="container">
+        
+        <div class="feature-deep-dive">
+          <div class="feature-deep-info">
+            <div class="section-tag">Tab 3 &bull; Insights &amp; Analytics</div>
+            <h2 class="feature-deep-title">3. Productivity Analytics &amp; Daily Streaks</h2>
+            <p class="feature-deep-lead">
+              Gain visibility into your daily focus routines, maintain your daily Pomodoro streak, and inspect recent completed sessions.
+            </p>
+            <ul class="feature-bullets">
+              <li><strong>Today's Focus Metric</strong>: Total Pomodoro sessions completed and cumulative focus minutes logged today.</li>
+              <li><strong>Daily Streak Engine</strong>: Consecutive active focus days (<code>🔥 7 Days</code>) with calendar midnight rollover and all-time personal bests.</li>
+              <li><strong>7-Day Focus Distribution</strong>: Vertical BarChart widget rendered with Unicode bar pillars for Monday through Sunday.</li>
+              <li><strong>Session Audit Log</strong>: Detailed history table recording completion timestamps, phase types (Focus/Break), duration, and associated task.</li>
+            </ul>
+          </div>
+          <div class="feature-deep-media">
+            <img src="assets/screenshots/03_stats_view.svg" alt="Termodoro Productivity Dashboard & Streaks" class="feature-img-card" />
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ========================================================================
+         Feature 4: 18 Built-in Themes & Custom Preferences
+         ======================================================================== -->
+    <section class="section" id="settings-feature" style="background: rgba(255, 255, 255, 0.01);">
+      <div class="container">
+        
+        <div class="feature-deep-dive reverse">
+          <div class="feature-deep-info">
+            <div class="section-tag">Tab 4 &bull; Preferences &amp; Themes</div>
+            <h2 class="feature-deep-title">4. Preferences &amp; 18 Hand-Crafted Themes</h2>
+            <p class="feature-deep-lead">
+              Fully customize timer intervals, automation behaviors, acoustic alerts, and visual color schemes without touching raw config files.
+            </p>
+            <ul class="feature-bullets">
+              <li><strong>Interactive Settings Table</strong>: 4-column Ratatui table (<code>Pointer</code>, <code>Setting</code>, <code>Current Value</code>, <code>Description</code>) navigable via <code>[j/k]</code> and adjustable via <code>[h/l]</code> or <code>[+/-]</code>.</li>
+              <li><strong>Custom Interval Control</strong>: Focus duration (1 - 120 mins), Short Break (1 - 60 mins), Long Break (1 - 90 mins), Long Break Interval (1 - 24).</li>
+              <li><strong>Automation Flags</strong>: Toggle auto-starting breaks, auto-starting work sessions, and desktop notifications.</li>
+              <li><strong>18 Curated Palettes</strong>: Catppuccin Mocha/Macchiato/Frappé/Latte, Nord, Gruvbox, Tokyo Night, Dracula, Rose Pine, One Dark, Kanagawa, Everforest Dark/Light, Solarized Dark/Light, Synthwave '84, Monokai Pro, OLED Phosphor.</li>
+            </ul>
+          </div>
+          <div class="feature-deep-media">
+            <img src="assets/screenshots/04_settings_view.svg" alt="Termodoro Settings & 18 Theme Switcher" class="feature-img-card" />
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ========================================================================
+         Feature 5: In-Memory Procedural Sound Synthesis
+         ======================================================================== -->
+    <section class="section" id="audio-feature">
+      <div class="container">
+        
+        <div class="section-header">
+          <div class="section-tag">Acoustic Audio Engine</div>
+          <h2 class="section-title">Pure Procedural Audio Synthesis</h2>
+          <p class="section-desc">
+            Termodoro generates mathematical 16-bit PCM RIFF WAV audio directly in memory. Zero MP3 files, zero external audio assets, and zero network requests.
+          </p>
+        </div>
+
+        <div class="audio-cards-grid">
+          <div class="audio-card">
+            <div class="audio-icon">🔔</div>
+            <h3 class="audio-title">528 Hz Tibetan Zen Bowl</h3>
+            <p class="audio-desc">
+              Triggered upon completing a focus Pomodoro. Synthesizes a pure 528 Hz miracle transformation tone accompanied by rich 1056 Hz and 1584 Hz overtone harmonics with exponential decay.
+            </p>
+            <button type="button" class="btn btn-secondary" id="test-zen-btn" style="margin-top: 1rem;">
+              🔊 Play 528 Hz Bowl
+            </button>
+          </div>
+
+          <div class="audio-card">
+            <div class="audio-icon">🎵</div>
+            <h3 class="audio-title">D5 &rarr; A5 Break Chime</h3>
+            <p class="audio-desc">
+              Triggered when a short or long break finishes. Synthesizes an energetic upward melodic interval from D5 (587.33 Hz) to A5 (880 Hz) to gently bring you back into the zone.
+            </p>
+            <button type="button" class="btn btn-secondary" id="test-break-btn" style="margin-top: 1rem;">
+              🔊 Play D5 &rarr; A5 Chime
+            </button>
+          </div>
+
+          <div class="audio-card">
+            <div class="audio-icon">⚡</div>
+            <h3 class="audio-title">800 Hz Terminal Alert</h3>
+            <p class="audio-desc">
+              A clean, high-frequency 800 Hz pulse alert for instant terminal notifications and audio test signals, paired with desktop notifications.
+            </p>
+            <button type="button" class="btn btn-secondary" id="test-bell-btn" style="margin-top: 1rem;">
+              🔊 Play 800 Hz Bell
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ========================================================================
+         Feature 6: Performance, Privacy & Multiplexers
+         ======================================================================== -->
+    <section class="section" id="architecture-feature" style="background: rgba(255, 255, 255, 0.01);">
+      <div class="container">
+        
+        <div class="feature-deep-dive">
+          <div class="feature-deep-info">
+            <div class="section-tag">Performance &amp; Engineering</div>
+            <h2 class="feature-deep-title">6. Built for tmux, Zellij &amp; High-Efficiency Workspaces</h2>
+            <p class="feature-deep-lead">
+              Compiled to single native binaries with zero runtime dependencies. Designed to run comfortably in a side-pane or background scratchpad.
+            </p>
+            <ul class="feature-bullets">
+              <li><strong>Sub-10ms Startup</strong>: Launches instantly from any shell without startup lag.</li>
+              <li><strong>Under 15MB Memory Footprint</strong>: Uses orders of magnitude less memory than Electron or web wrapper timers.</li>
+              <li><strong>Strict Local Privacy</strong>: All task backlogs and session stats are stored locally adhering to XDG standards (<code>~/.local/share/termodoro/data.json</code>). Zero cloud dependencies, zero telemetry, zero analytics tracking.</li>
+              <li><strong>Floating Help Overlay (<code>[?]</code>)</strong>: In-app searchable keybindings modal for instant shortcut discovery.</li>
+            </ul>
+          </div>
+          <div class="feature-deep-media">
+            <img src="assets/screenshots/06_help_modal.svg" alt="Termodoro Floating Help Modal" class="feature-img-card" />
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ========================================================================
+         Quick CTA Footer
+         ======================================================================== -->
+    <section class="section" style="text-align: center;">
+      <div class="container">
+        <h2 class="section-title">Ready to Elevate Your Terminal Productivity?</h2>
+        <p class="section-desc" style="margin-bottom: 2rem;">
+          Install Termodoro in seconds with Cargo and start your first distraction-free Pomodoro session.
+        </p>
+        <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+          <a href="index.html#install" class="btn btn-primary btn-lg">⚡ View Installation Commands</a>
+          <a href="index.html" class="btn btn-secondary btn-lg">🏠 Back to Overview</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ========================================================================
+       Site Footer
+       ======================================================================== -->
+  <footer class="site-footer">
+    <div class="container">
+      
+      <div class="footer-grid">
+        <div class="footer-brand-col">
+          <div class="brand">
+            <div class="brand-icon">
+              <svg viewBox="0 0 32 32" width="24" height="24">
+                <circle cx="16" cy="18" r="11" fill="var(--color-work)" />
+                <path d="M16 6 C16 4 19 3 20 4 C19 6 18 7 16 8 Z" fill="var(--color-short-break)" />
+                <path d="M16 6 C15 4 12 3 11 4 C12 6 14 7 16 8 Z" fill="var(--color-short-break)" />
+              </svg>
+            </div>
+            <span>Termodoro</span>
+          </div>
+          <p class="footer-tagline">
+            Ultra-fast, keyboard-driven Pomodoro timer &amp; task backlog manager in pure Rust &amp; Ratatui. 100% offline &amp; private.
+          </p>
+        </div>
+
+        <div>
+          <div class="footer-col-title">Navigation</div>
+          <ul class="footer-links">
+            <li><a href="index.html">Overview</a></li>
+            <li><a href="features.html">Feature Guide</a></li>
+            <li><a href="index.html#themes">18 Color Themes</a></li>
+            <li><a href="index.html#install">Installation</a></li>
+            <li><a href="index.html#keybindings">Keybindings Cheatsheet</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <div class="footer-col-title">Documentation</div>
+          <ul class="footer-links">
+            <li><a href="https://github.com/amanalip/Termodoro/blob/main/README.md" target="_blank" rel="noopener noreferrer">README Manual</a></li>
+            <li><a href="https://github.com/amanalip/Termodoro/blob/main/ARCHITECTURE.md" target="_blank" rel="noopener noreferrer">System Architecture</a></li>
+            <li><a href="https://github.com/amanalip/Termodoro/blob/main/IMPLEMENTATION.md" target="_blank" rel="noopener noreferrer">Implementation Spec</a></li>
+            <li><a href="https://github.com/amanalip/Termodoro/blob/main/WALKTHROUGH.md" target="_blank" rel="noopener noreferrer">Walkthrough &amp; QA</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <div class="footer-col-title">Community &amp; Code</div>
+          <ul class="footer-links">
+            <li><a href="https://github.com/amanalip/Termodoro" target="_blank" rel="noopener noreferrer">GitHub Repository</a></li>
+            <li><a href="https://github.com/amanalip/Termodoro/issues" target="_blank" rel="noopener noreferrer">Issue Tracker</a></li>
+            <li><a href="https://github.com/amanalip/Termodoro/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">GPL-3.0 License</a></li>
+            <li><a href="https://ratatui.rs" target="_blank" rel="noopener noreferrer">Ratatui Framework</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div>&copy; 2026 Termodoro. Open source under the GNU General Public License v3.0.</div>
+        <div style="color: var(--text-muted); font-family: var(--font-mono); font-size: 0.82rem;">
+          Built with <span style="color: var(--color-work);">♥</span> by <a href="https://github.com/amanalip" target="_blank" rel="noopener noreferrer" style="color: var(--color-primary); text-decoration: none; font-weight: 600;">Aman Ali Pogaku</a>, with Pure Rust &amp; Ratatui
+        </div>
+      </div>
+
+    </div>
+  </footer>
+
+  <!-- Toast Feedback Element -->
+  <div class="toast-notice" id="toast-notice">Action notification</div>
+
+  <!-- Audio Synthesis & Interactive Engine -->
+  <script src="app.js?v=20260818d"></script>
+</body>
+</html>

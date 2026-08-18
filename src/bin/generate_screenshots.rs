@@ -100,7 +100,7 @@ fn render_buffer_to_svg(
     svg.push_str("  <rect x=\"14\" y=\"9\" width=\"18\" height=\"18\" rx=\"4\" fill=\"#232629\" stroke=\"#31363b\" stroke-width=\"1\"/>\n");
     svg.push_str("  <text x=\"17\" y=\"20.5\" font-family=\"'JetBrains Mono', monospace\" font-size=\"9.5\" font-weight=\"bold\" fill=\"#3daee9\">&gt;_</text>\n");
 
-    // Window title (Left-aligned next to icon)
+    // Window title (Clean KDE Breeze window title without host/username)
     let escaped_title = title
         .replace('&', "&amp;")
         .replace('<', "&lt;")
@@ -108,7 +108,7 @@ fn render_buffer_to_svg(
         .replace('"', "&quot;");
 
     svg.push_str(&format!(
-        "  <text x=\"40\" y=\"19\" class=\"window-title\"><tspan class=\"window-title-muted\">amanap@cachyos:</tspan><tspan dx=\"6\">{}</tspan></text>\n\n",
+        "  <text x=\"40\" y=\"19\" class=\"window-title\"><tspan font-weight=\"600\">Termodoro</tspan><tspan class=\"window-title-muted\" dx=\"8\">—</tspan><tspan class=\"window-title-muted\" dx=\"8\">{}</tspan></text>\n\n",
         escaped_title
     ));
 
@@ -239,8 +239,11 @@ fn render_buffer_to_svg(
     svg
 }
 
-// Helper to save SVG and convert to crisp PNG (with cache-busting kde_ copies)
+// Helper to save SVG and convert to crisp PNG (syncing to assets/screenshots and docs/assets/screenshots)
 fn save_screenshot(svg: &str, out_dir: &Path, name: &str) {
+    let docs_dir = Path::new("docs/assets/screenshots");
+    let _ = fs::create_dir_all(docs_dir);
+
     let svg_path = out_dir.join(format!("{}.svg", name));
     let png_path = out_dir.join(format!("{}.png", name));
     let kde_png_path = out_dir.join(format!("kde_{}.png", name));
@@ -259,13 +262,18 @@ fn save_screenshot(svg: &str, out_dir: &Path, name: &str) {
         .output();
 
     let _ = fs::copy(&png_path, &kde_png_path);
-    println!("  ✓ Saved {}.png & kde_{}.png", name, name);
+    let _ = fs::copy(&svg_path, docs_dir.join(format!("{}.svg", name)));
+    let _ = fs::copy(&png_path, docs_dir.join(format!("{}.png", name)));
+    let _ = fs::copy(&png_path, docs_dir.join(format!("kde_{}.png", name)));
+    println!("  ✓ Saved {}.png & synced to docs/assets/screenshots/", name);
 }
 
 fn main() {
     println!("🎨 Generating Termodoro High-Res Screenshots...");
     let out_dir = Path::new("assets/screenshots");
     fs::create_dir_all(out_dir).expect("Failed to create assets/screenshots directory");
+    let docs_dir = Path::new("docs/assets/screenshots");
+    fs::create_dir_all(docs_dir).expect("Failed to create docs/assets/screenshots directory");
 
     let width = 96;
     let height = 32;

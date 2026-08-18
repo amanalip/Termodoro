@@ -17,7 +17,7 @@
   
   <!-- Favicon -->
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
-  <link rel="stylesheet" href="style.css?v=20260818c" />
+  <link rel="stylesheet" href="style.css?v=20260818d" />
 </head>
 <body>
 
@@ -26,7 +26,7 @@
        ======================================================================== -->
   <header class="site-header" id="site-header">
     <div class="container header-inner">
-      <a href="#" class="brand" id="brand-link">
+      <a href="index.html" class="brand" id="brand-link">
         <div class="brand-icon">
           <svg viewBox="0 0 32 32" width="28" height="28">
             <circle cx="16" cy="18" r="11" fill="var(--color-work)" />
@@ -41,8 +41,8 @@
       </a>
 
       <nav class="nav-menu" aria-label="Main Navigation">
-        <a href="#simulator" class="nav-link">Interactive Demo</a>
-        <a href="#features" class="nav-link">Features</a>
+        <a href="index.html" class="nav-link active">Overview</a>
+        <a href="features.html" class="nav-link">Features</a>
         <a href="#themes" class="nav-link">18 Themes</a>
         <a href="#install" class="nav-link">Install</a>
         <a href="#keybindings" class="nav-link">Keybindings</a>
@@ -59,363 +59,45 @@
     </div>
   </header>
 
-  <!-- ========================================================================
-       Hero Section
-       ======================================================================== -->
-  <main>
-    <section class="hero" id="hero-section">
-      <div class="container">
-        
-        <div class="badge-strip">
-          <span class="badge-item"><span class="dot"></span> 100% Offline &amp; Private</span>
-          <span class="badge-item">🦀 Safe Rust (0% Unsafe)</span>
-          <span class="badge-item">⚡ &lt;10ms Cold Startup</span>
-          <span class="badge-item">🎨 18 Built-in Themes</span>
-          <span class="badge-item">🛡️ 192 Tests Passed</span>
-        </div>
-
-        <h1 class="hero-title">
-          Terminal Pomodoro &amp; Task Management in <span>Pure Rust</span>
-        </h1>
-
-        <p class="hero-subtitle">
-          A keyboard-driven, ultra-responsive productivity system crafted with Ratatui. No Electron bloat, zero telemetry, sub-15MB RAM footprint, and instant focus flow.
-        </p>
-
-        <div class="hero-cta">
-          <a href="#install" class="btn btn-primary btn-lg" id="cta-quickstart-btn">⚡ Quick Start</a>
-          <a href="#simulator" class="btn btn-secondary btn-lg" id="cta-demo-btn">🎮 Try Interactive Simulator</a>
-        </div>
-
-      </div>
-    </section>
-
     <!-- ========================================================================
-         Interactive Terminal Simulator
+         Hero Section
          ======================================================================== -->
-    <section class="simulator-section" id="simulator">
-      <div class="container">
-        <div class="simulator-container">
+    <main>
+      <section class="hero" id="hero-section">
+        <div class="container">
           
-          <div class="terminal-window" id="terminal-window">
+          <div class="badge-strip">
+            <span class="badge-item"><span class="dot"></span> 100% Offline &amp; Private</span>
+            <span class="badge-item">🦀 Safe Rust (0% Unsafe)</span>
+            <span class="badge-item">⚡ &lt;10ms Cold Startup</span>
+            <span class="badge-item">🎨 18 Built-in Themes</span>
+            <span class="badge-item">🛡️ 192 Tests Passed</span>
+          </div>
+
+          <h1 class="hero-title">
+            Terminal Pomodoro &amp; Task Management in <span>Pure Rust</span>
+          </h1>
+
+          <p class="hero-subtitle">
+            A keyboard-driven, ultra-responsive productivity system crafted with Ratatui. No Electron bloat, zero telemetry, sub-15MB RAM footprint, and instant focus flow.
+          </p>
+
+          <div class="hero-cta">
+            <a href="#install" class="btn btn-primary btn-lg" id="cta-quickstart-btn">⚡ Get Started</a>
+            <a href="features.html" class="btn btn-secondary btn-lg" id="cta-features-btn">📖 Explore All Features &rarr;</a>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ========================================================================
+           KDE Terminal Showcase (Actual High-Res Screenshots)
+           ======================================================================== -->
+      <section class="showcase-section" id="showcase">
+        <div class="container">
+          
+          <div class="screenshot-showcase-container">
             
-            <!-- Terminal Titlebar -->
-            <div class="terminal-header">
-              <div class="terminal-controls">
-                <span class="terminal-btn terminal-btn-close"></span>
-                <span class="terminal-btn terminal-btn-minimize"></span>
-                <span class="terminal-btn terminal-btn-maximize"></span>
-              </div>
-              <div class="terminal-title">termodoro v0.1.0 — ratatui tui engine</div>
-              <div class="terminal-actions">
-                <button type="button" class="sound-toggle-btn" id="sound-toggle-btn" title="Toggle audio chime playback">
-                  🔊 Sound: ON
-                </button>
-              </div>
-            </div>
-
-            <!-- Tab Bar -->
-            <div class="terminal-tabs" role="tablist">
-              <button type="button" class="terminal-tab active" data-tab="1" role="tab" aria-selected="true" id="tab-btn-1">
-                <span class="tab-num">1</span> Timer
-              </button>
-              <button type="button" class="terminal-tab" data-tab="2" role="tab" aria-selected="false" id="tab-btn-2">
-                <span class="tab-num">2</span> Tasks
-              </button>
-              <button type="button" class="terminal-tab" data-tab="3" role="tab" aria-selected="false" id="tab-btn-3">
-                <span class="tab-num">3</span> Analytics
-              </button>
-              <button type="button" class="terminal-tab" data-tab="4" role="tab" aria-selected="false" id="tab-btn-4">
-                <span class="tab-num">4</span> Settings
-              </button>
-            </div>
-
-            <!-- Terminal Screen Body -->
-            <div class="terminal-body" id="terminal-screen-body">
-
-              <!-- TAB 1: TIMER SCREEN -->
-              <div class="screen-view active" data-screen="1" id="screen-timer">
-                <div class="ratatui-timer-layout">
-                  <!-- 1. Phase Header -->
-                  <div class="ratatui-phase-header">
-                    <span class="ratatui-phase-title" id="sim-phase-title">🍅 Focus Work</span>
-                    <span class="ratatui-status-badge" id="sim-status-badge">[● RUNNING]</span>
-                    <span class="ratatui-cycle-tracker" id="sim-cycle-tracker">Cycle 1/4 [<span id="sim-cycle-dots">◉ ○ ○ ○</span>]</span>
-                  </div>
-
-                  <!-- 2. Big Block Digits Banner (matching src/ui/digits.rs) -->
-                  <pre class="tui-big-clock" id="sim-big-clock">████ ████      ████ ████&#10;   █ █    ████ █  █ █  █&#10;████ ████      █  █ █  █&#10;█       █ ████ █  █ █  █&#10;████ ████      ████ ████</pre>
-
-                  <!-- 3. Ratatui Gauge Block -->
-                  <div class="ratatui-box ratatui-gauge-box">
-                    <div class="ratatui-box-title">── Progress </div>
-                    <div class="ratatui-gauge-inner">
-                      <div class="ratatui-gauge-bar-track">
-                        <div class="ratatui-gauge-bar-fill" id="sim-gauge-fill" style="width: 50%;"></div>
-                      </div>
-                      <span class="ratatui-gauge-text" id="sim-gauge-percent">50%</span>
-                    </div>
-                  </div>
-
-                  <!-- 4. Ratatui Target Box -->
-                  <div class="ratatui-box ratatui-target-box">
-                    <div class="ratatui-box-title">── 🎯 Current Target </div>
-                    <div class="ratatui-target-inner">
-                      <span class="tui-muted">Active Focus: </span>
-                      <strong class="tui-fg" id="sim-target-task-title">Implement GitHub Pages Website</strong>
-                      <span class="tui-secondary" id="sim-target-task-poms"> (🍅 2/4)</span>
-                    </div>
-                  </div>
-
-                  <!-- 5. Quick Controls & Daily Summary -->
-                  <div class="ratatui-timer-footer-summary">
-                    <div class="tui-summary-line">
-                      <span class="tui-muted">Today's Sessions: </span>
-                      <strong class="tui-fg" id="sim-timer-today-poms">4 pomodoros (100 mins)</strong>
-                      <span class="tui-dim"> │ </span>
-                      <span class="tui-muted">Streak: </span>
-                      <strong class="tui-warning">🔥 7 days</strong>
-                    </div>
-                    <div class="tui-controls-line">
-                      <span class="tui-key">[Space]</span> <span class="tui-action" id="sim-space-label">Pause</span>
-                      <span class="tui-key">[r]</span> <span class="tui-action">Reset</span>
-                      <span class="tui-key">[s]</span> <span class="tui-action">Skip Phase</span>
-                      <span class="tui-key">[a]</span> <span class="tui-action">Quick Add Task</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- TAB 2: TASKS SCREEN -->
-              <div class="screen-view" data-screen="2" id="screen-tasks">
-                <div class="ratatui-tasks-layout">
-                  <!-- 1. Filter Bar Box -->
-                  <div class="ratatui-box ratatui-filter-box">
-                    <div class="ratatui-box-title">── Filter </div>
-                    <div class="ratatui-filter-inner">
-                      <span class="tui-fg">Filter: </span>
-                      <button type="button" class="tui-filter-tab active" data-filter="all" id="tui-filter-all">[1] All (3)</button>
-                      <button type="button" class="tui-filter-tab" data-filter="active" id="tui-filter-active">[2] Active (2)</button>
-                      <button type="button" class="tui-filter-tab" data-filter="completed" id="tui-filter-completed">[3] Completed (1)</button>
-                    </div>
-                  </div>
-
-                  <!-- 2. Tasks Table Box -->
-                  <div class="ratatui-box ratatui-table-box">
-                    <div class="ratatui-box-title">── 📋 Tasks Backlog </div>
-                    <table class="ratatui-table" id="sim-tasks-tui-table">
-                      <thead>
-                        <tr>
-                          <th style="width: 4%;"></th>
-                          <th style="width: 8%;">Status</th>
-                          <th style="width: 48%;">Task Title</th>
-                          <th style="width: 22%;">Est. Pomodoros</th>
-                          <th style="width: 18%;">Active Target</th>
-                        </tr>
-                      </thead>
-                      <tbody id="sim-tasks-tbody">
-                        <!-- Rendered by app.js -->
-                      </tbody>
-                    </table>
-                  </div>
-
-                  <!-- 3. Actions Helper Box -->
-                  <div class="ratatui-box ratatui-helper-box">
-                    <div class="ratatui-helper-inner">
-                      <span class="tui-key">[a]</span> <span class="tui-action">Add Task</span>
-                      <span class="tui-key">[Space/Enter]</span> <span class="tui-action">Toggle Status</span>
-                      <span class="tui-key">[t]</span> <span class="tui-action">Set Active Target</span>
-                      <span class="tui-key">[d/x]</span> <span class="tui-action">Delete</span>
-                      <span class="tui-key">[↑/↓/j/k]</span> <span class="tui-action">Navigate</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- TAB 3: STATS SCREEN -->
-              <div class="screen-view" data-screen="3" id="screen-stats">
-                <div class="ratatui-stats-layout">
-                  <!-- 1. Top 3 Metric Summary Boxes -->
-                  <div class="ratatui-stats-cards-row">
-                    <div class="ratatui-box ratatui-stat-card">
-                      <div class="ratatui-box-title">── 📅 Today's Focus </div>
-                      <div class="ratatui-stat-val tui-work" id="stats-card-today-poms">4 🍅</div>
-                      <div class="ratatui-stat-sub tui-muted">100 minutes focused</div>
-                    </div>
-                    <div class="ratatui-box ratatui-stat-card">
-                      <div class="ratatui-box-title">── ⚡ Current Streak </div>
-                      <div class="ratatui-stat-val tui-warning">🔥 7 Days</div>
-                      <div class="ratatui-stat-sub tui-muted">Personal Best: 14 Days</div>
-                    </div>
-                    <div class="ratatui-box ratatui-stat-card">
-                      <div class="ratatui-box-title">── 🏆 All-Time Focus </div>
-                      <div class="ratatui-stat-val tui-secondary">42 Sessions</div>
-                      <div class="ratatui-stat-sub tui-muted">17.5 Total Focus Hours</div>
-                    </div>
-                  </div>
-
-                  <!-- 2. 7-Day BarChart Box -->
-                  <div class="ratatui-box ratatui-chart-box">
-                    <div class="ratatui-box-title">── 📊 7-Day Focus Distribution </div>
-                    <div class="ratatui-barchart-container">
-                      <div class="tui-chart-bars">
-                        <div class="tui-bar-col"><div class="tui-bar-fill" style="height: 35%;"></div><span class="tui-bar-label">Mon (3)</span></div>
-                        <div class="tui-bar-col"><div class="tui-bar-fill" style="height: 55%;"></div><span class="tui-bar-label">Tue (5)</span></div>
-                        <div class="tui-bar-col"><div class="tui-bar-fill" style="height: 75%;"></div><span class="tui-bar-label">Wed (7)</span></div>
-                        <div class="tui-bar-col"><div class="tui-bar-fill" style="height: 45%;"></div><span class="tui-bar-label">Thu (4)</span></div>
-                        <div class="tui-bar-col"><div class="tui-bar-fill" style="height: 90%;"></div><span class="tui-bar-label">Fri (8)</span></div>
-                        <div class="tui-bar-col"><div class="tui-bar-fill" style="height: 100%;"></div><span class="tui-bar-label">Sat (9)</span></div>
-                        <div class="tui-bar-col"><div class="tui-bar-fill" style="height: 65%;"></div><span class="tui-bar-label">Sun (6)</span></div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- 3. Recent Sessions Table Box -->
-                  <div class="ratatui-box ratatui-recent-box">
-                    <div class="ratatui-box-title">── 📜 Recent Completed Sessions </div>
-                    <table class="ratatui-table">
-                      <thead>
-                        <tr>
-                          <th style="width: 20%;">Time</th>
-                          <th style="width: 20%;">Type</th>
-                          <th style="width: 20%;">Duration</th>
-                          <th style="width: 40%;">Target Task</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr>
-                          <td>10:45 AM</td>
-                          <td><span class="tui-work">🍅 Focus</span></td>
-                          <td>25 mins</td>
-                          <td>Implement GitHub Pages Website</td>
-                        </tr>
-                        <tr>
-                          <td>10:15 AM</td>
-                          <td><span class="tui-short-break">☕ Break</span></td>
-                          <td>5 mins</td>
-                          <td>Rest &amp; hydrate</td>
-                        </tr>
-                        <tr>
-                          <td>09:45 AM</td>
-                          <td><span class="tui-work">🍅 Focus</span></td>
-                          <td>25 mins</td>
-                          <td>Write Ratatui block digits renderer</td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </div>
-
-              <!-- TAB 4: SETTINGS SCREEN (100% Ratatui Table Replica) -->
-              <div class="screen-view" data-screen="4" id="screen-settings">
-                <div class="ratatui-settings-layout">
-                  <!-- 1. Settings Table Box -->
-                  <div class="ratatui-box ratatui-table-box">
-                    <div class="ratatui-box-title">── ⚙️ Preferences &amp; Settings </div>
-                    <table class="ratatui-table" id="sim-settings-tui-table">
-                      <thead>
-                        <tr>
-                          <th style="width: 3%;"></th>
-                          <th style="width: 27%;">Setting</th>
-                          <th style="width: 20%;">Current Value</th>
-                          <th style="width: 50%;">Description</th>
-                        </tr>
-                      </thead>
-                      <tbody id="sim-settings-tbody">
-                        <!-- Rendered dynamically by app.js matching src/ui/settings_view.rs -->
-                      </tbody>
-                    </table>
-                  </div>
-
-                  <!-- 2. Settings Helper Box -->
-                  <div class="ratatui-box ratatui-helper-box">
-                    <div class="ratatui-helper-inner">
-                      <span class="tui-key">[↑/↓/j/k]</span> <span class="tui-action">Select Setting</span>
-                      <span class="tui-key">[←/→/h/l] or [+/-]</span> <span class="tui-action">Adjust Value / Change Theme</span>
-                      <span class="tui-key">[Space/Enter]</span> <span class="tui-action">Toggle</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- MODAL: HELP POPUP -->
-              <div class="terminal-modal-overlay" id="terminal-help-modal" style="display: none;">
-                <div class="terminal-modal" style="max-width: 540px;">
-                  <div class="modal-header">
-                    <span>❓ Termodoro Keybindings &amp; Help</span>
-                    <button type="button" class="modal-close-btn" onclick="toggleHelpModal(false)">&times;</button>
-                  </div>
-                  <div class="modal-body">
-                    <div style="font-size: 0.8rem; font-weight: bold; color: var(--color-primary); margin-bottom: 0.25rem;">Navigation &amp; Tabs</div>
-                    <div class="shortcut-row"><span>Cycle tabs forward / back</span><div><span class="key-badge">Tab</span> / <span class="key-badge">Shift+Tab</span></div></div>
-                    <div class="shortcut-row"><span>Jump directly to tabs 1 - 4</span><span class="key-badge">1 - 4</span></div>
-                    <div class="shortcut-row"><span>Toggle this Help popup</span><span class="key-badge">?</span></div>
-                    <div class="shortcut-row"><span>Close modal / Quit app</span><div><span class="key-badge">Esc</span> / <span class="key-badge">q</span></div></div>
-
-                    <div style="font-size: 0.8rem; font-weight: bold; color: var(--color-work); margin-top: 0.75rem; margin-bottom: 0.25rem;">Timer Controls (Tab 1)</div>
-                    <div class="shortcut-row"><span>Start / Pause countdown</span><span class="key-badge">Space</span></div>
-                    <div class="shortcut-row"><span>Reset current interval</span><span class="key-badge">r</span></div>
-                    <div class="shortcut-row"><span>Skip to next phase</span><span class="key-badge">s</span></div>
-                    <div class="shortcut-row"><span>Quickly add a task</span><span class="key-badge">a</span></div>
-
-                    <div style="font-size: 0.8rem; font-weight: bold; color: var(--color-secondary); margin-top: 0.75rem; margin-bottom: 0.25rem;">Task Management (Tab 2)</div>
-                    <div class="shortcut-row"><span>Create a new task</span><span class="key-badge">a</span></div>
-                    <div class="shortcut-row"><span>Toggle completed status</span><div><span class="key-badge">Space</span> / <span class="key-badge">Enter</span></div></div>
-                    <div class="shortcut-row"><span>Set as active target for timer</span><span class="key-badge">t</span></div>
-                    <div class="shortcut-row"><span>Delete selected task</span><div><span class="key-badge">d</span> / <span class="key-badge">x</span></div></div>
-                    <div class="shortcut-row"><span>Navigate task list</span><div><span class="key-badge">j / ↓</span> <span class="key-badge">k / ↑</span></div></div>
-                    <div class="shortcut-row"><span>Filter tasks (All, Active, Done)</span><span class="key-badge">1 / 2 / 3</span></div>
-
-                    <div style="font-size: 0.8rem; font-weight: bold; color: var(--color-warning); margin-top: 0.75rem; margin-bottom: 0.25rem;">Settings &amp; Preferences (Tab 4)</div>
-                    <div class="shortcut-row"><span>Select setting option</span><div><span class="key-badge">j / ↓</span> <span class="key-badge">k / ↑</span></div></div>
-                    <div class="shortcut-row"><span>Adjust values / cycle themes</span><div><span class="key-badge">h / ←</span> <span class="key-badge">l / →</span> <span class="key-badge">+ / -</span></div></div>
-                    <div class="shortcut-row"><span>Toggle feature flags</span><div><span class="key-badge">Space</span> / <span class="key-badge">Enter</span></div></div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- MODAL: ADD TASK -->
-              <div class="terminal-modal-overlay" id="terminal-task-modal" style="display: none;">
-                <div class="terminal-modal">
-                  <div class="modal-header">
-                    <span>📝 Add New Task</span>
-                    <button type="button" class="modal-close-btn" onclick="toggleTaskModal(false)">&times;</button>
-                  </div>
-                  <form id="modal-task-form" class="modal-body">
-                    <div>
-                      <label style="display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.35rem;">Task Description</label>
-                      <input type="text" id="modal-task-title-input" class="search-input" placeholder="e.g. Implement GitHub Pages Website" required />
-                    </div>
-                    <div>
-                      <label style="display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.35rem;">Estimated Pomodoros (1 - 20 🍅)</label>
-                      <input type="number" id="modal-task-est-input" class="search-input" value="1" min="1" max="20" />
-                    </div>
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem;">
-                      <span style="font-size: 0.75rem; color: var(--text-dim);">[Tab] Switch field &bull; [Enter] Save &bull; [Esc] Cancel</span>
-                      <div style="display: flex; gap: 0.5rem;">
-                        <button type="button" class="btn btn-secondary" onclick="toggleTaskModal(false)">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Add Task</button>
-                      </div>
-                    </div>
-                  </form>
-                </div>
-              </div>
-
-            </div>
-
-            <!-- Terminal Interactive Footer Controls -->
-            <div class="terminal-footer">
-              <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                <button type="button" class="sim-key-pill" data-action="toggle"><kbd>Space</kbd> Start/Pause</button>
-                <button type="button" class="sim-key-pill" data-action="reset"><kbd>r</kbd> Reset</button>
-                <button type="button" class="sim-key-pill" data-action="skip"><kbd>s</kbd> Skip</button>
-                <button type="button" class="sim-key-pill" data-action="add"><kbd>a</kbd> Add Task</button>
-                <button type="button" class="sim-key-pill" data-action="help"><kbd>?</kbd> Help</button>
-              </div>
-              <div>Use your keyboard or click buttons to interact</div>
-            </div>
-
           </div>
 
         </div>
@@ -506,7 +188,7 @@
           <div class="section-tag">Aesthetics &amp; Ergonomics</div>
           <h2 class="section-title">18 Curated Color Palettes</h2>
           <p class="section-desc">
-            Click any palette card below to preview the color scheme live across the website and interactive terminal simulator.
+            Click any palette card below to preview the color scheme live across the website.
           </p>
         </div>
 
@@ -907,20 +589,38 @@ zellij run --floating --width 70% --height 70% -- termodoro</code></pre>
     <div class="container">
       
       <div class="footer-grid">
-        <div>
-          <div class="brand" style="margin-bottom: 0.75rem;">
+        <div class="footer-brand-col">
+          <div class="brand">
+            <div class="brand-icon">
+              <svg viewBox="0 0 32 32" width="24" height="24">
+                <circle cx="16" cy="18" r="11" fill="var(--color-work)" />
+                <path d="M16 6 C16 4 19 3 20 4 C19 6 18 7 16 8 Z" fill="var(--color-short-break)" />
+                <path d="M16 6 C15 4 12 3 11 4 C12 6 14 7 16 8 Z" fill="var(--color-short-break)" />
+              </svg>
+            </div>
             <span>Termodoro</span>
           </div>
-          <p style="color: var(--text-muted); max-width: 360px; line-height: 1.55;">
-            An ultra-responsive, keyboard-driven Pomodoro timer and task manager crafted in pure Rust with Ratatui.
+          <p class="footer-tagline">
+            Ultra-fast, keyboard-driven Pomodoro timer &amp; task backlog manager in pure Rust &amp; Ratatui. 100% offline &amp; private.
           </p>
+        </div>
+
+        <div>
+          <div class="footer-col-title">Navigation</div>
+          <ul class="footer-links">
+            <li><a href="index.html">Overview</a></li>
+            <li><a href="features.html">Feature Guide</a></li>
+            <li><a href="#themes">18 Color Themes</a></li>
+            <li><a href="#install">Installation</a></li>
+            <li><a href="#keybindings">Keybindings Cheatsheet</a></li>
+          </ul>
         </div>
 
         <div>
           <div class="footer-col-title">Documentation</div>
           <ul class="footer-links">
-            <li><a href="https://github.com/amanalip/Termodoro/blob/main/README.md" target="_blank" rel="noopener noreferrer">README Guide</a></li>
-            <li><a href="https://github.com/amanalip/Termodoro/blob/main/System_design.md" target="_blank" rel="noopener noreferrer">System Architecture</a></li>
+            <li><a href="https://github.com/amanalip/Termodoro/blob/main/README.md" target="_blank" rel="noopener noreferrer">README Manual</a></li>
+            <li><a href="https://github.com/amanalip/Termodoro/blob/main/ARCHITECTURE.md" target="_blank" rel="noopener noreferrer">System Architecture</a></li>
             <li><a href="https://github.com/amanalip/Termodoro/blob/main/IMPLEMENTATION.md" target="_blank" rel="noopener noreferrer">Implementation Spec</a></li>
             <li><a href="https://github.com/amanalip/Termodoro/blob/main/WALKTHROUGH.md" target="_blank" rel="noopener noreferrer">Walkthrough &amp; QA</a></li>
           </ul>
@@ -951,6 +651,6 @@ zellij run --floating --width 70% --height 70% -- termodoro</code></pre>
   <div class="toast-notice" id="toast-notice">Action notification</div>
 
   <!-- Main JavaScript Engine -->
-  <script src="app.js?v=20260818c"></script>
+  <script src="app.js?v=20260818d"></script>
 </body>
 </html>
