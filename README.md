@@ -675,7 +675,7 @@ Termodoro features built-in, offline-first local persistence. **No information i
 ### How Data Persistence Works
 
 1. **Automatic Loading on Launch**: When `termodoro` boots up, it automatically locates and loads your `data.json` database. If launching for the first time, it initializes the database with clean default settings.
-2. **Real-Time & Exit Synchronization**: Whenever you create or complete a task, adjust preferences, change a theme, finish a focus interval, or quit (`q` / `Esc`), the application automatically serializes and writes the state to disk using atomic file writing.
+2. **Real-Time & Exit Synchronization**: Whenever you create or complete a task, adjust preferences, change a theme, finish a focus interval, or quit (`q`), the application automatically serializes and writes the state to disk using atomic file writing.
 3. **What is Persisted**:
    - 📋 **Interactive Tasks**: Task titles, completion marks (`✔` / `○`), spent Pomodoro counts, estimated Pomodoro counts, creation timestamps, and designated active target IDs.
    - ⚙️ **User Configuration**: Focus durations, break durations, long break intervals (1 to 24 cycles), automation toggles, alert preferences, and active color themes.

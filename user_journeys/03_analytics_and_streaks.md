@@ -105,4 +105,4 @@ In [`src/stats.rs`](../src/stats.rs), the analytics engine guarantees mathematic
 | `4` | **Switch to Settings** | [`src/app.rs:308`](../src/app.rs#L308) (`active_tab = ActiveTab::Settings`) |
 | `Tab` / `Shift+Tab` | **Cycle Tabs** | [`src/app.rs:268-286`](../src/app.rs#L268-L286) (`next_tab()` / `previous_tab()`) |
 | `?` | **Help Overlay** | [`src/app.rs:261`](../src/app.rs#L261) (`show_help = true`) |
-| `q` / `Esc` | **Quit** | [`src/app.rs:254`](../src/app.rs#L254) (`should_quit = true`) |
+| `q` | **Quit** | [`src/app.rs:254`](../src/app.rs#L254) (`should_quit = true`) |

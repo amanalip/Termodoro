@@ -134,4 +134,4 @@ From anywhere in Termodoro, press `2` (or press `Tab`) to navigate to **Tab 2: T
 | `3` | **Filter: Completed** | [`src/app.rs:559`](../src/app.rs#L559) (`tasks.filter = TaskFilter::Completed`) |
 | `Tab` / `BackTab` | **Switch Tabs** | [`src/app.rs:268-286`](../src/app.rs#L268-L286) (`next_tab()` / `previous_tab()`) |
 | `?` | **Help Overlay** | [`src/app.rs:261`](../src/app.rs#L261) (`show_help = true`) |
-| `q` / `Esc` | **Quit** | [`src/app.rs:254`](../src/app.rs#L254) (`should_quit = true`) |
+| `q` | **Quit** | [`src/app.rs:254`](../src/app.rs#L254) (`should_quit = true`) |
