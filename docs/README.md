@@ -22,6 +22,7 @@ docs/
     └── screenshots/        # Full vector SVG and PNG captures for documentation
         ├── 01_timer_view.svg
         ├── 02_tasks_view.svg
+        ├── 02_task_manager.svg
         ├── 03_stats_view.svg
         ├── 04_settings_view.svg
         ├── 05_task_modal.svg
