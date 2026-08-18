@@ -739,4 +739,85 @@ mod tests {
         );
         assert_eq!(restored.total_focus_minutes(), 25);
     }
+
+    #[test]
+    fn test_full_year_leap_year_streak_simulation() {
+        let mut stats = StatsHistory::new();
+        let today = Local::now().date_naive();
+
+        // Simulate 366 consecutive days of focus sessions (full leap year)
+        for offset in 0..366 {
+            let date = today - chrono::Duration::days(offset);
+            let dt = date
+                .and_hms_opt(10, 0, 0)
+                .unwrap()
+                .and_local_timezone(Local)
+                .unwrap()
+                .with_timezone(&Utc);
+            stats.sessions.push(CompletedSession {
+                timestamp: dt,
+                phase: PomodoroPhase::Work,
+                duration_mins: 25,
+                task_id: Some(format!("task-day-{}", offset)),
+                task_title: Some("Continuous Focus".to_string()),
+            });
+        }
+
+        // Streak must be exactly 366 days
+        assert_eq!(stats.current_streak_days(), 366);
+        assert_eq!(stats.longest_streak_days(), 366);
+        assert_eq!(stats.total_work_sessions(), 366);
+        assert_eq!(stats.total_focus_minutes(), 366 * 25);
+    }
+
+    #[test]
+    fn test_streak_with_intermittent_breaks_and_restarts() {
+        let mut stats = StatsHistory::new();
+        let today = Local::now().date_naive();
+
+        // Segment 1: 5 days continuous (today-4 down to today)
+        for offset in 0..5 {
+            let date = today - chrono::Duration::days(offset);
+            let dt = date
+                .and_hms_opt(11, 0, 0)
+                .unwrap()
+                .and_local_timezone(Local)
+                .unwrap()
+                .with_timezone(&Utc);
+            stats.sessions.push(CompletedSession {
+                timestamp: dt,
+                phase: PomodoroPhase::Work,
+                duration_mins: 30,
+                task_id: None,
+                task_title: None,
+            });
+        }
+
+        // Gap of 2 days (today-5, today-6 have NO sessions)
+
+        // Segment 2: 12 days continuous (today-18 to today-7)
+        for offset in 7..=18 {
+            let date = today - chrono::Duration::days(offset);
+            let dt = date
+                .and_hms_opt(11, 0, 0)
+                .unwrap()
+                .and_local_timezone(Local)
+                .unwrap()
+                .with_timezone(&Utc);
+            stats.sessions.push(CompletedSession {
+                timestamp: dt,
+                phase: PomodoroPhase::Work,
+                duration_mins: 30,
+                task_id: None,
+                task_title: None,
+            });
+        }
+
+        // Current streak should be 5 (active today)
+        assert_eq!(stats.current_streak_days(), 5);
+        // Longest streak should be 12 (Segment 2)
+        assert_eq!(stats.longest_streak_days(), 12);
+        assert_eq!(stats.total_work_sessions(), 17);
+        assert_eq!(stats.total_focus_minutes(), 17 * 30);
+    }
 }

@@ -632,4 +632,36 @@ mod tests {
         }
         assert_eq!(manager.tasks[0].pomodoros_spent, 25);
     }
+
+    #[test]
+    fn test_task_index_clamping_across_dynamic_filter_changes() {
+        let mut manager = TaskManager::new();
+        // Add 5 tasks: 4 active, 1 completed
+        for i in 1..=5 {
+            manager.add(format!("Task {}", i), 1);
+        }
+        manager.selected_index = 4;
+        manager.toggle_selected(); // Task 5 is completed
+
+        // All filter has 5 items, selected_index = 4
+        assert_eq!(manager.filtered_indices().len(), 5);
+        assert_eq!(manager.selected_index, 4);
+
+        // Switch filter to Completed (only 1 item)
+        manager.filter = TaskFilter::Completed;
+        assert_eq!(manager.filtered_indices().len(), 1);
+        // Deleting the single completed item
+        manager.selected_index = 0;
+        manager.remove_selected();
+        assert_eq!(manager.tasks.len(), 4);
+        assert_eq!(manager.filtered_indices().len(), 0);
+        assert_eq!(manager.selected_index, 0);
+
+        // Switch filter back to Active (4 items)
+        manager.filter = TaskFilter::Active;
+        assert_eq!(manager.filtered_indices().len(), 4);
+        manager.next();
+        manager.next();
+        assert_eq!(manager.selected_index, 2);
+    }
 }

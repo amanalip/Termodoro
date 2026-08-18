@@ -562,4 +562,48 @@ mod tests {
 
         let _ = std::fs::remove_dir_all(temp_dir);
     }
+
+    #[test]
+    fn test_buffer_cell_content_assertions_across_views() {
+        let (mut app, temp_dir) = create_test_app();
+        let backend = TestBackend::new(100, 30);
+        let mut terminal = Terminal::new(backend).unwrap();
+
+        // 1. Timer Tab buffer assertions
+        app.active_tab = ActiveTab::Timer;
+        app.tasks.add("Inspect TUI Buffer".to_string(), 2);
+        terminal.draw(|f| render(f, &app)).unwrap();
+
+        let buf = format!("{:?}", terminal.backend().buffer());
+        assert!(buf.contains("Termodoro") || buf.contains("Timer"));
+        assert!(buf.contains("Space") || buf.contains("Start"));
+
+        // 2. Tasks Tab buffer assertions
+        app.active_tab = ActiveTab::Tasks;
+        terminal.draw(|f| render(f, &app)).unwrap();
+        let buf_tasks = format!("{:?}", terminal.backend().buffer());
+        assert!(buf_tasks.contains("Inspect TUI Buffer"));
+
+        // 3. Settings Tab buffer assertions
+        app.active_tab = ActiveTab::Settings;
+        terminal.draw(|f| render(f, &app)).unwrap();
+        let buf_settings = format!("{:?}", terminal.backend().buffer());
+        assert!(buf_settings.contains("Work Duration") || buf_settings.contains("Settings"));
+
+        // 4. Help Modal buffer assertions
+        app.show_help = true;
+        terminal.draw(|f| render(f, &app)).unwrap();
+        let buf_help = format!("{:?}", terminal.backend().buffer());
+        assert!(buf_help.contains("Keyboard Shortcuts") || buf_help.contains("Help"));
+        app.show_help = false;
+
+        // 5. Task Modal buffer assertions
+        app.open_task_modal();
+        app.task_input_title = "Modal Title Check".to_string();
+        terminal.draw(|f| render(f, &app)).unwrap();
+        let buf_modal = format!("{:?}", terminal.backend().buffer());
+        assert!(buf_modal.contains("Modal Title Check") || buf_modal.contains("New Task"));
+
+        let _ = std::fs::remove_dir_all(temp_dir);
+    }
 }

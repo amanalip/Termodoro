@@ -1765,4 +1765,105 @@ mod tests {
         crate::audio::set_audio_muted_for_tests(false);
         let _ = std::fs::remove_dir_all(temp_dir);
     }
+
+    #[test]
+    fn test_fuzz_randomized_key_events_chaos_resilience() {
+        let (mut app, temp_dir) = create_test_app();
+        crate::audio::set_audio_muted_for_tests(true);
+
+        // Pre-populate tasks and stats
+        app.tasks.add("Task 1".to_string(), 3);
+        app.tasks.add("Task 2".to_string(), 1);
+
+        // Seeded pseudorandom key stream (1000 keystrokes)
+        let key_pool = [
+            KeyCode::Char(' '),
+            KeyCode::Char('a'),
+            KeyCode::Char('s'),
+            KeyCode::Char('r'),
+            KeyCode::Char('t'),
+            KeyCode::Char('d'),
+            KeyCode::Char('x'),
+            KeyCode::Char('j'),
+            KeyCode::Char('k'),
+            KeyCode::Char('h'),
+            KeyCode::Char('l'),
+            KeyCode::Char('+'),
+            KeyCode::Char('-'),
+            KeyCode::Char('1'),
+            KeyCode::Char('2'),
+            KeyCode::Char('3'),
+            KeyCode::Char('4'),
+            KeyCode::Char('?'),
+            KeyCode::Tab,
+            KeyCode::BackTab,
+            KeyCode::Esc,
+            KeyCode::Enter,
+            KeyCode::Backspace,
+            KeyCode::Up,
+            KeyCode::Down,
+            KeyCode::Left,
+            KeyCode::Right,
+        ];
+
+        let mut rng_state: u64 = 0xDEADBEEFCAFEBABE;
+        for _ in 0..1000 {
+            // Simple xorshift64 PRNG
+            rng_state ^= rng_state << 13;
+            rng_state ^= rng_state >> 7;
+            rng_state ^= rng_state << 17;
+
+            let key_idx = (rng_state as usize) % key_pool.len();
+            let code = key_pool[key_idx];
+
+            // If 'q' or quitting, reset should_quit to continue stress testing
+            if app.should_quit {
+                app.should_quit = false;
+            }
+
+            app.on_key_event(make_key(code));
+            app.on_tick();
+
+            // Verify core invariants never break
+            assert!(app.settings_index <= 8);
+            assert!(app.task_input_estimated >= 1 && app.task_input_estimated <= 20);
+        }
+
+        crate::audio::set_audio_muted_for_tests(false);
+        let _ = std::fs::remove_dir_all(temp_dir);
+    }
+
+    #[test]
+    fn test_rapid_filter_switching_and_index_clamping_chaos() {
+        let (mut app, temp_dir) = create_test_app();
+        app.active_tab = ActiveTab::Tasks;
+
+        // Add 10 tasks with alternating completion
+        for i in 1..=10 {
+            app.tasks.add(format!("Chaos Task {}", i), (i % 3) + 1);
+            if i % 2 == 0 {
+                app.tasks.toggle_selected();
+            }
+        }
+
+        // Rapid filter switches and selection adjustments
+        for _ in 0..20 {
+            // Switch to Active filter
+            app.on_key_event(make_key(KeyCode::Char('2')));
+            assert_eq!(app.tasks.filter, TaskFilter::Active);
+            app.on_key_event(make_key(KeyCode::Char('j')));
+            app.on_key_event(make_key(KeyCode::Char('j')));
+
+            // Switch to Completed filter
+            app.on_key_event(make_key(KeyCode::Char('3')));
+            assert_eq!(app.tasks.filter, TaskFilter::Completed);
+            app.on_key_event(make_key(KeyCode::Char('k')));
+
+            // Switch to All filter
+            app.on_key_event(make_key(KeyCode::Char('1')));
+            assert_eq!(app.tasks.filter, TaskFilter::All);
+        }
+
+        let _ = std::fs::remove_dir_all(temp_dir);
+    }
 }
