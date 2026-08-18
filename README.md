@@ -32,7 +32,10 @@ cargo run --release
 ```
 
 > [!TIP]
-> **Explore the Official Website & Showcase**: Explore Termodoro with interactive KDE terminal screenshots, 18-theme live switcher, audio chime previews, and in-depth feature breakdown at **[https://amanalip.github.io/Termodoro/](https://amanalip.github.io/Termodoro/)**.
+> **Explore the Official Website & Showcase**:
+> - 🌐 **Interactive Portal**: [https://amanalip.github.io/Termodoro/](https://amanalip.github.io/Termodoro/)
+> - 📖 **Feature Tour**: [https://amanalip.github.io/Termodoro/features.html](https://amanalip.github.io/Termodoro/features.html)
+> - ❓ **32-Question FAQs Hub**: [https://amanalip.github.io/Termodoro/faqs.html](https://amanalip.github.io/Termodoro/faqs.html)
 
 ---
 

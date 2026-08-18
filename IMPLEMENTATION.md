@@ -1,7 +1,10 @@
 # Termodoro: Detailed Technical Implementation Specification
 
 This document provides a comprehensive, beginner-friendly technical specification of the engineering architecture, data structures, state machines, and algorithms implemented in **Termodoro**.
-Official Website & Showcase: **[https://amanalip.github.io/Termodoro/](https://amanalip.github.io/Termodoro/)**
+Official Website & Knowledge Base:
+- 🌐 **Interactive Portal**: [https://amanalip.github.io/Termodoro/](https://amanalip.github.io/Termodoro/)
+- 📖 **Feature Tour**: [https://amanalip.github.io/Termodoro/features.html](https://amanalip.github.io/Termodoro/features.html)
+- ❓ **32-Question FAQs Hub**: [https://amanalip.github.io/Termodoro/faqs.html](https://amanalip.github.io/Termodoro/faqs.html)
 
 ---
 
