@@ -20,7 +20,7 @@ This document provides a detailed, beginner-friendly walkthrough of **Termodoro*
 
 ---
 
-## 1. Application Layout & Layout Hierarchy
+## 1. Application Overview & Layout Hierarchy
 
 Termodoro divides the terminal window into three main regions:
 
