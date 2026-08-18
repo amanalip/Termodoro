@@ -56,14 +56,14 @@ Termodoro intentionally limits external dependencies to a strictly audited set o
 
 ```mermaid
 graph TD
-    A[Termodoro Core] --> B[Rust 1.74+ Edition 2021]
-    A --> C[Ratatui 0.29.0 & Crossterm 0.28.1]
-    A --> D[Rodio 0.19.0 & Hound 3.5.1]
-    A --> E[Serde 1.0 & Serde_JSON 1.0]
-    A --> F[Directories 5.0.1]
-    A --> G[Chrono 0.4.45]
-    A --> H[Notify-Rust 4.18.0]
-    A --> I[Unicode-Width 0.2.0]
+    A["Termodoro Core"] --> B["Rust 1.74+ (Edition 2021)"]
+    A --> C["Ratatui 0.29.0 and Crossterm 0.28.1"]
+    A --> D["Rodio 0.19.0 and Hound 3.5.1"]
+    A --> E["Serde 1.0 and Serde_JSON 1.0"]
+    A --> F["Directories 5.0.1"]
+    A --> G["Chrono 0.4.45"]
+    A --> H["Notify-Rust 4.18.0"]
+    A --> I["Unicode-Width 0.2.0"]
 ```
 
 ### Technology Matrix & Selection Rationale
@@ -184,19 +184,20 @@ Ratatui employs an immediate-mode rendering architecture where the entire screen
 
 ```mermaid
 sequenceDiagram
-    participant Loop as Event Loop (100ms)
+    autonumber
+    participant Loop as Event Loop
     participant App as App State
-    participant UI as UI Coordinator (ui/mod.rs)
-    participant Buffer as Terminal Double Buffer
+    participant UI as UI Coordinator
+    participant Buffer as Terminal Buffer
 
-    Loop->>App: Tick (Calculate remaining seconds)
-    Loop->>UI: Terminal::draw(f, &app)
-    UI->>UI: Calculate Layout Constraints (Rects)
-    UI->>UI: Render Header (Tabs & Version)
-    UI->>UI: Render Active Tab View (Timer/Tasks/Stats/Settings)
-    UI->>UI: Render Modals (If Active)
-    UI->>UI: Render Status Toast & Keybinding Footer
-    UI->>Buffer: Flush Diff to Screen via Crossterm
+    Loop->>App: Calculate tick and remaining time
+    Loop->>UI: Trigger draw frame
+    UI->>UI: Compute layout constraints
+    UI->>UI: Render header bar and tabs
+    UI->>UI: Render active tab view
+    UI->>UI: Render modal overlays
+    UI->>UI: Render status toast and footer
+    UI->>Buffer: Flush diff to terminal via Crossterm
 ```
 
 ### Big Digits Block Rasterization
@@ -346,15 +347,15 @@ Termodoro's architecture is continuously certified by a comprehensive **192-test
 
 ```mermaid
 pie title Automated Test Distribution (192 Tests)
-    "App & E2E Workflows" : 35
+    "App and E2E Workflows" : 35
     "Productivity Analytics" : 29
     "Timer Finite State Machine" : 27
     "Task Management Engine" : 27
-    "Audio Synthesis & WAV" : 19
-    "TUI Rendering & Buffer" : 18
-    "Storage & Zero-Telemetry" : 14
-    "Theme Palettes & Contrast" : 10
-    "Configuration & Serde" : 8
+    "Audio Synthesis and WAV" : 19
+    "TUI Rendering and Buffer" : 18
+    "Storage and Zero-Telemetry" : 14
+    "Theme Palettes and Contrast" : 10
+    "Configuration and Serde" : 8
     "ASCII Block Typography" : 5
 ```
 
