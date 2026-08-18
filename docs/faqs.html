@@ -185,8 +185,13 @@
               </summary>
               <div class="faq-content">
                 <p>The recommended global installation method is through Cargo, Rust's official package manager:</p>
+                <p><strong>Option A: From local clone (Recommended):</strong></p>
+                <pre><code>git clone https://github.com/amanalip/Termodoro.git
+cd Termodoro
+cargo install --path .</code></pre>
+                <p><strong>Option B: Directly from Git repository:</strong></p>
                 <pre><code>cargo install --git https://github.com/amanalip/Termodoro.git</code></pre>
-                <p>Cargo automatically clones the repository, pulls audited dependencies, compiles an optimized release binary, and installs <code>termodoro</code> directly into your <code>~/.cargo/bin</code> directory.</p>
+                <p>Cargo compiles an optimized, standalone binary (<strong>~5.1 MB</strong>) and links <code>termodoro</code> directly into your <code>~/.cargo/bin</code> directory.</p>
               </div>
             </details>
 

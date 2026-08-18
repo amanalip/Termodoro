@@ -439,15 +439,21 @@
           <div class="install-nav">
             <button type="button" class="install-tab-btn active" data-install="cargo">Cargo Install</button>
             <button type="button" class="install-tab-btn" data-install="source">Source Build</button>
+            <button type="button" class="install-tab-btn" data-install="binary">Manual Binary</button>
             <button type="button" class="install-tab-btn" data-install="tmux">tmux Integration</button>
-            <button type="button" class="install-tab-btn" data-install="zellij">Zellij Floating Pane</button>
+            <button type="button" class="install-tab-btn" data-install="zellij">Zellij Pane</button>
           </div>
 
           <!-- Panel 1: Cargo -->
           <div class="install-code-panel" id="install-panel-cargo">
             <div class="code-box">
               <button type="button" class="copy-btn" data-target="code-cargo">📋 Copy</button>
-              <pre><code id="code-cargo"># Install globally via Cargo from Git repository
+              <pre><code id="code-cargo"># Option A: Global Installation from local clone (Recommended - ~5.1 MB binary)
+git clone https://github.com/amanalip/Termodoro.git
+cd Termodoro
+cargo install --path .
+
+# Option B: One-line install directly from Git
 cargo install --git https://github.com/amanalip/Termodoro.git
 
 # Launch Termodoro from anywhere
@@ -463,12 +469,26 @@ termodoro</code></pre>
 git clone https://github.com/amanalip/Termodoro.git
 cd Termodoro
 
-# 2. Build and launch in optimized release mode
+# 2. Build and launch directly in optimized release mode
 cargo run --release</code></pre>
             </div>
           </div>
 
-          <!-- Panel 3: tmux -->
+          <!-- Panel 3: Manual Binary -->
+          <div class="install-code-panel" id="install-panel-binary" style="display: none;">
+            <div class="code-box">
+              <button type="button" class="copy-btn" data-target="code-binary">📋 Copy</button>
+              <pre><code id="code-binary"># 1. Compile the standalone release artifact
+cargo build --release
+
+# 2. Copy binary to your local bin directory (~/.local/bin)
+mkdir -p ~/.local/bin
+cp target/release/termodoro ~/.local/bin/
+chmod +x ~/.local/bin/termodoro</code></pre>
+            </div>
+          </div>
+
+          <!-- Panel 4: tmux -->
           <div class="install-code-panel" id="install-panel-tmux" style="display: none;">
             <div class="code-box">
               <button type="button" class="copy-btn" data-target="code-tmux">📋 Copy</button>
@@ -480,7 +500,7 @@ bind-key T split-window -h -p 30 "termodoro"</code></pre>
             </div>
           </div>
 
-          <!-- Panel 4: Zellij -->
+          <!-- Panel 5: Zellij -->
           <div class="install-code-panel" id="install-panel-zellij" style="display: none;">
             <div class="code-box">
               <button type="button" class="copy-btn" data-target="code-zellij">📋 Copy</button>
