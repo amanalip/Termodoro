@@ -45,12 +45,17 @@ clippy:
 test-e2e:
 	node scripts/e2e-website-test.mjs
 
+# Run full sanity & fact-checking audit against Rust source code
+check-facts:
+	node scripts/sanity_and_fact_check.mjs
+
 # Display available commands
 help:
 	@echo "Termodoro Makefile Commands:"
 	@echo "  make test        - Run full 192 tests and automatically clean target/ cache"
 	@echo "  make test-clean  - Run tests and auto-clean (reclaims ~1.8GB disk space)"
 	@echo "  make test-e2e    - Run Playwright E2E test suite (desktop + mobile viewports)"
+	@echo "  make check-facts - Run full sanity and fact-check audit vs Rust source"
 	@echo "  make check       - Run fmt, clippy, 192 tests, and auto-clean"
 	@echo "  make build       - Compile optimized release binary"
 	@echo "  make run         - Run Termodoro in release mode"
