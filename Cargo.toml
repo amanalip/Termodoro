@@ -2,6 +2,7 @@
 name = "termodoro"
 version = "0.1.0"
 edition = "2021"
+default-run = "termodoro"
 authors = ["Aman <pamanalionline@gmail.com>"]
 description = "A sleek, feature-rich Pomodoro timer and task manager for the terminal."
 license = "GPL-3.0"
