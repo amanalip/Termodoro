@@ -249,7 +249,7 @@ cd Termodoro
 Choose the installation option that fits your preference:
 
 #### Option A: Global Installation via Cargo (Recommended)
-This compiles an optimized, standalone binary (~4 MB) and installs it into `~/.cargo/bin/termodoro`:
+This compiles an optimized, standalone binary (~5.1 MB) and installs it into `~/.cargo/bin/termodoro`:
 ```bash
 cargo install --path .
 ```
@@ -257,6 +257,16 @@ Once installed, you can launch Termodoro from **any terminal folder** on your sy
 ```bash
 termodoro
 ```
+
+##### Total Installation & Disk Footprint
+
+| Component | Filesystem Location | Disk Footprint | Details |
+| :--- | :--- | :---: | :--- |
+| **Standalone Binary** | `~/.cargo/bin/termodoro` | **~5.1 MB** | Fully self-contained binary with 18 themes, audio PCM synth & TUI engine |
+| **User Data & Settings** | `~/.local/share/termodoro/data.json` | **~5 KB** | Stores tasks, streaks, analytics & custom durations |
+| **Source Repository** | `~/Documents/.../Termodoro` | **~3.9 MB** | Complete codebase, documentation, and Git history |
+| **Compiler Cache** | `target/` | **0 MB** *(after `cargo clean`)* | Temporary build cache can be deleted anytime without impacting the app |
+| **Total System Footprint** | Global System Installation | **~5.1 MB** | Ultra-lightweight (smaller than a single MP3 audio file!) |
 
 > **💡 Disk Space Tip**: After running `cargo install --path .`, you can safely run `cargo clean` inside this repository folder. The installed `termodoro` binary in `~/.cargo/bin/` will continue to launch instantly (0.01s) without needing any recompilation, keeping your local project folder at a lean **~3.9 MB** without generating temporary compiler cache files!
 
