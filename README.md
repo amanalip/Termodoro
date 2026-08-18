@@ -236,6 +236,10 @@ Termodoro uses purely synthesized in-memory PCM audio without requiring heavy ex
   xcode-select --install
   ```
 
+- **Windows (10 / 11 / Server)**:
+  - Install **Visual Studio C++ Build Tools** (selected automatically during `rustup-init.exe` or downloadable from [Visual Studio Downloads](https://visualstudio.microsoft.com/visual-cpp-build-tools/)).
+  - No additional audio packages needed (Windows Core Audio is supported natively).
+
 ---
 
 ### Step 3: Cloning and Installing Termodoro
