@@ -185,25 +185,34 @@
                 <div class="tasks-screen-container">
                   <div class="tasks-toolbar">
                     <div class="tasks-filter-tabs">
-                      <button type="button" class="task-filter-btn active" data-filter="all">All (3)</button>
-                      <button type="button" class="task-filter-btn" data-filter="pending">Pending (2)</button>
-                      <button type="button" class="task-filter-btn" data-filter="completed">Done (1)</button>
+                      <button type="button" class="task-filter-btn active" data-filter="all">[1] All (3)</button>
+                      <button type="button" class="task-filter-btn" data-filter="active">[2] Active (2)</button>
+                      <button type="button" class="task-filter-btn" data-filter="completed">[3] Completed (1)</button>
                     </div>
-                    <button type="button" class="sim-key-pill" data-action="add">
-                      <kbd>a</kbd> Add Task
-                    </button>
+                    <div style="display: flex; gap: 0.4rem;">
+                      <button type="button" class="sim-key-pill" data-action="set-target" title="Set selected task as active target">
+                        <kbd>t</kbd> Set Target
+                      </button>
+                      <button type="button" class="sim-key-pill" data-action="delete" title="Delete selected task">
+                        <kbd>d</kbd> Delete
+                      </button>
+                      <button type="button" class="sim-key-pill" data-action="add">
+                        <kbd>a</kbd> Add Task
+                      </button>
+                    </div>
                   </div>
 
                   <table class="tasks-table">
                     <thead>
                       <tr>
-                        <th>Task Name</th>
-                        <th>Priority</th>
-                        <th>Pomodoros</th>
+                        <th style="width: 10%;">Status</th>
+                        <th style="width: 50%;">Task Title</th>
+                        <th style="width: 20%;">Est. Pomodoros</th>
+                        <th style="width: 20%;">Active Target</th>
                       </tr>
                     </thead>
                     <tbody id="sim-tasks-tbody">
-                      <!-- Rendered by app.js -->
+                      <!-- Rendered dynamically by app.js -->
                     </tbody>
                   </table>
                 </div>
@@ -213,33 +222,52 @@
               <div class="screen-view" data-screen="3" id="screen-stats">
                 <div class="stats-grid">
                   <div class="stat-card">
-                    <span class="stat-label">Daily Focus</span>
-                    <span class="stat-value">150 min</span>
-                    <span class="stat-sub">6 Pomodoros</span>
+                    <span class="stat-label">📅 Today's Focus</span>
+                    <span class="stat-value" id="stats-today-poms">4 🍅</span>
+                    <span class="stat-sub">100 minutes focused</span>
                   </div>
                   <div class="stat-card">
-                    <span class="stat-label">Current Streak</span>
-                    <span class="stat-value">🔥 7 Days</span>
-                    <span class="stat-sub">Best: 14 Days</span>
+                    <span class="stat-label">🔥 Daily Streak</span>
+                    <span class="stat-value">7 Days</span>
+                    <span class="stat-sub">Longest: 14 days</span>
                   </div>
                   <div class="stat-card">
-                    <span class="stat-label">Tasks Finished</span>
-                    <span class="stat-value">12 Items</span>
-                    <span class="stat-sub">92% completion rate</span>
+                    <span class="stat-label">⭐ All-Time Total</span>
+                    <span class="stat-value">42 🍅</span>
+                    <span class="stat-sub">1,050 total minutes</span>
+                  </div>
+                </div>
+
+                <div class="chart-box" style="margin-bottom: 1.25rem;">
+                  <div class="chart-title">📊 Last 7 Days Activity (Pomodoros Completed)</div>
+                  <div class="bar-chart-visual">
+                    <div class="bar-col"><div class="bar-pillar" style="height: 35px;"></div><span class="bar-day">Mon (3)</span></div>
+                    <div class="bar-col"><div class="bar-pillar" style="height: 55px;"></div><span class="bar-day">Tue (5)</span></div>
+                    <div class="bar-col"><div class="bar-pillar" style="height: 75px;"></div><span class="bar-day">Wed (7)</span></div>
+                    <div class="bar-col"><div class="bar-pillar" style="height: 45px;"></div><span class="bar-day">Thu (4)</span></div>
+                    <div class="bar-col"><div class="bar-pillar" style="height: 90px;"></div><span class="bar-day">Fri (8)</span></div>
+                    <div class="bar-col"><div class="bar-pillar" style="height: 100px;"></div><span class="bar-day">Sat (9)</span></div>
+                    <div class="bar-col"><div class="bar-pillar" style="height: 65px;"></div><span class="bar-day">Sun (6)</span></div>
                   </div>
                 </div>
 
                 <div class="chart-box">
-                  <div class="chart-title">Weekly Focus Time Distribution (Minutes)</div>
-                  <div class="bar-chart-visual">
-                    <div class="bar-col"><div class="bar-pillar"></div><span class="bar-day">Mon</span></div>
-                    <div class="bar-col"><div class="bar-pillar"></div><span class="bar-day">Tue</span></div>
-                    <div class="bar-col"><div class="bar-pillar"></div><span class="bar-day">Wed</span></div>
-                    <div class="bar-col"><div class="bar-pillar"></div><span class="bar-day">Thu</span></div>
-                    <div class="bar-col"><div class="bar-pillar"></div><span class="bar-day">Fri</span></div>
-                    <div class="bar-col"><div class="bar-pillar"></div><span class="bar-day">Sat</span></div>
-                    <div class="bar-col"><div class="bar-pillar"></div><span class="bar-day">Sun</span></div>
-                  </div>
+                  <div class="chart-title">📜 Recent Completed Sessions</div>
+                  <table class="tasks-table">
+                    <thead>
+                      <tr>
+                        <th>Time</th>
+                        <th>Type</th>
+                        <th>Duration</th>
+                        <th>Target Task</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr><td>10:45 AM</td><td><span style="color: var(--color-work);">🍅 Focus</span></td><td>25 mins</td><td>Implement GitHub Pages Website</td></tr>
+                      <tr><td>10:15 AM</td><td><span style="color: var(--color-short-break);">☕ Break</span></td><td>5 mins</td><td>Rest &amp; hydrate</td></tr>
+                      <tr><td>09:45 AM</td><td><span style="color: var(--color-work);">🍅 Focus</span></td><td>25 mins</td><td>Write Ratatui block digits renderer</td></tr>
+                    </tbody>
+                  </table>
                 </div>
               </div>
 
@@ -247,61 +275,77 @@
               <div class="screen-view" data-screen="4" id="screen-settings">
                 <div class="settings-grid">
                   <div class="setting-group">
-                    <div class="setting-group-title">Interval Durations</div>
+                    <div class="setting-group-title">Timer Durations &amp; Intervals</div>
                     <div class="setting-row">
-                      <span>Work Duration:</span>
-                      <strong>25 minutes</strong>
+                      <span>Focus Duration:</span>
+                      <strong>25 mins</strong>
                     </div>
                     <div class="setting-row">
                       <span>Short Break:</span>
-                      <strong>5 minutes</strong>
+                      <strong>5 mins</strong>
                     </div>
                     <div class="setting-row">
                       <span>Long Break:</span>
-                      <strong>15 minutes</strong>
+                      <strong>15 mins</strong>
+                    </div>
+                    <div class="setting-row">
+                      <span>Long Break Interval:</span>
+                      <strong>4 sessions</strong>
                     </div>
                   </div>
 
                   <div class="setting-group">
-                    <div class="setting-group-title">Acoustic Audio Chimes</div>
+                    <div class="setting-group-title">Automation &amp; Alerts</div>
                     <div class="setting-row">
-                      <span>Zen Tibetan Bowl (528 Hz):</span>
-                      <button type="button" class="btn btn-secondary" id="test-zen-btn" style="padding: 0.2rem 0.5rem; font-size: 0.75rem;">▶ Play</button>
+                      <span>Auto-start Breaks:</span>
+                      <strong style="color: var(--text-dim);">Disabled</strong>
                     </div>
                     <div class="setting-row">
-                      <span>Break Complete (D5 &rarr; A5):</span>
-                      <button type="button" class="btn btn-secondary" id="test-break-btn" style="padding: 0.2rem 0.5rem; font-size: 0.75rem;">▶ Play</button>
+                      <span>Auto-start Work:</span>
+                      <strong style="color: var(--text-dim);">Disabled</strong>
                     </div>
                     <div class="setting-row">
-                      <span>Terminal Bell Beep (800 Hz):</span>
-                      <button type="button" class="btn btn-secondary" id="test-bell-btn" style="padding: 0.2rem 0.5rem; font-size: 0.75rem;">▶ Play</button>
+                      <span>Desktop Notifications:</span>
+                      <strong style="color: var(--color-success);">Enabled</strong>
+                    </div>
+                    <div class="setting-row">
+                      <span>Sound / Bell Alert:</span>
+                      <strong style="color: var(--color-success);">Enabled</strong>
                     </div>
                   </div>
 
-                  <div class="setting-group">
-                    <div class="setting-group-title">Theme Palette</div>
-                    <div class="setting-row">
-                      <span>Active Palette:</span>
-                      <select class="setting-select" id="sim-theme-select">
-                        <option value="catppuccin_mocha">Catppuccin Mocha</option>
-                        <option value="catppuccin_macchiato">Catppuccin Macchiato</option>
-                        <option value="catppuccin_frappe">Catppuccin Frappé</option>
-                        <option value="catppuccin_latte">Catppuccin Latte (Light)</option>
-                        <option value="nord">Nord</option>
-                        <option value="gruvbox_dark">Gruvbox Dark</option>
-                        <option value="tokyo_night">Tokyo Night</option>
-                        <option value="dracula">Dracula</option>
-                        <option value="rose_pine">Rose Pine</option>
-                        <option value="one_dark">One Dark</option>
-                        <option value="kanagawa">Kanagawa</option>
-                        <option value="everforest_dark">Everforest Dark</option>
-                        <option value="everforest_light">Everforest Light</option>
-                        <option value="solarized_dark">Solarized Dark</option>
-                        <option value="solarized_light">Solarized Light</option>
-                        <option value="synthwave84">Synthwave '84</option>
-                        <option value="monokai_pro">Monokai Pro</option>
-                        <option value="oled_phosphor">OLED Phosphor</option>
-                      </select>
+                  <div class="setting-group" style="grid-column: 1 / -1;">
+                    <div class="setting-group-title">Acoustic Audio &amp; Theme Engine</div>
+                    <div style="display: flex; flex-wrap: wrap; gap: 1.5rem; justify-content: space-between; align-items: center;">
+                      <div style="display: flex; gap: 0.75rem; align-items: center;">
+                        <span>Audio Chimes:</span>
+                        <button type="button" class="btn btn-secondary" id="test-zen-btn" style="padding: 0.3rem 0.65rem; font-size: 0.8rem;">🔔 528 Hz Zen Bowl</button>
+                        <button type="button" class="btn btn-secondary" id="test-break-btn" style="padding: 0.3rem 0.65rem; font-size: 0.8rem;">🎵 D5 &rarr; A5 Chime</button>
+                        <button type="button" class="btn btn-secondary" id="test-bell-btn" style="padding: 0.3rem 0.65rem; font-size: 0.8rem;">⚡ 800 Hz Bell</button>
+                      </div>
+                      <div style="display: flex; gap: 0.75rem; align-items: center;">
+                        <span>Active Theme:</span>
+                        <select class="setting-select" id="sim-theme-select">
+                          <option value="catppuccin_mocha">Catppuccin Mocha</option>
+                          <option value="catppuccin_macchiato">Catppuccin Macchiato</option>
+                          <option value="catppuccin_frappe">Catppuccin Frappé</option>
+                          <option value="catppuccin_latte">Catppuccin Latte (Light)</option>
+                          <option value="nord">Nord</option>
+                          <option value="gruvbox_dark">Gruvbox Dark</option>
+                          <option value="tokyo_night">Tokyo Night</option>
+                          <option value="dracula">Dracula</option>
+                          <option value="rose_pine">Rose Pine</option>
+                          <option value="one_dark">One Dark</option>
+                          <option value="kanagawa">Kanagawa</option>
+                          <option value="everforest_dark">Everforest Dark</option>
+                          <option value="everforest_light">Everforest Light</option>
+                          <option value="solarized_dark">Solarized Dark</option>
+                          <option value="solarized_light">Solarized Light</option>
+                          <option value="synthwave84">Synthwave '84</option>
+                          <option value="monokai_pro">Monokai Pro</option>
+                          <option value="oled_phosphor">OLED Phosphor</option>
+                        </select>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -309,19 +353,36 @@
 
               <!-- MODAL: HELP POPUP -->
               <div class="terminal-modal-overlay" id="terminal-help-modal" style="display: none;">
-                <div class="terminal-modal">
+                <div class="terminal-modal" style="max-width: 540px;">
                   <div class="modal-header">
-                    <span>Keyboard Navigation Reference</span>
+                    <span>❓ Termodoro Keybindings &amp; Help</span>
                     <button type="button" class="modal-close-btn" onclick="toggleHelpModal(false)">&times;</button>
                   </div>
                   <div class="modal-body">
-                    <div class="shortcut-row"><span>Start / Pause Timer</span><span class="key-badge">Space</span></div>
-                    <div class="shortcut-row"><span>Reset Current Interval</span><span class="key-badge">r</span></div>
-                    <div class="shortcut-row"><span>Skip Interval Phase</span><span class="key-badge">s</span></div>
-                    <div class="shortcut-row"><span>Switch Tabs</span><span class="key-badge">1 - 4</span></div>
-                    <div class="shortcut-row"><span>Add New Task</span><span class="key-badge">a</span></div>
-                    <div class="shortcut-row"><span>Help Modal Overlay</span><span class="key-badge">?</span></div>
-                    <div class="shortcut-row"><span>Close Modal / Back</span><span class="key-badge">Esc</span></div>
+                    <div style="font-size: 0.8rem; font-weight: bold; color: var(--color-primary); margin-bottom: 0.25rem;">Navigation &amp; Tabs</div>
+                    <div class="shortcut-row"><span>Cycle tabs forward / back</span><div><span class="key-badge">Tab</span> / <span class="key-badge">Shift+Tab</span></div></div>
+                    <div class="shortcut-row"><span>Jump directly to tabs 1 - 4</span><span class="key-badge">1 - 4</span></div>
+                    <div class="shortcut-row"><span>Toggle this Help popup</span><span class="key-badge">?</span></div>
+                    <div class="shortcut-row"><span>Close modal / Quit app</span><div><span class="key-badge">Esc</span> / <span class="key-badge">q</span></div></div>
+
+                    <div style="font-size: 0.8rem; font-weight: bold; color: var(--color-work); margin-top: 0.75rem; margin-bottom: 0.25rem;">Timer Controls (Tab 1)</div>
+                    <div class="shortcut-row"><span>Start / Pause countdown</span><span class="key-badge">Space</span></div>
+                    <div class="shortcut-row"><span>Reset current interval</span><span class="key-badge">r</span></div>
+                    <div class="shortcut-row"><span>Skip to next phase</span><span class="key-badge">s</span></div>
+                    <div class="shortcut-row"><span>Quickly add a task</span><span class="key-badge">a</span></div>
+
+                    <div style="font-size: 0.8rem; font-weight: bold; color: var(--color-secondary); margin-top: 0.75rem; margin-bottom: 0.25rem;">Task Management (Tab 2)</div>
+                    <div class="shortcut-row"><span>Create a new task</span><span class="key-badge">a</span></div>
+                    <div class="shortcut-row"><span>Toggle completed status</span><div><span class="key-badge">Space</span> / <span class="key-badge">Enter</span></div></div>
+                    <div class="shortcut-row"><span>Set as active target for timer</span><span class="key-badge">t</span></div>
+                    <div class="shortcut-row"><span>Delete selected task</span><div><span class="key-badge">d</span> / <span class="key-badge">x</span></div></div>
+                    <div class="shortcut-row"><span>Navigate task list</span><div><span class="key-badge">j / ↓</span> <span class="key-badge">k / ↑</span></div></div>
+                    <div class="shortcut-row"><span>Filter tasks (All, Active, Done)</span><span class="key-badge">1 / 2 / 3</span></div>
+
+                    <div style="font-size: 0.8rem; font-weight: bold; color: var(--color-warning); margin-top: 0.75rem; margin-bottom: 0.25rem;">Settings &amp; Preferences (Tab 4)</div>
+                    <div class="shortcut-row"><span>Select setting option</span><div><span class="key-badge">j / ↓</span> <span class="key-badge">k / ↑</span></div></div>
+                    <div class="shortcut-row"><span>Adjust values / cycle themes</span><div><span class="key-badge">h / ←</span> <span class="key-badge">l / →</span> <span class="key-badge">+ / -</span></div></div>
+                    <div class="shortcut-row"><span>Toggle feature flags</span><div><span class="key-badge">Space</span> / <span class="key-badge">Enter</span></div></div>
                   </div>
                 </div>
               </div>
@@ -330,31 +391,24 @@
               <div class="terminal-modal-overlay" id="terminal-task-modal" style="display: none;">
                 <div class="terminal-modal">
                   <div class="modal-header">
-                    <span>Create New Task</span>
+                    <span>📝 Add New Task</span>
                     <button type="button" class="modal-close-btn" onclick="toggleTaskModal(false)">&times;</button>
                   </div>
                   <form id="modal-task-form" class="modal-body">
                     <div>
                       <label style="display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.35rem;">Task Description</label>
-                      <input type="text" id="modal-task-title-input" class="search-input" placeholder="e.g. Write unit tests for storage" required />
+                      <input type="text" id="modal-task-title-input" class="search-input" placeholder="e.g. Implement GitHub Pages Website" required />
                     </div>
-                    <div style="display: flex; gap: 1rem;">
-                      <div style="flex: 1;">
-                        <label style="display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.35rem;">Priority</label>
-                        <select id="modal-task-tag-select" class="setting-select" style="width: 100%;">
-                          <option value="HIGH">HIGH</option>
-                          <option value="MED" selected>MED</option>
-                          <option value="LOW">LOW</option>
-                        </select>
-                      </div>
-                      <div style="flex: 1;">
-                        <label style="display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.35rem;">Est. Pomodoros</label>
-                        <input type="number" id="modal-task-est-input" class="search-input" value="3" min="1" max="20" />
-                      </div>
+                    <div>
+                      <label style="display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.35rem;">Estimated Pomodoros (1 - 20 🍅)</label>
+                      <input type="number" id="modal-task-est-input" class="search-input" value="1" min="1" max="20" />
                     </div>
-                    <div style="display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 0.5rem;">
-                      <button type="button" class="btn btn-secondary" onclick="toggleTaskModal(false)">Cancel</button>
-                      <button type="submit" class="btn btn-primary">Add Task</button>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem;">
+                      <span style="font-size: 0.75rem; color: var(--text-dim);">[Tab] Switch field &bull; [Enter] Save &bull; [Esc] Cancel</span>
+                      <div style="display: flex; gap: 0.5rem;">
+                        <button type="button" class="btn btn-secondary" onclick="toggleTaskModal(false)">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Add Task</button>
+                      </div>
                     </div>
                   </form>
                 </div>
@@ -774,38 +828,43 @@ zellij run --floating --width 70% --height 70% -- termodoro</code></pre>
               <tbody>
                 <tr>
                   <td><span class="key-badge">Space</span></td>
-                  <td>Toggle Start / Pause timer countdown</td>
-                  <td>Global / Timer</td>
+                  <td>Toggle Start / Pause (Timer) &bull; Toggle Task Done (Tasks) &bull; Toggle Flag (Settings)</td>
+                  <td>Contextual</td>
                 </tr>
                 <tr>
                   <td><span class="key-badge">r</span></td>
-                  <td>Reset current interval to initial duration</td>
+                  <td>Reset current countdown timer to initial duration</td>
                   <td>Timer</td>
                 </tr>
                 <tr>
                   <td><span class="key-badge">s</span></td>
-                  <td>Skip current interval phase immediately</td>
+                  <td>Skip current Pomodoro or Break phase immediately</td>
                   <td>Timer</td>
                 </tr>
                 <tr>
                   <td><span class="key-badge">1</span> / <span class="key-badge">2</span> / <span class="key-badge">3</span> / <span class="key-badge">4</span></td>
-                  <td>Switch between Timer, Tasks, Stats, and Settings tabs</td>
+                  <td>Jump directly to Timer (1), Tasks (2), Stats (3), Settings (4)</td>
                   <td>Global</td>
                 </tr>
                 <tr>
-                  <td><span class="key-badge">Tab</span> / <span class="key-badge">BackTab</span></td>
-                  <td>Cycle forward / backward through tabs</td>
+                  <td><span class="key-badge">Tab</span> / <span class="key-badge">Shift+Tab</span></td>
+                  <td>Cycle forward / backward sequentially through all navigation tabs</td>
                   <td>Global</td>
-                </tr>
-                <tr>
-                  <td><span class="key-badge">j</span> / <span class="key-badge">k</span> (or <span class="key-badge">↓</span> / <span class="key-badge">↑</span>)</td>
-                  <td>Navigate up / down through list rows</td>
-                  <td>Tasks / Settings</td>
                 </tr>
                 <tr>
                   <td><span class="key-badge">a</span></td>
-                  <td>Open Add Task dialog modal</td>
+                  <td>Open Add Task modal (Title input + 1-20 Pomodoro estimation)</td>
+                  <td>Timer / Tasks</td>
+                </tr>
+                <tr>
+                  <td><span class="key-badge">t</span></td>
+                  <td>Bind highlighted task as active goal target for the Pomodoro timer</td>
                   <td>Tasks</td>
+                </tr>
+                <tr>
+                  <td><span class="key-badge">Enter</span></td>
+                  <td>Toggle completed status on selected task &bull; Save task modal</td>
+                  <td>Tasks / Modals</td>
                 </tr>
                 <tr>
                   <td><span class="key-badge">d</span> / <span class="key-badge">x</span></td>
@@ -813,28 +872,28 @@ zellij run --floating --width 70% --height 70% -- termodoro</code></pre>
                   <td>Tasks</td>
                 </tr>
                 <tr>
-                  <td><span class="key-badge">Enter</span></td>
-                  <td>Toggle task completion or bind active target goal</td>
+                  <td><span class="key-badge">j / ↓</span> &bull; <span class="key-badge">k / ↑</span></td>
+                  <td>Navigate cursor up / down through task list rows or settings items</td>
+                  <td>Tasks / Settings</td>
+                </tr>
+                <tr>
+                  <td><span class="key-badge">1</span> / <span class="key-badge">2</span> / <span class="key-badge">3</span></td>
+                  <td>Switch task backlog view filters: [1] All &bull; [2] Active &bull; [3] Completed</td>
                   <td>Tasks</td>
                 </tr>
                 <tr>
-                  <td><span class="key-badge">f</span></td>
-                  <td>Cycle task status filter (All &rarr; Pending &rarr; Completed)</td>
-                  <td>Tasks</td>
-                </tr>
-                <tr>
-                  <td><span class="key-badge">h</span> / <span class="key-badge">l</span> (or <span class="key-badge">←</span> / <span class="key-badge">→</span>)</td>
-                  <td>Adjust interval duration or switch active theme</td>
-                  <td>Settings</td>
+                  <td><span class="key-badge">h / ←</span> &bull; <span class="key-badge">l / →</span> (or <span class="key-badge">+ / -</span>)</td>
+                  <td>Adjust interval duration mins or cycle through all 18 color themes</td>
+                  <td>Settings / Modals</td>
                 </tr>
                 <tr>
                   <td><span class="key-badge">?</span></td>
-                  <td>Open keyboard shortcuts reference modal</td>
+                  <td>Toggle floating Help &amp; Keybindings popup modal overlay</td>
                   <td>Global</td>
                 </tr>
                 <tr>
-                  <td><span class="key-badge">q</span> / <span class="key-badge">Ctrl+C</span></td>
-                  <td>Safely persist state and quit application</td>
+                  <td><span class="key-badge">q</span> / <span class="key-badge">Esc</span></td>
+                  <td>Dismiss active modal &bull; Safely persist state to disk and quit</td>
                   <td>Global</td>
                 </tr>
               </tbody>

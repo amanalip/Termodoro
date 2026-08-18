@@ -317,7 +317,7 @@ function playBellBeep() {
 // 4. Interactive Terminal State Machine & App Controller
 // ============================================================================
 const state = {
-  currentTab: 1,
+  currentTab: 1, // 1: Timer, 2: Tasks, 3: Stats, 4: Settings
   phase: 'work', // 'work', 'shortBreak', 'longBreak'
   workDuration: 25 * 60,
   shortBreakDuration: 5 * 60,
@@ -328,11 +328,12 @@ const state = {
   completedCycles: 0,
   targetTask: 'Implement GitHub Pages Website',
   tasks: [
-    { id: 1, title: 'Implement GitHub Pages Website', poms: 2, est: 4, tag: 'HIGH', done: false },
-    { id: 2, title: 'Write Ratatui block digits renderer', poms: 3, est: 3, tag: 'MED', done: true },
-    { id: 3, title: 'Synthesize PCM RIFF WAV sound chimes', poms: 1, est: 2, tag: 'LOW', done: false }
+    { id: 1, title: 'Implement GitHub Pages Website', completed_poms: 2, est_poms: 4, completed: false, is_active: true },
+    { id: 2, title: 'Write Ratatui block digits renderer', completed_poms: 3, est_poms: 3, completed: true, is_active: false },
+    { id: 3, title: 'Synthesize PCM RIFF WAV sound chimes', completed_poms: 1, est_poms: 2, completed: false, is_active: false }
   ],
-  activeFilter: 'all',
+  selectedTaskIndex: 0,
+  activeFilter: 'all', // 'all', 'active', 'completed'
   helpModalOpen: false,
   taskModalOpen: false
 };
@@ -417,7 +418,7 @@ function updateClockDisplay() {
 
   // Update target task title
   const taskTitleEl = document.getElementById('sim-target-task-title');
-  if (taskTitleEl) taskTitleEl.textContent = state.targetTask;
+  if (taskTitleEl) taskTitleEl.textContent = state.targetTask || 'No Active Goal';
 }
 
 function toggleTimer() {
@@ -446,6 +447,14 @@ function tickTimer() {
       state.completedCycles++;
       playZenBowlChime();
       showToast('Focus session complete! 🎉');
+      
+      // Update active target task completed pomodoros
+      const activeTask = state.tasks.find(t => t.is_active);
+      if (activeTask) {
+        activeTask.completed_poms++;
+        renderTasksScreen();
+      }
+
       if (state.completedCycles % state.cyclesBeforeLongBreak === 0) {
         state.phase = 'longBreak';
         state.timeRemaining = state.longBreakDuration;
@@ -470,7 +479,7 @@ function resetTimer() {
   state.timeRemaining = state.phase === 'work' ? state.workDuration :
                         state.phase === 'shortBreak' ? state.shortBreakDuration : state.longBreakDuration;
   updateClockDisplay();
-  showToast('Timer reset');
+  showToast('Timer reset.');
 }
 
 function skipPhase() {
@@ -488,7 +497,7 @@ function skipPhase() {
     state.timeRemaining = state.workDuration;
   }
   updateClockDisplay();
-  showToast(`Skipped to ${state.phase.toUpperCase()}`);
+  showToast(`Skipped to ${state.phase === 'work' ? 'Focus Work' : state.phase === 'shortBreak' ? 'Short Break' : 'Long Break'}`);
 }
 
 function switchTab(tabIndex) {
@@ -513,41 +522,76 @@ function renderTimerScreen() {
   updateClockDisplay();
 }
 
+function getFilteredTasks() {
+  return state.tasks.filter(t => {
+    if (state.activeFilter === 'active') return !t.completed;
+    if (state.activeFilter === 'completed') return t.completed;
+    return true;
+  });
+}
+
 function renderTasksScreen() {
   const tbody = document.getElementById('sim-tasks-tbody');
   if (!tbody) return;
 
-  const filtered = state.tasks.filter(t => {
-    if (state.activeFilter === 'pending') return !t.done;
-    if (state.activeFilter === 'completed') return t.done;
-    return true;
+  const filtered = getFilteredTasks();
+  const totalCount = state.tasks.length;
+  const doneCount = state.tasks.filter(t => t.completed).length;
+  const activeCount = totalCount - doneCount;
+
+  // Update filter button badges
+  const filterBtns = document.querySelectorAll('.task-filter-btn');
+  filterBtns.forEach(btn => {
+    const f = btn.dataset.filter;
+    btn.classList.toggle('active', f === state.activeFilter);
+    if (f === 'all') btn.textContent = `[1] All (${totalCount})`;
+    else if (f === 'active') btn.textContent = `[2] Active (${activeCount})`;
+    else if (f === 'completed') btn.textContent = `[3] Completed (${doneCount})`;
   });
 
-  tbody.innerHTML = filtered.map(t => `
-    <tr class="task-row ${t.done ? 'completed' : ''}" data-id="${t.id}">
-      <td><span class="task-checkbox">${t.done ? '[x]' : '[ ]'}</span> ${t.title}</td>
-      <td><span class="task-tag tag-${t.tag.toLowerCase()}">${t.tag}</span></td>
-      <td>${t.poms}/${t.est} 🍅</td>
-    </tr>
-  `).join('');
+  if (state.selectedTaskIndex >= filtered.length) {
+    state.selectedTaskIndex = Math.max(0, filtered.length - 1);
+  }
+
+  tbody.innerHTML = filtered.map((t, idx) => {
+    const isSelected = idx === state.selectedTaskIndex;
+    const checkGlyph = t.completed ? '<span style="color: var(--color-success); font-weight: bold;">✔</span>' : '<span style="color: var(--text-dim);">○</span>';
+    const targetBadge = t.is_active ? '<span style="color: var(--color-work); font-weight: bold;">🎯 ACTIVE</span>' : '<span style="color: var(--text-dim);">-</span>';
+    
+    // Generate pomodoro blocks
+    let blocks = '';
+    for (let b = 0; b < Math.min(t.est_poms, 10); b++) {
+      blocks += b < t.completed_poms ? '■' : '□';
+    }
+
+    return `
+      <tr class="task-row ${isSelected ? 'selected-row' : ''} ${t.completed ? 'completed' : ''}" data-index="${idx}" style="${isSelected ? 'background: var(--color-highlight);' : ''}">
+        <td style="text-align: center;">${checkGlyph}</td>
+        <td style="${t.completed ? 'text-decoration: line-through; opacity: 0.7;' : ''}">${t.title}</td>
+        <td><code style="color: var(--color-warning);">${blocks}</code> ${t.completed_poms}/${t.est_poms} 🍅</td>
+        <td>${targetBadge}</td>
+      </tr>
+    `;
+  }).join('');
 
   tbody.querySelectorAll('.task-row').forEach(row => {
     row.addEventListener('click', () => {
-      const id = parseInt(row.dataset.id);
-      const task = state.tasks.find(x => x.id === id);
+      const idx = parseInt(row.dataset.index);
+      state.selectedTaskIndex = idx;
+      const filteredTasks = getFilteredTasks();
+      const task = filteredTasks[idx];
       if (task) {
-        task.done = !task.done;
+        task.completed = !task.completed;
         renderTasksScreen();
-        showToast(`Task ${task.done ? 'completed' : 'reopened'}`);
+        showToast(`Task marked ${task.completed ? 'completed' : 'active'}`);
       }
     });
   });
 }
 
 function renderStatsScreen() {
-  // Weekly bar chart values
   const pillars = document.querySelectorAll('.bar-pillar');
-  const heights = [45, 60, 80, 50, 95, 110, 70];
+  const heights = [35, 55, 75, 45, 90, 100, 65];
   pillars.forEach((p, idx) => {
     p.style.height = `${heights[idx] || 50}px`;
   });
@@ -588,9 +632,9 @@ function toggleTaskModal(show) {
 
 // Setup event listeners
 function setupEventListeners() {
-  // Keyboard navigation
+  // Global & Contextual Keyboard dispatcher matching src/app.rs
   window.addEventListener('keydown', (e) => {
-    // Ignore keystrokes if typing inside text inputs
+    // Ignore keystrokes inside text inputs unless Enter/Escape
     if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) {
       if (e.key === 'Escape') {
         toggleTaskModal(false);
@@ -599,28 +643,132 @@ function setupEventListeners() {
       return;
     }
 
-    if (e.key === ' ' || e.code === 'Space') {
+    // Modal open handling
+    if (state.helpModalOpen || state.taskModalOpen) {
+      if (e.key === 'Escape' || e.key === 'q' || e.key === '?') {
+        toggleHelpModal(false);
+        toggleTaskModal(false);
+      }
+      return;
+    }
+
+    // Global Keybindings
+    if (e.key === 'q') {
+      showToast('Termodoro: Use terminal controls or close browser tab.');
+      return;
+    }
+    if (e.key === '?' || e.key === 'F1') {
+      toggleHelpModal(true);
+      return;
+    }
+    if (e.key === 'Tab') {
       e.preventDefault();
-      toggleTimer();
-    } else if (e.key === 'r') {
-      resetTimer();
-    } else if (e.key === 's') {
-      skipPhase();
-    } else if (e.key === '1') {
-      switchTab(1);
-    } else if (e.key === '2') {
-      switchTab(2);
-    } else if (e.key === '3') {
-      switchTab(3);
-    } else if (e.key === '4') {
-      switchTab(4);
-    } else if (e.key === '?' || e.key === 'h') {
-      toggleHelpModal();
-    } else if (e.key === 'a') {
-      toggleTaskModal(true);
-    } else if (e.key === 'Escape') {
-      toggleHelpModal(false);
-      toggleTaskModal(false);
+      if (e.shiftKey) {
+        const prevTab = state.currentTab === 1 ? 4 : state.currentTab - 1;
+        switchTab(prevTab);
+      } else {
+        const nextTab = state.currentTab === 4 ? 1 : state.currentTab + 1;
+        switchTab(nextTab);
+      }
+      return;
+    }
+
+    // Tab-specific keybindings
+    if (state.currentTab === 1) {
+      // TAB 1: TIMER
+      if (e.key === ' ' || e.code === 'Space') {
+        e.preventDefault();
+        toggleTimer();
+      } else if (e.key === 'r') {
+        resetTimer();
+      } else if (e.key === 's') {
+        skipPhase();
+      } else if (e.key === 'a') {
+        toggleTaskModal(true);
+      } else if (['1', '2', '3', '4'].includes(e.key)) {
+        switchTab(parseInt(e.key));
+      }
+    } else if (state.currentTab === 2) {
+      // TAB 2: TASKS
+      const filtered = getFilteredTasks();
+      if (e.key === '1') {
+        state.activeFilter = 'all';
+        state.selectedTaskIndex = 0;
+        renderTasksScreen();
+      } else if (e.key === '2') {
+        state.activeFilter = 'active';
+        state.selectedTaskIndex = 0;
+        renderTasksScreen();
+      } else if (e.key === '3') {
+        state.activeFilter = 'completed';
+        state.selectedTaskIndex = 0;
+        renderTasksScreen();
+      } else if (e.key === '4') {
+        switchTab(4);
+      } else if (e.key === 'j' || e.key === 'ArrowDown') {
+        if (state.selectedTaskIndex < filtered.length - 1) {
+          state.selectedTaskIndex++;
+          renderTasksScreen();
+        }
+      } else if (e.key === 'k' || e.key === 'ArrowUp') {
+        if (state.selectedTaskIndex > 0) {
+          state.selectedTaskIndex--;
+          renderTasksScreen();
+        }
+      } else if (e.key === ' ' || e.key === 'Enter') {
+        const task = filtered[state.selectedTaskIndex];
+        if (task) {
+          task.completed = !task.completed;
+          renderTasksScreen();
+          showToast(`Task ${task.completed ? 'completed' : 'reopened'}`);
+        }
+      } else if (e.key === 't') {
+        const task = filtered[state.selectedTaskIndex];
+        if (task) {
+          state.tasks.forEach(t => t.is_active = (t.id === task.id));
+          state.targetTask = task.title;
+          updateClockDisplay();
+          renderTasksScreen();
+          showToast(`Target set to: ${task.title}`);
+        }
+      } else if (e.key === 'd' || e.key === 'x') {
+        const task = filtered[state.selectedTaskIndex];
+        if (task) {
+          state.tasks = state.tasks.filter(t => t.id !== task.id);
+          if (task.is_active) {
+            state.targetTask = '';
+            updateClockDisplay();
+          }
+          renderTasksScreen();
+          showToast('Task deleted.');
+        }
+      } else if (e.key === 'a') {
+        toggleTaskModal(true);
+      }
+    } else if (state.currentTab === 3) {
+      // TAB 3: STATS
+      if (['1', '2', '3', '4'].includes(e.key)) {
+        switchTab(parseInt(e.key));
+      }
+    } else if (state.currentTab === 4) {
+      // TAB 4: SETTINGS
+      if (['1', '2', '3', '4'].includes(e.key)) {
+        switchTab(parseInt(e.key));
+      } else if (e.key === 'l' || e.key === 'ArrowRight' || e.key === '+' || e.key === '=') {
+        // Cycle theme forward
+        const themeKeys = Object.keys(THEMES);
+        const curIdx = themeKeys.indexOf(currentThemeKey);
+        const nextKey = themeKeys[(curIdx + 1) % themeKeys.length];
+        applyTheme(nextKey);
+        showToast(`Theme: ${THEMES[nextKey].name}`);
+      } else if (e.key === 'h' || e.key === 'ArrowLeft' || e.key === '-' || e.key === '_') {
+        // Cycle theme backward
+        const themeKeys = Object.keys(THEMES);
+        const curIdx = themeKeys.indexOf(currentThemeKey);
+        const prevKey = themeKeys[(curIdx - 1 + themeKeys.length) % themeKeys.length];
+        applyTheme(prevKey);
+        showToast(`Theme: ${THEMES[prevKey].name}`);
+      }
     }
   });
 
@@ -644,15 +792,37 @@ function setupEventListeners() {
       else if (action === 'skip') skipPhase();
       else if (action === 'help') toggleHelpModal(true);
       else if (action === 'add') toggleTaskModal(true);
+      else if (action === 'set-target') {
+        const filtered = getFilteredTasks();
+        const task = filtered[state.selectedTaskIndex];
+        if (task) {
+          state.tasks.forEach(t => t.is_active = (t.id === task.id));
+          state.targetTask = task.title;
+          updateClockDisplay();
+          renderTasksScreen();
+          showToast(`Target set to: ${task.title}`);
+        }
+      } else if (action === 'delete') {
+        const filtered = getFilteredTasks();
+        const task = filtered[state.selectedTaskIndex];
+        if (task) {
+          state.tasks = state.tasks.filter(t => t.id !== task.id);
+          if (task.is_active) {
+            state.targetTask = '';
+            updateClockDisplay();
+          }
+          renderTasksScreen();
+          showToast('Task deleted.');
+        }
+      }
     });
   });
 
   // Task Filters
   document.querySelectorAll('.task-filter-btn').forEach(btn => {
     btn.addEventListener('click', () => {
-      document.querySelectorAll('.task-filter-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
       state.activeFilter = btn.dataset.filter;
+      state.selectedTaskIndex = 0;
       renderTasksScreen();
     });
   });
@@ -690,19 +860,20 @@ function setupEventListeners() {
     createTaskForm.addEventListener('submit', (e) => {
       e.preventDefault();
       const input = document.getElementById('modal-task-title-input');
-      const tagSelect = document.getElementById('modal-task-tag-select');
       const estInput = document.getElementById('modal-task-est-input');
 
       if (input && input.value.trim()) {
+        const est = parseInt(estInput.value) || 1;
         const newTask = {
           id: Date.now(),
           title: input.value.trim(),
-          poms: 0,
-          est: parseInt(estInput.value) || 2,
-          tag: tagSelect.value || 'MED',
-          done: false
+          completed_poms: 0,
+          est_poms: Math.max(1, Math.min(20, est)),
+          completed: false,
+          is_active: false
         };
         state.tasks.unshift(newTask);
+        state.selectedTaskIndex = 0;
         renderTasksScreen();
         toggleTaskModal(false);
         showToast(`Added task: "${newTask.title}"`);
