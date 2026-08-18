@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <defs>
+    <!-- Totoro Fur Gradient -->
+    <linearGradient id="totoroFur" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6c7086" />
+      <stop offset="100%" stop-color="#45475a" />
+    </linearGradient>
+    <!-- Tomato Leaf Hat Gradient -->
+    <linearGradient id="totoroLeaf" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#a6e3a1" />
+      <stop offset="100%" stop-color="#40a02b" />
+    </linearGradient>
+    <!-- Belly Gradient -->
+    <linearGradient id="totoroBelly" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#f5e0dc" />
+      <stop offset="100%" stop-color="#dce0e8" />
+    </linearGradient>
+    <!-- Terminal Tomato Accent -->
+    <linearGradient id="tomatoBadge" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f38ba8" />
+      <stop offset="100%" stop-color="#d20f39" />
+    </linearGradient>
+  </defs>
+
+  <!-- Terminal Dark Rounded Tile -->
+  <rect width="64" height="64" rx="16" fill="#181825" />
+  <rect x="1" y="1" width="62" height="62" rx="15" fill="none" stroke="#313244" stroke-width="1.5" />
+
+  <!-- Left Totoro Ear -->
+  <path d="M21 28 C17 19 18 9 22 7 C25 8 27 19 26 28 Z" fill="url(#totoroFur)" />
+  <path d="M21.5 24 C19 18 20 11 22 10 C24 11 25 18 24.5 24 Z" fill="#313244" opacity="0.3" />
+
+  <!-- Right Totoro Ear -->
+  <path d="M43 28 C47 19 46 9 42 7 C39 8 37 19 38 28 Z" fill="url(#totoroFur)" />
+  <path d="M42.5 24 C45 18 44 11 42 10 C40 11 39 18 39.5 24 Z" fill="#313244" opacity="0.3" />
+
+  <!-- Totoro Main Body -->
+  <path d="M18 34 C18 25 46 25 46 34 C53 40 53 54 46 58 C39 61 25 61 18 58 C11 54 11 40 18 34 Z" fill="url(#totoroFur)" />
+
+  <!-- Cream Belly Patch -->
+  <path d="M22 39 C22 33 42 33 42 39 C47 44 47 55 42 57 C37 59 27 59 22 57 C17 55 17 44 22 39 Z" fill="url(#totoroBelly)" />
+
+  <!-- Iconic Totoro Belly Chevron Marks (Carats ^ ^ ^) -->
+  <!-- Top Row Chevrons -->
+  <path d="M27 41 C28 39 30 39 31 41" fill="none" stroke="#585b70" stroke-width="1.5" stroke-linecap="round" />
+  <path d="M33 41 C34 39 36 39 37 41" fill="none" stroke="#585b70" stroke-width="1.5" stroke-linecap="round" />
+  <!-- Bottom Row Chevrons -->
+  <path d="M24 45 C25 43 27 43 28 45" fill="none" stroke="#585b70" stroke-width="1.5" stroke-linecap="round" />
+  <path d="M30 45 C31 43 33 43 34 45" fill="none" stroke="#585b70" stroke-width="1.5" stroke-linecap="round" />
+  <path d="M36 45 C37 43 39 43 40 45" fill="none" stroke="#585b70" stroke-width="1.5" stroke-linecap="round" />
+
+  <!-- Eyes -->
+  <!-- Left Eye -->
+  <circle cx="25" cy="30" r="4.2" fill="#ffffff" />
+  <circle cx="26.2" cy="30" r="2.1" fill="#11111b" />
+  <circle cx="25.5" cy="29.2" r="0.7" fill="#ffffff" />
+
+  <!-- Right Eye -->
+  <circle cx="39" cy="30" r="4.2" fill="#ffffff" />
+  <circle cx="37.8" cy="30" r="2.1" fill="#11111b" />
+  <circle cx="37.1" cy="29.2" r="0.7" fill="#ffffff" />
+
+  <!-- Nose -->
+  <path d="M30.5 31.5 L33.5 31.5 L32 33 Z" fill="#11111b" />
+
+  <!-- Whiskers -->
+  <!-- Left Whiskers -->
+  <line x1="12" y1="32" x2="20" y2="33" stroke="#a6adc8" stroke-width="1.2" stroke-linecap="round" />
+  <line x1="11" y1="35.5" x2="20" y2="35.5" stroke="#a6adc8" stroke-width="1.2" stroke-linecap="round" />
+  <line x1="12" y1="39" x2="20" y2="38" stroke="#a6adc8" stroke-width="1.2" stroke-linecap="round" />
+
+  <!-- Right Whiskers -->
+  <line x1="52" y1="32" x2="44" y2="33" stroke="#a6adc8" stroke-width="1.2" stroke-linecap="round" />
+  <line x1="53" y1="35.5" x2="44" y2="35.5" stroke="#a6adc8" stroke-width="1.2" stroke-linecap="round" />
+  <line x1="52" y1="39" x2="44" y2="38" stroke="#a6adc8" stroke-width="1.2" stroke-linecap="round" />
+
+  <!-- Tomato Leaf Hat on Head (Studio Ghibli Leaf Tribute) -->
+  <!-- Big Central Leaf -->
+  <path d="M32 23 C26 21 27 14 32 13 C37 14 38 21 32 23 Z" fill="url(#totoroLeaf)" />
+  <!-- Side Leaflets (Tomato Calyx) -->
+  <path d="M32 21 C28 20 28 17 31 16 Z" fill="url(#totoroLeaf)" opacity="0.9" />
+  <path d="M32 21 C36 20 36 17 33 16 Z" fill="url(#totoroLeaf)" opacity="0.9" />
+  <!-- Leaf Stem with Dewdrop / Tomato Top -->
+  <path d="M32 14 C32 10 34 8 37 8" fill="none" stroke="#a6e3a1" stroke-width="1.8" stroke-linecap="round" />
+  <circle cx="32" cy="18" r="1.5" fill="#f38ba8" />
+</svg>
