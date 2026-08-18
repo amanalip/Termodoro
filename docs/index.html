@@ -17,7 +17,7 @@
   
   <!-- Favicon -->
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css?v=20260818c" />
 </head>
 <body>
 
@@ -143,14 +143,8 @@
                     <span class="ratatui-cycle-tracker" id="sim-cycle-tracker">Cycle 1/4 [<span id="sim-cycle-dots">◉ ○ ○ ○</span>]</span>
                   </div>
 
-                  <!-- 2. Big Block Digits -->
-                  <div class="ratatui-clock-display" id="sim-clock-display">
-                    <pre class="tui-digit" id="digit-1">███&#10;█ █&#10;█ █&#10;█ █&#10;███</pre>
-                    <pre class="tui-digit" id="digit-2">███&#10;  █&#10;███&#10;  █&#10;███</pre>
-                    <pre class="tui-digit-colon" id="digit-colon">&#10; █ &#10;&#10; █ &#10;</pre>
-                    <pre class="tui-digit" id="digit-3">███&#10;█ █&#10;█ █&#10;█ █&#10;███</pre>
-                    <pre class="tui-digit" id="digit-4">███&#10;█ █&#10;█ █&#10;█ █&#10;███</pre>
-                  </div>
+                  <!-- 2. Big Block Digits Banner (matching src/ui/digits.rs) -->
+                  <pre class="tui-big-clock" id="sim-big-clock">████ ████      ████ ████&#10;   █ █    ████ █  █ █  █&#10;████ ████      █  █ █  █&#10;█       █ ████ █  █ █  █&#10;████ ████      ████ ████</pre>
 
                   <!-- 3. Ratatui Gauge Block -->
                   <div class="ratatui-box ratatui-gauge-box">
@@ -957,6 +951,6 @@ zellij run --floating --width 70% --height 70% -- termodoro</code></pre>
   <div class="toast-notice" id="toast-notice">Action notification</div>
 
   <!-- Main JavaScript Engine -->
-  <script src="app.js"></script>
+  <script src="app.js?v=20260818c"></script>
 </body>
 </html>

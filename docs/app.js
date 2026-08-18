@@ -191,25 +191,34 @@ function applyTheme(themeKey) {
 }
 
 // ============================================================================
-// 2. 5x3 Block Digits Rasterizer (matching Ratatui implementation)
+// 2. 5x4 Block Digits Rasterizer (matching src/ui/digits.rs)
 // ============================================================================
 const DIGIT_PATTERNS = {
-  '0': ['███', '█ █', '█ █', '█ █', '███'],
-  '1': [' ██', '  █', '  █', '  █', '  █'],
-  '2': ['███', '  █', '███', '█  ', '███'],
-  '3': ['███', '  █', '███', '  █', '███'],
-  '4': ['█ █', '█ █', '███', '  █', '  █'],
-  '5': ['███', '█  ', '███', '  █', '███'],
-  '6': ['███', '█  ', '███', '█ █', '███'],
-  '7': ['███', '  █', '  █', '  █', '  █'],
-  '8': ['███', '█ █', '███', '█ █', '███'],
-  '9': ['███', '█ █', '███', '  █', '███'],
-  ':': [' ', '█', ' ', '█', ' ']
+  '0': ['████', '█  █', '█  █', '█  █', '████'],
+  '1': ['  ██', '  ██', '  ██', '  ██', '  ██'],
+  '2': ['████', '   █', '████', '█   ', '████'],
+  '3': ['████', '   █', '████', '   █', '████'],
+  '4': ['█  █', '█  █', '████', '   █', '   █'],
+  '5': ['████', '█   ', '████', '   █', '████'],
+  '6': ['████', '█   ', '████', '█  █', '████'],
+  '7': ['████', '   █', '   █', '   █', '   █'],
+  '8': ['████', '█  █', '████', '█  █', '████'],
+  '9': ['████', '█  █', '████', '   █', '████'],
+  ':': ['    ', ' ██ ', '    ', ' ██ ', '    '],
+  ' ': ['    ', '    ', '    ', '    ', '    ']
 };
 
-function renderBlockDigit(char) {
-  const pattern = DIGIT_PATTERNS[char] || DIGIT_PATTERNS['0'];
-  return pattern.join('\n');
+function renderBigTime(mins, secs) {
+  const str = String(mins).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
+  const lines = ['', '', '', '', ''];
+  for (let i = 0; i < str.length; i++) {
+    const pattern = DIGIT_PATTERNS[str[i]] || DIGIT_PATTERNS[' '];
+    for (let row = 0; row < 5; row++) {
+      if (i > 0) lines[row] += ' ';
+      lines[row] += pattern[row];
+    }
+  }
+  return lines.join('\n');
 }
 
 // ============================================================================
@@ -359,20 +368,14 @@ function updateClockDisplay() {
   const mins = Math.floor(state.timeRemaining / 60);
   const secs = state.timeRemaining % 60;
 
-  const minStr = String(mins).padStart(2, '0');
-  const secStr = String(secs).padStart(2, '0');
+  const clockEl = document.getElementById('sim-big-clock');
+  const t = THEMES[currentThemeKey] || THEMES.catppuccin_mocha;
 
-  const d1 = document.getElementById('digit-1');
-  const d2 = document.getElementById('digit-2');
-  const colon = document.getElementById('digit-colon');
-  const d3 = document.getElementById('digit-3');
-  const d4 = document.getElementById('digit-4');
-
-  if (d1) d1.textContent = renderBlockDigit(minStr[0]);
-  if (d2) d2.textContent = renderBlockDigit(minStr[1]);
-  if (colon) colon.textContent = renderBlockDigit(':');
-  if (d3) d3.textContent = renderBlockDigit(secStr[0]);
-  if (d4) d4.textContent = renderBlockDigit(secStr[1]);
+  if (clockEl) {
+    clockEl.textContent = renderBigTime(mins, secs);
+    clockEl.style.color = state.phase === 'work' ? t.work :
+                          state.phase === 'shortBreak' ? t.shortBreak : t.longBreak;
+  }
 
   const total = state.phase === 'work' ? state.workDurationMins * 60 :
                 state.phase === 'shortBreak' ? state.shortBreakMins * 60 : state.longBreakMins * 60;
