@@ -154,11 +154,12 @@ const THEMES = {
 
 let currentThemeKey = 'catppuccin_mocha';
 
-function applyTheme(themeKey) {
+function applyTheme(themeKey, saveToStorage = true) {
   const t = THEMES[themeKey] || THEMES.catppuccin_mocha;
   currentThemeKey = themeKey;
 
   const root = document.documentElement;
+  root.setAttribute('data-theme', themeKey);
   root.style.setProperty('--bg-base', t.bg);
   root.style.setProperty('--bg-surface', t.surface);
   root.style.setProperty('--bg-card', t.card);
@@ -176,6 +177,15 @@ function applyTheme(themeKey) {
   root.style.setProperty('--border-color', t.border);
   root.style.setProperty('--border-active', t.borderActive);
   root.style.setProperty('--highlight-bg', t.highlight);
+
+  // Save selection across all pages in localStorage
+  if (saveToStorage) {
+    try {
+      localStorage.setItem('termodoro_theme', themeKey);
+    } catch (e) {
+      // Ignore private browsing / local storage security exceptions
+    }
+  }
 
   // Update theme selector label if present
   const themeLabel = document.getElementById('current-theme-name');
@@ -517,7 +527,15 @@ function setupCommonListeners() {
 
 // Initialize on DOM load
 document.addEventListener('DOMContentLoaded', () => {
-  applyTheme('catppuccin_mocha');
+  let savedTheme = 'catppuccin_mocha';
+  try {
+    const stored = localStorage.getItem('termodoro_theme');
+    if (stored && THEMES[stored]) {
+      savedTheme = stored;
+    }
+  } catch (e) {}
+
+  applyTheme(savedTheme, false);
   initShowcase();
   setupCommonListeners();
 });
