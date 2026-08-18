@@ -194,6 +194,9 @@ function applyTheme(themeKey, saveToStorage = true) {
   const themeSelect = document.getElementById('sim-theme-select');
   if (themeSelect) themeSelect.value = themeKey;
 
+  const navThemeSelect = document.getElementById('nav-theme-select');
+  if (navThemeSelect) navThemeSelect.value = themeKey;
+
   // Update active state in theme gallery
   document.querySelectorAll('.theme-card').forEach(card => {
     card.classList.toggle('active', card.dataset.theme === themeKey);
@@ -405,6 +408,16 @@ function setupCommonListeners() {
       showToast(`Switched theme to ${THEMES[themeKey].name}`);
     });
   });
+
+  // Nav theme selector dropdown change
+  const navThemeSelect = document.getElementById('nav-theme-select');
+  if (navThemeSelect) {
+    navThemeSelect.addEventListener('change', (e) => {
+      const themeKey = e.target.value;
+      applyTheme(themeKey);
+      showToast(`Theme: ${THEMES[themeKey]?.name || themeKey}`);
+    });
+  }
 
   // Audio test buttons
   const testZenBtn = document.getElementById('test-zen-btn');
