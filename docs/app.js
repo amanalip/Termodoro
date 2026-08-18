@@ -446,6 +446,73 @@ function setupCommonListeners() {
       });
     });
   }
+
+  // FAQ Search & Category Filter Controller
+  const faqSearchInput = document.getElementById('faq-search-input');
+  const faqPills = document.querySelectorAll('.faq-pill-btn');
+  const faqGroups = document.querySelectorAll('.faq-group');
+  const faqItems = document.querySelectorAll('.faq-item');
+  const faqEmptyState = document.getElementById('faq-empty-state');
+
+  function filterFAQs() {
+    if (!faqSearchInput) return;
+    const query = faqSearchInput.value.toLowerCase().trim();
+    const activeCategory = document.querySelector('.faq-pill-btn.active')?.dataset.category || 'all';
+
+    let totalVisible = 0;
+
+    faqGroups.forEach(group => {
+      const groupCategory = group.dataset.group;
+      const categoryMatches = (activeCategory === 'all' || activeCategory === groupCategory);
+
+      if (!categoryMatches) {
+        group.style.display = 'none';
+        return;
+      }
+
+      let visibleInGroup = 0;
+      const itemsInGroup = group.querySelectorAll('.faq-item');
+
+      itemsInGroup.forEach(item => {
+        const questionText = item.querySelector('summary')?.textContent.toLowerCase() || '';
+        const answerText = item.querySelector('.faq-content')?.textContent.toLowerCase() || '';
+        const matchesQuery = !query || questionText.includes(query) || answerText.includes(query);
+
+        if (matchesQuery) {
+          item.style.display = '';
+          if (query.length > 2) {
+            item.setAttribute('open', '');
+          }
+          visibleInGroup++;
+          totalVisible++;
+        } else {
+          item.style.display = 'none';
+        }
+      });
+
+      group.style.display = visibleInGroup > 0 ? '' : 'none';
+    });
+
+    if (faqEmptyState) {
+      if (totalVisible === 0) {
+        faqEmptyState.classList.add('show');
+      } else {
+        faqEmptyState.classList.remove('show');
+      }
+    }
+  }
+
+  if (faqSearchInput) {
+    faqSearchInput.addEventListener('input', filterFAQs);
+  }
+
+  faqPills.forEach(pill => {
+    pill.addEventListener('click', () => {
+      faqPills.forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+      filterFAQs();
+    });
+  });
 }
 
 // Initialize on DOM load
@@ -454,3 +521,4 @@ document.addEventListener('DOMContentLoaded', () => {
   initShowcase();
   setupCommonListeners();
 });
+

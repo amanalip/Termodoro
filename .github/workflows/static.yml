@@ -31,6 +31,7 @@ jobs:
         run: |
           test -f ./docs/index.html
           test -f ./docs/features.html
+          test -f ./docs/faqs.html
           test -f ./docs/style.css
           test -f ./docs/app.js
           test -f ./docs/favicon.svg

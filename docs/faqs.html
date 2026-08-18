@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="catppuccin_mocha">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Frequently Asked Questions — Termodoro</title>
+  <meta name="description" content="Comprehensive FAQs for Termodoro: installation, shell integration, tmux and Zellij popups, audio synthesis, task management, XDG data storage, and privacy." />
+  
+  <!-- Open Graph -->
+  <meta property="og:title" content="Termodoro FAQs — Everything You Need to Know" />
+  <meta property="og:description" content="Find answers to common questions about Termodoro installation, multiplexers, offline privacy, keybindings, and acoustic sound synthesis." />
+  <meta property="og:image" content="assets/screenshots/01_timer_view.png" />
+  
+  <!-- Favicon & Stylesheet -->
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="stylesheet" href="style.css?v=20260818d" />
+</head>
+<body>
+
+  <!-- ========================================================================
+       Site Header
+       ======================================================================== -->
+  <header class="site-header" id="site-header">
+    <div class="container header-inner">
+      <a href="index.html" class="brand" id="brand-link">
+        <div class="brand-icon">
+          <img src="favicon.svg" alt="Termodoro Totoro Logo" width="30" height="30" style="display: block;" />
+        </div>
+        <span>Termodoro</span>
+        <span class="brand-badge">v0.1.0</span>
+      </a>
+
+      <nav class="nav-menu" aria-label="Main Navigation">
+        <a href="index.html" class="nav-link">Overview</a>
+        <a href="features.html" class="nav-link">Features</a>
+        <a href="faqs.html" class="nav-link active">FAQs</a>
+        <a href="index.html#themes" class="nav-link">18 Themes</a>
+        <a href="index.html#install" class="nav-link">Install</a>
+        <a href="index.html#keybindings" class="nav-link">Keybindings</a>
+      </nav>
+
+      <div class="nav-actions">
+        <a href="https://github.com/amanalip/Termodoro" target="_blank" rel="noopener noreferrer" class="btn btn-secondary" id="github-repo-btn">
+          <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
+            <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+          </svg>
+          <span>GitHub</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- ========================================================================
+         Hero Section
+         ======================================================================== -->
+    <section class="hero" style="padding-bottom: 2rem;">
+      <div class="container">
+        
+        <div class="badge-strip">
+          <span class="badge-item">❓ Knowledge Base</span>
+          <span class="badge-item">💡 Practical Guides</span>
+          <span class="badge-item">🦀 Pure Rust Architecture</span>
+        </div>
+
+        <h1 class="hero-title">Frequently Asked Questions</h1>
+        <p class="hero-subtitle">
+          Everything you need to know about Termodoro's installation, workflows, multiplexer configurations, audio engine, and privacy guarantees.
+        </p>
+
+        <!-- Search Box -->
+        <div class="faq-search-box">
+          <span class="faq-search-icon">🔍</span>
+          <input type="text" id="faq-search-input" class="faq-search-input" placeholder="Type keywords to filter questions (e.g. 'tmux', 'storage', 'audio', 'theme')..." />
+        </div>
+
+        <!-- Category Filter Pills -->
+        <div class="faq-category-pills" id="faq-category-pills">
+          <button type="button" class="faq-pill-btn active" data-category="all">All Questions (24)</button>
+          <button type="button" class="faq-pill-btn" data-category="install">📦 Installation</button>
+          <button type="button" class="faq-pill-btn" data-category="terminal">🪟 Multiplexers &amp; Shell</button>
+          <button type="button" class="faq-pill-btn" data-category="timer">⏱️ Timer &amp; Pomodoro</button>
+          <button type="button" class="faq-pill-btn" data-category="tasks">🎯 Task Management</button>
+          <button type="button" class="faq-pill-btn" data-category="audio">🔔 Audio &amp; Alerts</button>
+          <button type="button" class="faq-pill-btn" data-category="privacy">🔒 Storage &amp; Privacy</button>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ========================================================================
+         FAQ Accordion Content
+         ======================================================================== -->
+    <section class="section" style="padding-top: 0;">
+      <div class="container" style="max-width: 860px;">
+
+        <!-- Group 1: Installation & Setup -->
+        <div class="faq-group" data-group="install">
+          <h2 class="faq-group-title">
+            <span class="faq-group-icon">📦</span> Installation &amp; Environment Setup
+          </h2>
+          <div class="faq-accordion">
+            
+            <details class="faq-item" open>
+              <summary>
+                <span>What are the system requirements to run Termodoro?</span>
+                <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+              </summary>
+              <div class="faq-content">
+                <p>Termodoro is a single, statically-compiled native binary with zero runtime dependencies. It runs on:</p>
+                <ul>
+                  <li><strong>Linux</strong>: x86_64, aarch64 (glibc or musl).</li>
+                  <li><strong>macOS</strong>: macOS 11+ (Apple Silicon M1/M2/M3 &amp; Intel).</li>
+                  <li><strong>Windows</strong>: Windows 10/11 (Command Prompt, PowerShell, or Windows Terminal).</li>
+                  <li><strong>Terminal Emulators</strong>: Any terminal with ANSI TrueColor support (Alacritty, Kitty, WezTerm, KDE Konsole, GNOME Terminal, iTerm2, Ghostty).</li>
+                </ul>
+              </div>
+            </details>
+
+            <details class="faq-item">
+              <summary>
+                <span>How do I install Termodoro globally on my machine?</span>
+                <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+              </summary>
+              <div class="faq-content">
+                <p>The fastest way is installing via Rust's official package manager, Cargo:</p>
+                <pre><code>cargo install --git https://github.com/amanalip/Termodoro.git</code></pre>
+                <p>This compiles the binary and places <code>termodoro</code> directly in your <code>~/.cargo/bin</code> directory.</p>
+              </div>
+            </details>
+
+            <details class="faq-item">
+              <summary>
+                <span>How do I ensure <code>termodoro</code> can be launched from anywhere in my shell?</span>
+                <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+              </summary>
+              <div class="faq-content">
+                <p>Make sure Cargo's binary directory is in your shell's <code>PATH</code>. Add this line to your <code>~/.bashrc</code> or <code>~/.zshrc</code>:</p>
+                <pre><code>export PATH="$HOME/.cargo/bin:$PATH"</code></pre>
+                <p>Then restart your terminal or run <code>source ~/.bashrc</code>.</p>
+              </div>
+            </details>
+
+            <details class="faq-item">
+              <summary>
+                <span>How do I update Termodoro to the latest release?</span>
+                <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+              </summary>
+              <div class="faq-content">
+                <p>Run the <code>cargo install</code> command with the <code>--force</code> flag to recompile and replace the existing binary:</p>
+                <pre><code>cargo install --force --git https://github.com/amanalip/Termodoro.git</code></pre>
+              </div>
+            </details>
+
+            <details class="faq-item">
+              <summary>
+                <span>How do I cleanly uninstall Termodoro and purge all stored data?</span>
+                <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+              </summary>
+              <div class="faq-content">
+                <p>1. Remove the binary:</p>
+                <pre><code>cargo uninstall termodoro</code></pre>
+                <p>2. Optionally remove your local data file:</p>
+                <pre><code>rm -rf ~/.local/share/termodoro/   # Linux
+rm -rf ~/Library/Application\ Support/termodoro/   # macOS</code></pre>
+              </div>
+            </details>
+
+          </div>
+        </div>
+
+        <!-- Group 2: Terminal Multiplexers & Shell Integration -->
+        <div class="faq-group" data-group="terminal">
+          <h2 class="faq-group-title">
+            <span class="faq-group-icon">🪟</span> Terminal Multiplexers &amp; Shell Integration
+          </h2>
+          <div class="faq-accordion">
+            
+            <details class="faq-item">
+              <summary>
+                <span>How do I configure Termodoro as a floating popup in tmux?</span>
+                <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+              </summary>
+              <div class="faq-content">
+                <p>Add the following binding to your <code>~/.tmux.conf</code> to open Termodoro in a floating center modal with <kbd>Prefix</kbd> + <kbd>P</kbd>:</p>
+                <pre><code># Open Termodoro in a floating popup
+bind-key P display-popup -E -w 75% -h 75% "termodoro"</code></pre>
+                <p>Reload tmux with <code>tmux source ~/.tmux.conf</code>.</p>
+              </div>
+            </details>
+
+            <details class="faq-item">
+              <summary>
+                <span>How do I run Termodoro in a Zellij floating pane?</span>
+                <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+              </summary>
+              <div class="faq-content">
+                <p>In Zellij, you can spawn Termodoro into a floating window anytime with:</p>
+                <pre><code>zellij run --floating --width 70% --height 70% -- termodoro</code></pre>
+              </div>
+            </details>
+
+            <details class="faq-item">
+              <summary>
+                <span>Does Termodoro work over remote SSH sessions?</span>
+                <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+              </summary>
+              <div class="faq-content">
+                <p>Yes! Termodoro sends standard ANSI escape codes. It has zero GPU or X11/Wayland display dependencies and operates smoothly over SSH sessions.</p>
+              </div>
+            </details>
+
+            <details class="faq-item">
+              <summary>
+                <span>Why do some colors look dull or incorrect in my terminal?</span>
+                <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+              </summary>
+              <div class="faq-content">
+                <p>Ensure your terminal emulator has 24-bit TrueColor enabled. Add this to your shell profile (<code>~/.bashrc</code> or <code>~/.zshrc</code>):</p>
+                <pre><code>export COLORTERM=truecolor</code></pre>
+              </div>
+            </details>
+
+          </div>
+        </div>
+
+        <!-- Group 3: Timer & Pomodoro Workflow -->
+        <div class="faq-group" data-group="timer">
+          <h2 class="faq-group-title">
+            <span class="faq-group-icon">⏱️</span> Timer &amp; Pomodoro Mechanics
+          </h2>
+          <div class="faq-accordion">
+            
+            <details class="faq-item">
+              <summary>
+                <span>What is the standard interval cycle in Termodoro?</span>
+                <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+              </summary>
+              <div class="faq-content">
+                <p>By default, Termodoro follows the classic 4-cycle Pomodoro pattern:</p>
+                <ol>
+                  <li><strong>Focus Session</strong> (25 minutes)</li>
+                  <li><strong>Short Break</strong> (5 minutes)</li>
+                  <li>Repeat for 4 focus sessions</li>
+                  <li><strong>Long Break</strong> (15 minutes)</li>
+                  <li>The cycle dots <code>[● ● ● ●]</code> reset and begin fresh.</li>
+                </ol>
+              </div>
+            </details>
+
+            <details class="faq-item">
+              <summary>
+                <span>How do I pause, reset, or skip timer phases?</span>
+                <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+              </summary>
+              <div class="faq-content">
+                <ul>
+                  <li><kbd>Space</kbd>: Start or Pause the countdown.</li>
+                  <li><kbd>r</kbd>: Reset the current phase back to its full initial duration.</li>
+                  <li><kbd>s</kbd>: Skip directly to the next phase (e.g. skip break and return to focus).</li>
+                </ul>
+              </div>
+            </details>
+
+            <details class="faq-item">
+              <summary>
+                <span>Can I customize focus and break lengths?</span>
+                <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+              </summary>
+              <div class="faq-content">
+                <p>Yes. Navigate to <strong>Settings</strong> (<kbd>4</kbd> or <kbd>Tab</kbd>). You can customize:</p>
+                <ul>
+                  <li><strong>Focus Duration</strong>: 1 to 120 minutes</li>
+                  <li><strong>Short Break Duration</strong>: 1 to 60 minutes</li>
+                  <li><strong>Long Break Duration</strong>: 1 to 90 minutes</li>
+                  <li><strong>Long Break Interval</strong>: 1 to 24 cycles</li>
+                </ul>
+                <p>Use <kbd>h</kbd> / <kbd>l</kbd> or <kbd>←</kbd> / <kbd>→</kbd> to adjust values in real time.</p>
+              </div>
+            </details>
+
+            <details class="faq-item">
+              <summary>
+                <span>Can Termodoro automatically start breaks and work sessions?</span>
+                <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+              </summary>
+              <div class="faq-content">
+                <p>Yes. In the <strong>Settings</strong> screen, toggle <strong>Auto-Start Breaks</strong> and <strong>Auto-Start Work</strong> by highlighting them and pressing <kbd>Space</kbd> or <kbd>Enter</kbd>.</p>
+              </div>
+            </details>
+
+          </div>
+        </div>
+
+        <!-- Group 4: Task Management & Target Tracking -->
+        <div class="faq-group" data-group="tasks">
+          <h2 class="faq-group-title">
+            <span class="faq-group-icon">🎯</span> Task Management &amp; Target Tracking
+          </h2>
+          <div class="faq-accordion">
+            
+            <details class="faq-item">
+              <summary>
+                <span>How do I bind a specific task to my current focus session?</span>
+                <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+              </summary>
+              <div class="faq-content">
+                <p>1. Switch to the <strong>Tasks</strong> tab (<kbd>2</kbd>).<br/>
+                2. Highlight the task with <kbd>j</kbd> / <kbd>k</kbd>.<br/>
+                3. Press <kbd>t</kbd> to mark it with the <code>🎯 ACTIVE</code> target badge.<br/>
+                4. Switch back to <strong>Timer</strong> (<kbd>1</kbd>). The active task card will display your task name and live tally!</p>
+              </div>
+            </details>
+
+            <details class="faq-item">
+              <summary>
+                <span>How do estimated Pomodoro tallies work?</span>
+                <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+              </summary>
+              <div class="faq-content">
+                <p>When creating a task with <kbd>a</kbd>, set your estimated Pomodoros (1–20). As you finish focus sessions with that task active, Termodoro automatically increments the completed tally (e.g. <code>[■■□□] 2/4 🍅</code>).</p>
+              </div>
+            </details>
+
+            <details class="faq-item">
+              <summary>
+                <span>How do I filter between All, Pending, and Completed tasks?</span>
+                <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+              </summary>
+              <div class="faq-content">
+                <p>On the <strong>Tasks</strong> screen (<kbd>2</kbd>), use the numeric keys:</p>
+                <ul>
+                  <li><kbd>1</kbd>: All Tasks</li>
+                  <li><kbd>2</kbd>: Pending Tasks Only</li>
+                  <li><kbd>3</kbd>: Completed Tasks Only</li>
+                </ul>
+              </div>
+            </details>
+
+            <details class="faq-item">
+              <summary>
+                <span>Is there a limit on how many tasks I can store?</span>
+                <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+              </summary>
+              <div class="faq-content">
+                <p>There is no practical limit. Tasks are indexed with UUIDv4 and saved as compact JSON. The storage engine has been benchmarked with thousands of items with sub-millisecond save and load times.</p>
+              </div>
+            </details>
+
+          </div>
+        </div>
+
+        <!-- Group 5: Audio Engine & Notifications -->
+        <div class="faq-group" data-group="audio">
+          <h2 class="faq-group-title">
+            <span class="faq-group-icon">🔔</span> In-Memory Audio Engine &amp; Notifications
+          </h2>
+          <div class="faq-accordion">
+            
+            <details class="faq-item">
+              <summary>
+                <span>How does Termodoro generate sound without MP3 files?</span>
+                <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+              </summary>
+              <div class="faq-content">
+                <p>Termodoro's audio subsystem (<code>src/audio.rs</code>) synthesizes 16-bit PCM RIFF WAV audio purely through mathematical sine wave functions in memory. It synthesizes:</p>
+                <ul>
+                  <li><strong>Focus End</strong>: 528 Hz Zen Bowl with harmonic overtones (1056 Hz, 1584 Hz).</li>
+                  <li><strong>Short Break End</strong>: Upward melodic chime from D5 (587.33 Hz) to A5 (880 Hz).</li>
+                  <li><strong>Long Break End</strong>: Celebratory major triad arpeggio (C5 &rarr; E5 &rarr; G5).</li>
+                </ul>
+              </div>
+            </details>
+
+            <details class="faq-item">
+              <summary>
+                <span>What happens if I'm on a headless server or have no audio device?</span>
+                <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+              </summary>
+              <div class="faq-content">
+                <p>Termodoro gracefully handles missing audio hardware without crashing. If Rodio cannot initialize an audio output stream, it falls back to the ASCII terminal bell (<code>\x07</code>). You can also disable sound in <code>Settings &rarr; Sound / Bell Alert</code>.</p>
+              </div>
+            </details>
+
+            <details class="faq-item">
+              <summary>
+                <span>How do native desktop notifications work?</span>
+                <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+              </summary>
+              <div class="faq-content">
+                <p>Termodoro utilizes <code>notify-rust</code> to send cross-platform OS notifications (Linux D-Bus notification daemons, macOS Notification Center, and Windows Toast system).</p>
+              </div>
+            </details>
+
+          </div>
+        </div>
+
+        <!-- Group 6: Storage, Privacy & Architecture -->
+        <div class="faq-group" data-group="privacy">
+          <h2 class="faq-group-title">
+            <span class="faq-group-icon">🔒</span> Data Storage, Privacy &amp; Architecture
+          </h2>
+          <div class="faq-accordion">
+            
+            <details class="faq-item">
+              <summary>
+                <span>Where is my data stored on disk?</span>
+                <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+              </summary>
+              <div class="faq-content">
+                <p>Data is stored locally adhering to XDG standards:</p>
+                <ul>
+                  <li><strong>Linux</strong>: <code>~/.local/share/termodoro/data.json</code></li>
+                  <li><strong>macOS</strong>: <code>~/Library/Application Support/termodoro/data.json</code></li>
+                  <li><strong>Windows</strong>: <code>%APPDATA%\termodoro\data.json</code></li>
+                </ul>
+              </div>
+            </details>
+
+            <details class="faq-item">
+              <summary>
+                <span>Does Termodoro collect telemetry or analytics?</span>
+                <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+              </summary>
+              <div class="faq-content">
+                <p><strong>Zero.</strong> There is no internet connection, no analytics SDK, no crash reporting daemons, and zero network calls. Your data never leaves your computer.</p>
+              </div>
+            </details>
+
+            <details class="faq-item">
+              <summary>
+                <span>How are streaks and daily stats calculated?</span>
+                <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+              </summary>
+              <div class="faq-content">
+                <p>Each completed focus session records a timestamped entry. Streaks track consecutive calendar days with at least one completed session, automatically handling midnight calendar rollovers and leap years.</p>
+              </div>
+            </details>
+
+            <details class="faq-item">
+              <summary>
+                <span>Why is Termodoro built with Pure Rust &amp; Ratatui instead of web technologies?</span>
+                <svg class="faq-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+              </summary>
+              <div class="faq-content">
+                <p>Electron and browser-based timers consume 200MB–500MB of RAM and drain battery. By using Rust and Ratatui, Termodoro launches in <strong>5 milliseconds</strong>, consumes only <strong>4.6MB of RAM</strong>, uses 0% CPU when idle, and guarantees memory safety without garbage collection pauses.</p>
+              </div>
+            </details>
+
+          </div>
+        </div>
+
+        <!-- Empty Search Result State -->
+        <div class="faq-empty-state" id="faq-empty-state">
+          <div style="font-size: 2.5rem; margin-bottom: 1rem;">🔍</div>
+          <h3>No matching questions found</h3>
+          <p>Try searching with different keywords or switch back to "All Questions".</p>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ========================================================================
+         Bottom CTA
+         ======================================================================== -->
+    <section class="section" style="background: var(--bg-surface); border-top: 1px solid var(--border-color); text-align: center;">
+      <div class="container">
+        <h2>Ready to Master Your Focus?</h2>
+        <p class="section-desc" style="max-width: 600px; margin: 0.5rem auto 1.5rem;">
+          Join developers who stay in the flow state with pure Rust efficiency.
+        </p>
+        <div style="display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap;">
+          <a href="index.html#install" class="btn btn-primary btn-lg">⚡ Get Started</a>
+          <a href="features.html" class="btn btn-secondary btn-lg">📖 Explore Features</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ========================================================================
+       Site Footer
+       ======================================================================== -->
+  <footer class="site-footer">
+    <div class="container">
+      
+      <div class="footer-grid">
+        <div class="footer-brand-col">
+          <div class="brand">
+            <div class="brand-icon">
+              <img src="favicon.svg" alt="Termodoro Totoro Logo" width="26" height="26" style="display: block;" />
+            </div>
+            <span>Termodoro</span>
+          </div>
+          <p class="footer-tagline">
+            Ultra-fast, keyboard-driven Pomodoro timer &amp; task backlog manager in pure Rust &amp; Ratatui. 100% offline &amp; private.
+          </p>
+        </div>
+
+        <div>
+          <div class="footer-col-title">Navigation</div>
+          <ul class="footer-links">
+            <li><a href="index.html">Overview</a></li>
+            <li><a href="features.html">Feature Guide</a></li>
+            <li><a href="faqs.html">FAQs</a></li>
+            <li><a href="index.html#themes">18 Color Themes</a></li>
+            <li><a href="index.html#install">Installation</a></li>
+            <li><a href="index.html#keybindings">Keybindings Cheatsheet</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <div class="footer-col-title">Documentation</div>
+          <ul class="footer-links">
+            <li><a href="https://github.com/amanalip/Termodoro/blob/main/README.md" target="_blank" rel="noopener noreferrer">README Manual</a></li>
+            <li><a href="https://github.com/amanalip/Termodoro/blob/main/System_design.md" target="_blank" rel="noopener noreferrer">System Architecture</a></li>
+            <li><a href="https://github.com/amanalip/Termodoro/blob/main/IMPLEMENTATION.md" target="_blank" rel="noopener noreferrer">Implementation Spec</a></li>
+            <li><a href="https://github.com/amanalip/Termodoro/blob/main/WALKTHROUGH.md" target="_blank" rel="noopener noreferrer">Walkthrough &amp; QA</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <div class="footer-col-title">Community &amp; Code</div>
+          <ul class="footer-links">
+            <li><a href="https://github.com/amanalip/Termodoro" target="_blank" rel="noopener noreferrer">GitHub Repository</a></li>
+            <li><a href="https://github.com/amanalip/Termodoro/issues" target="_blank" rel="noopener noreferrer">Issue Tracker</a></li>
+            <li><a href="https://github.com/amanalip/Termodoro/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">GPL-3.0 License</a></li>
+            <li><a href="https://ratatui.rs" target="_blank" rel="noopener noreferrer">Ratatui Framework</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <div>&copy; 2026 Termodoro. Open source under the GNU General Public License v3.0.</div>
+        <div style="color: var(--text-muted); font-family: var(--font-mono); font-size: 0.82rem;">
+          Built by <a href="https://github.com/amanalip" target="_blank" rel="noopener noreferrer" style="color: var(--color-primary); text-decoration: none; font-weight: 600;">Aman Ali Pogaku</a>, with Pure Rust &amp; Ratatui
+        </div>
+      </div>
+
+    </div>
+  </footer>
+
+  <!-- Toast Feedback Element -->
+  <div class="toast-notice" id="toast-notice">Action notification</div>
+
+  <!-- Interactive JavaScript Engine -->
+  <script src="app.js?v=20260818d"></script>
+</body>
+</html>
