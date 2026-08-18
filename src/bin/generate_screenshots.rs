@@ -339,36 +339,25 @@ fn main() {
     {
         let (mut app, temp_dir) = make_app(ThemeChoice::TokyoNight);
         app.active_tab = ActiveTab::Tasks;
-        app.tasks.add(
-            "🦀 Build Ratatui TUI Framework".to_string(),
-            3,
-        );
+        app.tasks
+            .add("🦀 Build Ratatui TUI Framework".to_string(), 3);
         app.tasks.tasks[0].pomodoros_spent = 3;
         app.tasks.tasks[0].completed = true;
 
-        app.tasks.add(
-            "🎵 Synthesize 16-Bit Audio Chimes".to_string(),
-            2,
-        );
+        app.tasks
+            .add("🎵 Synthesize 16-Bit Audio Chimes".to_string(), 2);
         app.tasks.tasks[1].pomodoros_spent = 2;
         app.tasks.tasks[1].completed = true;
 
-        app.tasks.add(
-            "🎨 Implement 18 Built-in Themes".to_string(),
-            4,
-        );
+        app.tasks
+            .add("🎨 Implement 18 Built-in Themes".to_string(), 4);
         app.tasks.tasks[2].pomodoros_spent = 2;
 
-        app.tasks.add(
-            "📊 Track Daily Focus Goals".to_string(),
-            2,
-        );
+        app.tasks.add("📊 Track Daily Focus Goals".to_string(), 2);
         app.tasks.tasks[3].pomodoros_spent = 0;
 
-        app.tasks.add(
-            "🚀 Write CI/CD GitHub Workflows".to_string(),
-            1,
-        );
+        app.tasks
+            .add("🚀 Write CI/CD GitHub Workflows".to_string(), 1);
         app.tasks.tasks[4].pomodoros_spent = 0;
 
         app.tasks.selected_index = 2;
