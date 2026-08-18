@@ -72,7 +72,7 @@ Termodoro runs natively in your terminal. It uses negligible memory (less than 1
 - **Smooth Visual Gauge Bar**: Real-time progress bar rendering elapsed percentage for the active interval.
 - **Full Task Lifecycle Management**: Create tasks, set estimated Pomodoro counts, mark items complete, and bind a target task to log effort automatically.
 - **Analytics Dashboard & Streak Tracker**: Daily focus summaries, consecutive active calendar day streaks, 7-day visual bar charts, and a historical session log.
-- **Six Built-in Color Themes**: Modern palettes including Catppuccin Mocha, Nord, Gruvbox Dark, Tokyo Night, Dracula, and Solarized Dark.
+- **18 Built-in Color Themes**: Modern dark and light palettes including Catppuccin Mocha, Macchiato, Frappé, Latte (Light), Nord, Gruvbox Dark, Tokyo Night, Dracula, Solarized Dark & Light, Rose Pine, One Dark, Kanagawa, Everforest Dark & Light, Synthwave '84, Monokai Pro, and OLED Phosphor.
 - **Acoustic Chimes & Native Notifications**: Pure in-memory synthesized audio chimes (Zen Tibetan singing bowl, two-tone alert, and major triad chord) paired with native desktop notifications and ASCII terminal bell fallback.
 - **Automatic State Persistence**: Automatically saves your tasks, preferences, and session history according to standard XDG data directory guidelines.
 
@@ -365,7 +365,7 @@ To verify your installation:
 
 1. **Launch**: Run `termodoro` in your terminal.
 2. **Layout Check**: Ensure the 5-row digital block clock renders without wrapping. Terminal window should be at least 80 columns wide by 24 rows high.
-3. **Themes Check**: Press `4` to enter Settings, navigate to **Color Theme**, and press `l` or `→` to cycle themes (Catppuccin Mocha, Nord, Gruvbox, Tokyo Night, Dracula, Solarized Dark).
+3. **Themes Check**: Press `4` to enter Settings, navigate to **Color Theme**, and press `l` or `→` to cycle through all 18 built-in themes (Catppuccin Mocha/Macchiato/Frappé/Latte, Nord, Gruvbox, Tokyo Night, Dracula, Solarized Dark/Light, Rose Pine, One Dark, Kanagawa, Everforest Dark/Light, Synthwave '84, Monokai Pro, OLED Phosphor).
 4. **Audio Check**: Press `1` to return to the Timer, press `Space` to start, then press `s` to skip phase and confirm acoustic chimes play upon interval completion.
 5. **Persistence Check**: Press `q` to quit, then restart `termodoro`. Confirm that your settings and active state were safely restored.
 
@@ -667,7 +667,7 @@ To provide full confidence to developers, contributors, and users, all claims, m
 
 | Verified Claim / Metric | Documented Value | Audited Source Code Reference | Verification Method & Benchmark | Status |
 | :--- | :--- | :--- | :--- | :---: |
-| **Test Suite Pass Rate** | 91 / 91 Passed (100%) | `src/` (All 9 test modules) | `cargo test` execution (1.09s total runtime) | **VERIFIED** |
+| **Test Suite Pass Rate** | 93 / 93 Passed (100%) | `src/` (All 9 test modules) | `cargo test` execution (1.12s total runtime) | **VERIFIED** |
 | **Rust Safety Guarantee** | 100% Safe Rust (`0` unsafe blocks) | Full codebase grep (`grep -rn "unsafe" src/`) | Static code analysis via compiler frontend | **VERIFIED** |
 | **Static Analysis Compliance** | 0 Warnings, 0 Errors | Entire workspace | `cargo clippy -- -D warnings` | **VERIFIED** |
 | **Code Formatting Standard** | 100% Rustfmt Compliant | Code formatting rules | `cargo fmt -- --check` | **VERIFIED** |
@@ -676,13 +676,13 @@ To provide full confidence to developers, contributors, and users, all claims, m
 | **Max Long Break Cycles** | $1 \le N \le 24$ Cycles | [`src/config.rs`](file:///home/amanap/Documents/GitHub/Termodoro/src/config.rs#L12-L28) & [`src/timer.rs`](file:///home/amanap/Documents/GitHub/Termodoro/src/timer.rs#L85-L105) | Unit test `test_twenty_four_cycle_advancement_and_long_break_trigger` | **VERIFIED** |
 | **Streak Calculation Invariant** | Preservation across Month/Year | [`src/stats.rs`](file:///home/amanap/Documents/GitHub/Termodoro/src/stats.rs#L120-L190) | Unit test `test_streak_calculation_across_month_and_year_boundaries` | **VERIFIED** |
 | **Storage Architecture** | Atomic Write & XDG Compliance | [`src/storage.rs`](file:///home/amanap/Documents/GitHub/Termodoro/src/storage.rs#L40-L110) | Atomic tempfile rename; XDG Base Directory specification | **VERIFIED** |
-| **Color Palettes** | 6 Built-In Palettes | [`src/theme.rs`](file:///home/amanap/Documents/GitHub/Termodoro/src/theme.rs#L6-L42) | Unit test `test_theme_from_choice_all_variants` | **VERIFIED** |
+| **Color Palettes** | 18 Built-In Palettes | [`src/theme.rs`](file:///home/amanap/Documents/GitHub/Termodoro/src/theme.rs#L6-L42) | Unit test `test_theme_from_choice_all_variants` | **VERIFIED** |
 
 ### Independent Reproducibility Commands
 Any user can independently reproduce and verify this entire audit report on their local machine by executing:
 
 ```bash
-# 1. Run full 91-test automated suite
+# 1. Run full 93-test automated suite
 cargo test -- --nocapture
 
 # 2. Verify zero compiler warnings or lint issues

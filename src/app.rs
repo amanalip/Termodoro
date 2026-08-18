@@ -965,7 +965,7 @@ mod tests {
         app.settings_index = 8;
         app.config.theme = ThemeChoice::CatppuccinMocha;
         app.on_key_event(make_key(KeyCode::Char('+')));
-        assert_eq!(app.config.theme, ThemeChoice::Nord);
+        assert_eq!(app.config.theme, ThemeChoice::CatppuccinMacchiato);
         app.on_key_event(make_key(KeyCode::Char('-')));
         assert_eq!(app.config.theme, ThemeChoice::CatppuccinMocha);
 
@@ -1272,7 +1272,7 @@ mod tests {
         app.settings_index = 8;
         app.config.theme = ThemeChoice::CatppuccinMocha;
         app.on_key_event(make_key(KeyCode::Char('h')));
-        assert_eq!(app.config.theme, ThemeChoice::SolarizedDark);
+        assert_eq!(app.config.theme, ThemeChoice::OledPhosphor);
 
         let _ = std::fs::remove_dir_all(temp_dir);
     }
@@ -1409,6 +1409,82 @@ mod tests {
         }
 
         crate::audio::set_audio_muted_for_tests(false);
+        let _ = std::fs::remove_dir_all(temp_dir);
+    }
+
+    #[test]
+    fn test_all_eighteen_themes_cycle_and_persistence_e2e() {
+        let (mut app, temp_dir) = create_test_app();
+        let all_themes = ThemeChoice::all();
+        assert_eq!(all_themes.len(), 18);
+
+        // Select theme setting row (row 8)
+        app.active_tab = ActiveTab::Settings;
+        app.settings_index = 8;
+        app.config.theme = ThemeChoice::CatppuccinMocha;
+
+        // Step forward through every single theme
+        for (i, expected_theme) in all_themes.iter().enumerate() {
+            assert_eq!(
+                app.config.theme, *expected_theme,
+                "Mismatch at theme index {}",
+                i
+            );
+            app.save_state();
+
+            // Save state and verify re-load in fresh app instance
+            let file_path = temp_dir.join("data.json");
+            let storage = Storage::with_path(file_path);
+            let app_data = storage.load();
+            assert_eq!(app_data.config.theme, *expected_theme);
+
+            // Advance to next theme
+            app.on_key_event(make_key(KeyCode::Char('l')));
+        }
+        // After 18 steps, wrapped back to start
+        assert_eq!(app.config.theme, ThemeChoice::CatppuccinMocha);
+
+        // Step backwards through every theme in reverse
+        for expected_theme in all_themes.iter().rev() {
+            app.on_key_event(make_key(KeyCode::Char('h')));
+            assert_eq!(app.config.theme, *expected_theme);
+        }
+
+        let _ = std::fs::remove_dir_all(temp_dir);
+    }
+
+    #[test]
+    fn test_all_eighteen_themes_full_ui_render_all_tabs_e2e() {
+        let (mut app, temp_dir) = create_test_app();
+        app.tasks.add("Implement Section A Themes".to_string(), 3);
+        app.stats
+            .record(crate::timer::PomodoroPhase::Work, 25, None, None);
+
+        let backend = ratatui::backend::TestBackend::new(100, 30);
+        let mut terminal = ratatui::Terminal::new(backend).unwrap();
+
+        for theme_choice in ThemeChoice::all() {
+            app.config.theme = *theme_choice;
+            for tab in [
+                ActiveTab::Timer,
+                ActiveTab::Tasks,
+                ActiveTab::Stats,
+                ActiveTab::Settings,
+            ] {
+                app.active_tab = tab;
+                terminal.draw(|f| crate::ui::render(f, &app)).unwrap();
+            }
+
+            // Also test modal overlays with this theme
+            app.open_task_modal();
+            terminal.draw(|f| crate::ui::render(f, &app)).unwrap();
+            app.show_task_modal = false;
+
+            app.show_help = true;
+            terminal.draw(|f| crate::ui::render(f, &app)).unwrap();
+            app.show_help = false;
+        }
+
         let _ = std::fs::remove_dir_all(temp_dir);
     }
 }

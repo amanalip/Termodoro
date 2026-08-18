@@ -102,13 +102,25 @@ Termodoro divides the terminal window into three main regions:
    - Highlight **Auto-start Breaks** and press `Space` to enable automatic break starts.
    - Highlight **Desktop Notifications** or **Sound / Bell Alert** to customize acoustic and visual alerts.
 4. **Change Color Themes**:
-   - Highlight **Color Theme** and press `←` / `h` or `→` / `l` to cycle between:
+   - Highlight **Color Theme** and press `←` / `h` or `→` / `l` to cycle through all **18 themes**:
      - *Catppuccin Mocha*
+     - *Catppuccin Macchiato*
+     - *Catppuccin Frappé*
+     - *Catppuccin Latte* (Light Theme)
      - *Nord*
      - *Gruvbox Dark*
      - *Tokyo Night*
      - *Dracula*
      - *Solarized Dark*
+     - *Solarized Light* (Light Theme)
+     - *Rose Pine*
+     - *One Dark*
+     - *Kanagawa*
+     - *Everforest Dark*
+     - *Everforest Light* (Light Theme)
+     - *Synthwave '84*
+     - *Monokai Pro*
+     - *OLED Phosphor*
 5. **Instant Persistence**: All changes are automatically saved to your storage file immediately.
 
 ---
@@ -123,7 +135,7 @@ If you are new to Rust or TUI development, here is how the code flows:
 4. **`src/audio.rs`**: In-memory 16-bit PCM RIFF WAV audio synthesizer and non-blocking background sound playback engine.
 5. **`src/tasks.rs`**: Manages the task vector, active target ID, completion toggles, and filtered views.
 6. **`src/stats.rs`**: Records session history and runs the consecutive calendar day streak algorithm.
-7. **`src/theme.rs`**: Defines all color schemes using 24-bit RGB values.
+7. **`src/theme.rs`**: Defines all 18 color schemes using 24-bit RGB values.
 8. **`src/storage.rs`**: Handles saving and loading JSON state to the user's standard XDG data directory.
 9. **`src/ui/`**: Contains pure rendering functions that turn state into visual widgets on screen on every frame.
 
@@ -131,8 +143,8 @@ If you are new to Rust or TUI development, here is how the code flows:
 
 ## 4. Verification, Testing & Quality Assurance
 
-### Running the Test Suite (91 Tests)
-Termodoro includes a comprehensive suite of **91 automated unit, integration, and UI rendering tests**:
+### Running the Test Suite (93 Tests)
+Termodoro includes a comprehensive suite of **93 automated unit, integration, and UI rendering tests**:
 
 ```bash
 cargo test
@@ -166,6 +178,7 @@ To verify that the documented operational workflows match runtime reality, the s
 | **Quick Task Creation** | `a` modal opens with input validation | [`src/app.rs`](file:///home/amanap/Documents/GitHub/Termodoro/src/app.rs#L190-L240) | `test_task_modal_validation_and_bounds` | **VERIFIED** |
 | **Target Task Binding** | `t` marks target & credits finished focus | [`src/tasks.rs`](file:///home/amanap/Documents/GitHub/Termodoro/src/tasks.rs#L60-L90) | `test_set_selected_active` | **VERIFIED** |
 | **Streak Integrity** | Active if session completed today/yesterday | [`src/stats.rs`](file:///home/amanap/Documents/GitHub/Termodoro/src/stats.rs#L100-L160) | `test_multi_day_streak_yesterday_continuation` | **VERIFIED** |
+| **Theme Cycling** | `l`/`h` cycles across 18 palettes with wrap | [`src/theme.rs`](file:///home/amanap/Documents/GitHub/Termodoro/src/theme.rs#L1-L150) | `test_all_eighteen_themes_cycle_and_persistence_e2e` | **VERIFIED** |
 | **Live Settings Update** | Adjusting durations instantly updates timer | [`src/app.rs`](file:///home/amanap/Documents/GitHub/Termodoro/src/app.rs#L310-L360) | `test_settings_tab_vim_keys_and_live_timer_updates` | **VERIFIED** |
 | **Terminal Clean Exit** | `q` or `Esc` restores raw mode cleanly | [`src/main.rs`](file:///home/amanap/Documents/GitHub/Termodoro/src/main.rs#L25-L65) | `test_app_restart_and_state_recovery_e2e` | **VERIFIED** |
 

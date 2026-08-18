@@ -56,16 +56,16 @@ This document serves as the master roadmap, specification catalog, architectural
 
 | ID | Item Name | Category | Complexity | Status |
 |---|---|---|---|:---:|
-| **TH-01** | Rose Pine Theme | Themes | Low | [ ] |
-| **TH-02** | Catppuccin Latte (Light Theme) | Themes | Low | [ ] |
-| **TH-03** | One Dark (Atom Pro) Theme | Themes | Low | [ ] |
-| **TH-04** | Kanagawa (Wave) Theme | Themes | Low | [ ] |
-| **TH-05** | Everforest Dark & Light Themes | Themes | Low | [ ] |
-| **TH-06** | Synthwave / Cyberpunk '84 Theme | Themes | Low | [ ] |
-| **TH-07** | Monokai Pro Theme | Themes | Low | [ ] |
-| **TH-08** | Solarized Light Theme | Themes | Low | [ ] |
-| **TH-09** | OLED Pitch Black / Terminal Phosphor Theme | Themes | Low | [ ] |
-| **TH-10** | Catppuccin Macchiato & Frappé Themes | Themes | Low | [ ] |
+| **TH-01** | Rose Pine Theme | Themes | Low | [x] |
+| **TH-02** | Catppuccin Latte (Light Theme) | Themes | Low | [x] |
+| **TH-03** | One Dark (Atom Pro) Theme | Themes | Low | [x] |
+| **TH-04** | Kanagawa (Wave) Theme | Themes | Low | [x] |
+| **TH-05** | Everforest Dark & Light Themes | Themes | Low | [x] |
+| **TH-06** | Synthwave / Cyberpunk '84 Theme | Themes | Low | [x] |
+| **TH-07** | Monokai Pro Theme | Themes | Low | [x] |
+| **TH-08** | Solarized Light Theme | Themes | Low | [x] |
+| **TH-09** | OLED Pitch Black / Terminal Phosphor Theme | Themes | Low | [x] |
+| **TH-10** | Catppuccin Macchiato & Frappé Themes | Themes | Low | [x] |
 | **FE-01** | Continuous Flow & Auto-Start Mode | Timer | Low | [ ] |
 | **FE-02** | Overtime & Deep Work Grace Period | Timer | Medium | [ ] |
 | **FE-03** | Rhythm Presets & Profile Switcher (25/5, 50/10, Custom) | Timer | Medium | [ ] |

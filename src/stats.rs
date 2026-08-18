@@ -352,11 +352,14 @@ mod tests {
     #[test]
     fn test_streak_yesterday_preserved() {
         let mut stats = StatsHistory::new();
-        let yesterday_utc = (Utc::now() - chrono::Duration::days(1))
-            .date_naive()
+        let today = Local::now().date_naive();
+        let yesterday = today - chrono::Duration::days(1);
+        let yesterday_utc = yesterday
             .and_hms_opt(12, 0, 0)
             .unwrap()
-            .and_utc();
+            .and_local_timezone(Local)
+            .unwrap()
+            .with_timezone(&Utc);
         stats.sessions.push(CompletedSession {
             timestamp: yesterday_utc,
             phase: PomodoroPhase::Work,
@@ -373,11 +376,14 @@ mod tests {
     #[test]
     fn test_streak_broken_two_days_ago() {
         let mut stats = StatsHistory::new();
-        let two_days_ago_utc = (Utc::now() - chrono::Duration::days(2))
-            .date_naive()
+        let today = Local::now().date_naive();
+        let two_days_ago = today - chrono::Duration::days(2);
+        let two_days_ago_utc = two_days_ago
             .and_hms_opt(12, 0, 0)
             .unwrap()
-            .and_utc();
+            .and_local_timezone(Local)
+            .unwrap()
+            .with_timezone(&Utc);
         stats.sessions.push(CompletedSession {
             timestamp: two_days_ago_utc,
             phase: PomodoroPhase::Work,
