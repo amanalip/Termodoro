@@ -2,6 +2,13 @@
 
 <div align="center">
 
+[![CI](https://github.com/amanalip/Termodoro/actions/workflows/rust.yml/badge.svg)](https://github.com/amanalip/Termodoro/actions)
+[![Tests](https://img.shields.io/badge/tests-192%20passed%20(100%25)-brightgreen.svg)](test_report.md)
+[![Rust](https://img.shields.io/badge/rust-1.74%2B%20(Edition%202021)-orange.svg)](https://www.rust-lang.org)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Safety](https://img.shields.io/badge/unsafe%20code-0%25%20(Safe%20Rust)-brightgreen.svg)](audit_log.md)
+[![Privacy](https://img.shields.io/badge/telemetry-0%25%20(100%25%20Offline)-blueviolet.svg)](audit_log.md)
+
 ![Termodoro Focus Timer View](assets/screenshots/kde_01_timer_view.png)
 
 *A keyboard-driven, ultra-fast Pomodoro timer and task manager crafted in pure Rust with Ratatui on KDE Linux / CachyOS.*
@@ -10,8 +17,20 @@
 
 ---
 
-## Table of Contents
+### ⚡ 30-Second Quick Start
 
+```bash
+# 1. Clone the repository
+git clone https://github.com/amanalip/Termodoro.git
+cd Termodoro
+
+# 2. Build and launch in release mode
+cargo run --release
+```
+
+---
+
+## Table of Contents
 
 1. [Introduction to the Pomodoro Technique](#1-introduction-to-the-pomodoro-technique)
 2. [Why Use a Terminal-Based Timer?](#2-why-use-a-terminal-based-timer)
@@ -597,6 +616,29 @@ The Settings view allows you to customize durations, toggles, and visual appeara
 - `←` / `h` or `-` / `_`: Decrease numerical values, or cycle backwards through color themes.
 - `→` / `l` or `+` / `=`: Increase numerical values, or cycle forwards through color themes.
 - `Space` or `Enter`: Toggle boolean flags (Enabled / Disabled).
+
+#### Built-In Color Palettes Showcase (18 Themes)
+
+| Palette Name | Type | Background | Primary Accent | Focus Phase Tone |
+| :--- | :---: | :---: | :---: | :---: |
+| **Catppuccin Mocha** *(Default)* | Dark | `#1e1e2e` | `#cba6f7` (Mauve) | `#f38ba8` (Red) |
+| **Catppuccin Macchiato** | Dark | `#24273a` | `#c6a0f6` (Mauve) | `#ed8796` (Red) |
+| **Catppuccin Frappé** | Dark | `#303446` | `#ca9ee6` (Mauve) | `#e78284` (Red) |
+| **Catppuccin Latte** | Light | `#eff1f5` | `#8839ef` (Mauve) | `#d20f39` (Red) |
+| **Tokyo Night** | Dark | `#1a1b26` | `#7aa2f7` (Blue) | `#f7768e` (Coral Red) |
+| **Nord** | Dark | `#2e3440` | `#88c0d0` (Frost Cyan) | `#bf616a` (Nordic Red) |
+| **Gruvbox Dark** | Dark | `#282828` | `#fabd2f` (Yellow) | `#fb4934` (Warm Red) |
+| **Dracula** | Dark | `#282a36` | `#bd93f9` (Purple) | `#ff5555` (Dracula Red) |
+| **Solarized Dark** | Dark | `#002b36` | `#268bd2` (Blue) | `#dc322f` (Solar Red) |
+| **Solarized Light** | Light | `#fdf6e3` | `#268bd2` (Blue) | `#dc322f` (Solar Red) |
+| **Rose Pine** | Dark | `#191724` | `#ebbcba` (Rose) | `#eb6f92` (Love) |
+| **One Dark** | Dark | `#282c34` | `#61afef` (Blue) | `#e06c75` (Red) |
+| **Kanagawa** | Dark | `#1f1f28` | `#7e9cd8` (Wave Blue) | `#c34043` (Autumn Red) |
+| **Everforest Dark** | Dark | `#2d353b` | `#a7c080` (Green) | `#e67e80` (Red) |
+| **Everforest Light** | Light | `#fdf6e3` | `#8da101` (Olive) | `#f85552` (Red) |
+| **Synthwave '84** | Dark | `#262335` | `#ff7edb` (Neon Pink) | `#fe4450` (Hot Red) |
+| **Monokai Pro** | Dark | `#2d2a2e` | `#ffd866` (Sun Yellow) | `#ff6188` (Rose Red) |
+| **OLED Phosphor** | Dark | `#000000` | `#00ff66` (CRT Phosphor) | `#ff3333` (Warning Red) |
 
 ---
 
