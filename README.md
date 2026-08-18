@@ -123,12 +123,16 @@ Termodoro is organized as a modular Rust application adhering to strict separati
 ```
 Termodoro/
 ├── Cargo.toml                  # Package manifest, dependencies, and build profiles
+├── Makefile                    # Automation shortcuts (make test, check, build, clean)
+├── ARCHITECTURE.md             # High-level architecture index and navigation
 ├── System_design.md            # Comprehensive system design, architecture & technical rationale
 ├── IMPLEMENTATION.md           # In-depth engineering specification and algorithms
 ├── WALKTHROUGH.md              # Operational workflows, code tour, and test benchmarks
 ├── test_report.md              # Comprehensive 192-test QA audit & test suite report
-├── audit_log.md                # Permanent audit log & verification history (AUD-001 to AUD-013)
+├── audit_log.md                # Permanent audit log & verification history (AUD-001 to AUD-016)
 ├── new_features_tracker.md     # Feature tracking roadmap and specifications
+├── scripts/                    # Automation helper scripts (test_and_clean.sh)
+├── docs/                       # GitHub Pages live web showcase, simulator & documentation
 ├── user_journeys/              # Interactive step-by-step visual user journey walkthroughs
 │   ├── README.md               # User journeys index, workflow catalog & keybinding reference
 │   ├── 01_focus_session_and_cycling.md
@@ -145,6 +149,8 @@ Termodoro/
     ├── config.rs               # User preference schema and default parameters
     ├── theme.rs                # Theme choices and concrete 18 RGB color palettes
     ├── storage.rs              # File I/O, XDG directory resolution, zero-telemetry storage
+    ├── bin/
+    │   └── generate_screenshots.rs # Automated vector SVG & headless screenshot engine
     └── ui/
         ├── mod.rs              # Root view layout coordinator, tabs, header and footer
         ├── digits.rs           # 5x3 block font character rasterization for digital clock
