@@ -120,4 +120,60 @@ mod tests {
             assert_eq!(parsed.theme, *theme);
         }
     }
+
+    #[test]
+    fn test_config_boolean_flag_combinations() {
+        let config = Config {
+            auto_start_breaks: true,
+            auto_start_work: true,
+            sound_enabled: false,
+            desktop_notifications: false,
+            ..Default::default()
+        };
+
+        let json = serde_json::to_string(&config).unwrap();
+        let loaded: Config = serde_json::from_str(&json).unwrap();
+        assert!(loaded.auto_start_breaks);
+        assert!(loaded.auto_start_work);
+        assert!(!loaded.sound_enabled);
+        assert!(!loaded.desktop_notifications);
+    }
+
+    #[test]
+    fn test_config_extreme_duration_values_serde() {
+        let config = Config {
+            work_duration_mins: 120,
+            short_break_mins: 60,
+            long_break_mins: 90,
+            long_break_interval: 24,
+            ..Default::default()
+        };
+        let json = serde_json::to_string(&config).unwrap();
+        let loaded: Config = serde_json::from_str(&json).unwrap();
+        assert_eq!(loaded.work_duration_mins, 120);
+        assert_eq!(loaded.short_break_mins, 60);
+        assert_eq!(loaded.long_break_mins, 90);
+        assert_eq!(loaded.long_break_interval, 24);
+    }
+
+    #[test]
+    fn test_config_debug_formatting() {
+        let config = Config::default();
+        let debug_str = format!("{:?}", config);
+        assert!(debug_str.contains("work_duration_mins: 25"));
+        assert!(debug_str.contains("short_break_mins: 5"));
+        assert!(debug_str.contains("CatppuccinMocha"));
+    }
+
+    #[test]
+    fn test_config_custom_initialization_builder_pattern() {
+        let config = Config {
+            work_duration_mins: 45,
+            theme: ThemeChoice::GruvboxDark,
+            ..Default::default()
+        };
+        assert_eq!(config.work_duration_mins, 45);
+        assert_eq!(config.theme, ThemeChoice::GruvboxDark);
+        assert_eq!(config.short_break_mins, 5);
+    }
 }

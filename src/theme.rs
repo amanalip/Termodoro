@@ -570,4 +570,64 @@ mod tests {
             assert_eq!(all[prev_idx], all[(i + 17) % 18]);
         }
     }
+
+    #[test]
+    fn test_theme_phase_colors_distinctness() {
+        for choice in ThemeChoice::all() {
+            let theme = Theme::from_choice(*choice);
+            // Work color and ShortBreak color should never be identical in any theme
+            assert_ne!(
+                format!("{:?}", theme.work),
+                format!("{:?}", theme.short_break),
+                "Theme {:?} work and short_break colors collide",
+                choice
+            );
+        }
+    }
+
+    #[test]
+    fn test_theme_default_fallback_is_catppuccin_mocha() {
+        assert_eq!(ThemeChoice::default(), ThemeChoice::CatppuccinMocha);
+        let theme = Theme::from_choice(ThemeChoice::default());
+        assert_eq!(theme.choice, ThemeChoice::CatppuccinMocha);
+    }
+
+    #[test]
+    fn test_theme_rgb_components_within_byte_bounds() {
+        for choice in ThemeChoice::all() {
+            let theme = Theme::from_choice(*choice);
+            let colors = [
+                theme.bg,
+                theme.fg,
+                theme.primary,
+                theme.secondary,
+                theme.work,
+                theme.short_break,
+                theme.long_break,
+                theme.success,
+                theme.warning,
+                theme.border,
+                theme.border_active,
+                theme.muted,
+                theme.highlight,
+            ];
+            for c in colors {
+                match c {
+                    Color::Rgb(r, g, b) => {
+                        // Pattern match verifies 24-bit TrueColor RGB encoding
+                        let _ = (r, g, b);
+                    }
+                    _ => panic!("Expected RGB color in theme"),
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn test_theme_choice_clone_and_copy() {
+        let original = ThemeChoice::TokyoNight;
+        let cloned = original;
+        assert_eq!(original, cloned);
+        assert_eq!(format!("{:?}", original), "TokyoNight");
+    }
 }

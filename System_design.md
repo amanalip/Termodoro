@@ -338,20 +338,20 @@ std::panic::set_hook(Box::new(move |info| {
 
 ## 10. Automated Quality Assurance & Verification Matrix
 
-Termodoro's architecture is continuously certified by a comprehensive **154-test automated QA harness** running across Linux, macOS, and Windows:
+Termodoro's architecture is continuously certified by a comprehensive **192-test automated QA harness** running across Linux, macOS, and Windows:
 
 ```mermaid
-pie title Automated Test Distribution (154 Tests)
-    "App & E2E Workflows" : 31
-    "Productivity Analytics" : 24
-    "Timer Finite State Machine" : 22
-    "Task Management Engine" : 22
-    "Audio Synthesis & WAV" : 15
-    "TUI Rendering & Buffer" : 15
-    "Storage & Zero-Telemetry" : 10
-    "Theme Palettes & Contrast" : 6
+pie title Automated Test Distribution (192 Tests)
+    "App & E2E Workflows" : 35
+    "Productivity Analytics" : 29
+    "Timer Finite State Machine" : 27
+    "Task Management Engine" : 27
+    "Audio Synthesis & WAV" : 19
+    "TUI Rendering & Buffer" : 18
+    "Storage & Zero-Telemetry" : 14
+    "Theme Palettes & Contrast" : 10
+    "Configuration & Serde" : 8
     "ASCII Block Typography" : 5
-    "Configuration & Serde" : 4
 ```
 
 | Verification Dimension | Verified Standard | Verification Tool | Status |
@@ -359,7 +359,7 @@ pie title Automated Test Distribution (154 Tests)
 | **Compiler Compliance** | Rust 1.74+ (Edition 2021) | `cargo check` | **PASS** |
 | **Code Formatting** | 100% Rustfmt canonical style | `cargo fmt -- --check` | **PASS** |
 | **Static Analysis** | Zero warnings with fatal pedantic flags | `cargo clippy -- -D warnings` | **PASS** |
-| **Unit & E2E Tests** | 154 / 154 passing across all 9 modules | `cargo test` | **PASS** |
+| **Unit & E2E Tests** | 192 / 192 passing across all 9 modules | `cargo test` | **PASS** |
 | **Memory Safety** | Zero `unsafe` keywords in `src/` | AST regex scan | **PASS** |
 | **Network Isolation** | Zero HTTP/network client libraries in lockfile | Dependency audit | **PASS** |
 | **Multi-OS CI Matrix** | Ubuntu Latest, macOS Latest, Windows Latest | GitHub Actions CI | **PASS** |

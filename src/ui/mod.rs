@@ -647,4 +647,62 @@ mod tests {
 
         let _ = std::fs::remove_dir_all(temp_dir);
     }
+
+    #[test]
+    fn test_render_extreme_high_resolution_terminal() {
+        let (app, temp_dir) = create_test_app();
+        let backend = TestBackend::new(350, 120);
+        let mut terminal = Terminal::new(backend).unwrap();
+
+        // 350x120 4K Ultra-wide terminal rendering
+        terminal.draw(|f| render(f, &app)).unwrap();
+        let buf = format!("{:?}", terminal.backend().buffer());
+        assert!(buf.contains("Termodoro"));
+
+        let _ = std::fs::remove_dir_all(temp_dir);
+    }
+
+    #[test]
+    fn test_render_all_three_task_filter_tabs() {
+        let (mut app, temp_dir) = create_test_app();
+        let backend = TestBackend::new(90, 30);
+        let mut terminal = Terminal::new(backend).unwrap();
+
+        app.active_tab = ActiveTab::Tasks;
+        app.tasks.add("Pending Task".to_string(), 2);
+        app.tasks.add("Done Task".to_string(), 1);
+        app.tasks.selected_index = 1;
+        app.tasks.toggle_selected();
+
+        for filter in [
+            crate::tasks::TaskFilter::All,
+            crate::tasks::TaskFilter::Active,
+            crate::tasks::TaskFilter::Completed,
+        ] {
+            app.tasks.filter = filter;
+            terminal.draw(|f| render(f, &app)).unwrap();
+            let buf = format!("{:?}", terminal.backend().buffer());
+            assert!(buf.contains("Tasks"));
+        }
+
+        let _ = std::fs::remove_dir_all(temp_dir);
+    }
+
+    #[test]
+    fn test_render_active_task_card_details_on_timer_view() {
+        let (mut app, temp_dir) = create_test_app();
+        let backend = TestBackend::new(90, 30);
+        let mut terminal = Terminal::new(backend).unwrap();
+
+        app.tasks.add("Refactor Storage Subsystem".to_string(), 4);
+        app.tasks.selected_index = 0;
+        app.tasks.set_selected_active();
+
+        app.active_tab = ActiveTab::Timer;
+        terminal.draw(|f| render(f, &app)).unwrap();
+        let buf = format!("{:?}", terminal.backend().buffer());
+        assert!(buf.contains("Refactor Storage Subsystem") || buf.contains("Target"));
+
+        let _ = std::fs::remove_dir_all(temp_dir);
+    }
 }

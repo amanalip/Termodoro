@@ -358,17 +358,17 @@ If an unhandled error triggers a panic, this hook executes first:
 
 ## 11. Automated Testing Strategy & Benchmarks
 
-Termodoro includes **154 automated unit, integration, and UI rendering tests** across all 9 modules:
+Termodoro includes **192 automated unit, integration, and UI rendering tests** across all 9 modules:
 
-- **Audio Engine (`src/audio.rs`)**: Tests 16-bit PCM RIFF headers, signal clipping bounds ($>10000$, $<32000$), smooth exponential decay envelopes, pop/click prevention on audio DAC, custom sample rates ($8\text{kHz}$ to $96\text{kHz}$), byte-level RIFF alignment, and atomic muting flags.
-- **Timer Engine (`src/timer.rs`)**: Tests 24-cycle state machine progression, underflow safety on sub-second ticks, tuple time formatting, large duration formatting (up to 120 mins), 50 rapid skips, zero-duration progress calculations, pause, toggle, and reset transitions.
-- **Task Management (`src/tasks.rs`)**: Tests UUID generation uniqueness across 100 tasks, 500-task high volume benchmarks, dynamic filter index clamping, transient JSON exclusions, boundary deletions, empty manager resilience, and active task auto-reassignment.
-- **Productivity Analytics (`src/stats.rs`)**: Tests 366-day leap year streaks, multi-day streaks across year and month boundaries, 1,000-session large accumulation, minute-to-hour calculations, session metadata retention, and weekday histogram labels.
-- **Storage & Zero-Telemetry Privacy (`src/storage.rs`)**: Tests atomic save/load roundtrips, corrupt file graceful recovery, zero-telemetry schema invariants, rejection of third-party network SDKs/URLs, and local-only XDG directory isolation.
-- **Application Workflows (`src/app.rs`)**: Tests 1,000-keystroke chaos fuzzing, 18-theme forward/backward navigation and disk persistence, exhaustive 9-row settings clamping, modal input isolation and rapid editing/backspace, full 24-cycle E2E workflows, sound & desktop notification flags, status message expiration, and keybinding dispatchers.
-- **Themes & Palettes (`src/theme.rs`)**: Tests all 18 palettes, WCAG relative luminance contrast formulas, forward/backward index cycling, and serde roundtrips.
-- **Configuration & Preferences (`src/config.rs`)**: Tests default parameters, field mutations, struct equality, and serde serialization across all 18 theme variants.
-- **UI Terminal Frame Rendering (`src/ui/mod.rs`)**: Uses Ratatui `TestBackend` to verify pixel buffer contents across all tabs, modal dialogs, status toast banners, 24-dot cycle views, all 18 color themes, and extreme terminal geometries from $20\times 10$ to $300\times 100$.
+- **Audio Engine (`src/audio.rs`, 19 tests)**: Tests 16-bit PCM RIFF headers, signal clipping bounds ($>10000$, $<32000$), smooth exponential decay envelopes, pop/click prevention on audio DAC, custom sample rates ($8\text{kHz}$ to $96\text{kHz}$), byte-level RIFF alignment, two-tone/three-tone duration timing, and atomic muting flags.
+- **Timer Engine (`src/timer.rs`, 27 tests)**: Tests 24-cycle state machine progression, underflow safety on sub-second ticks, tuple time formatting, large duration formatting (up to 120 mins), 50 rapid skips, zero-duration progress calculations, pause, toggle, reset transitions, and phase title/emoji parity.
+- **Task Management (`src/tasks.rs`, 27 tests)**: Tests UUID generation uniqueness across 100 tasks, 500-task high volume benchmarks, dynamic filter index clamping, transient JSON exclusions, boundary deletions, empty manager resilience, selection wrapping, multiline sanitization, and active task auto-reassignment.
+- **Productivity Analytics (`src/stats.rs`, 29 tests)**: Tests 366-day leap year streaks, multi-day streaks across year and month boundaries, 1,000-session large accumulation, minute-to-hour calculations, session metadata retention, empty window distributions, and weekday histogram labels.
+- **Storage & Zero-Telemetry Privacy (`src/storage.rs`, 14 tests)**: Tests atomic save/load roundtrips, corrupt file graceful recovery, zero-telemetry schema invariants, rejection of third-party network SDKs/URLs, atomic .tmp file cleanups, and local-only XDG directory isolation.
+- **Application Workflows (`src/app.rs`, 35 tests)**: Tests 1,000-keystroke chaos fuzzing, 18-theme forward/backward navigation and disk persistence, exhaustive 9-row settings clamping, modal input isolation and rapid editing/backspace, full 24-cycle E2E workflows, direct numeric tab jumping, modal dismissal keys, sound & desktop notification flags, status message expiration, and keybinding dispatchers.
+- **Themes & Palettes (`src/theme.rs`, 10 tests)**: Tests all 18 palettes, WCAG relative luminance contrast formulas, forward/backward index cycling, phase color distinctness, byte-level RGB constraints, and serde roundtrips.
+- **Configuration & Preferences (`src/config.rs`, 8 tests)**: Tests default parameters, field mutations, struct equality, extreme value serde serialization, boolean flag permutations, and serde serialization across all 18 theme variants.
+- **UI Terminal Frame Rendering (`src/ui/mod.rs` & `src/ui/digits.rs`, 23 tests)**: Uses Ratatui `TestBackend` to verify pixel buffer contents across all tabs, active target badges, modal dialogs, status toast banners, 24-dot cycle views, all 18 color themes, and extreme terminal geometries from $20\times 10$ to $350\times 120$.
 
 Run the complete test suite with:
 ```bash

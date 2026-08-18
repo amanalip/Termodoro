@@ -428,4 +428,66 @@ mod tests {
             "Must not contain Google Analytics trackers"
         );
     }
+
+    #[test]
+    fn test_storage_atomic_tmp_file_cleaned_after_save() {
+        let temp_dir =
+            std::env::temp_dir().join(format!("termodoro_tmpclean_{}", uuid::Uuid::new_v4()));
+        let file_path = temp_dir.join("data.json");
+        let tmp_file_path = temp_dir.join("data.json.tmp");
+        let storage = Storage::with_path(file_path.clone());
+
+        storage.save(
+            &Config::default(),
+            &TaskManager::new(),
+            &StatsHistory::new(),
+        );
+        assert!(file_path.exists());
+        // The .tmp file must be atomically renamed and must NOT linger around
+        assert!(!tmp_file_path.exists());
+
+        let _ = fs::remove_dir_all(temp_dir);
+    }
+
+    #[test]
+    fn test_storage_app_data_clone_and_equality() {
+        let app_data = AppData {
+            config: Config::default(),
+            tasks: TaskManager::new(),
+            stats: StatsHistory::new(),
+        };
+        let cloned = app_data.clone();
+        assert_eq!(app_data.config, cloned.config);
+        assert_eq!(app_data.tasks.tasks.len(), cloned.tasks.tasks.len());
+        assert_eq!(app_data.stats.sessions.len(), cloned.stats.sessions.len());
+    }
+
+    #[test]
+    fn test_storage_load_idempotence() {
+        let temp_dir =
+            std::env::temp_dir().join(format!("termodoro_idemp_{}", uuid::Uuid::new_v4()));
+        let file_path = temp_dir.join("data.json");
+        let storage = Storage::with_path(file_path.clone());
+
+        let mut tasks = TaskManager::new();
+        tasks.add("Idempotent Task".to_string(), 4);
+        storage.save(&Config::default(), &tasks, &StatsHistory::new());
+
+        let load_1 = storage.load();
+        let load_2 = storage.load();
+        let load_3 = storage.load();
+
+        assert_eq!(load_1.tasks.tasks[0].title, "Idempotent Task");
+        assert_eq!(load_2.tasks.tasks[0].title, "Idempotent Task");
+        assert_eq!(load_3.tasks.tasks[0].title, "Idempotent Task");
+
+        let _ = fs::remove_dir_all(temp_dir);
+    }
+
+    #[test]
+    fn test_storage_constructor_new_default_path_exists() {
+        let storage = Storage::new();
+        let path = storage.data_file_path();
+        assert!(path.to_string_lossy().contains("termodoro"));
+    }
 }

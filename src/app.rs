@@ -1972,4 +1972,96 @@ mod tests {
 
         let _ = std::fs::remove_dir_all(temp_dir);
     }
+
+    #[test]
+    fn test_app_direct_tab_numeric_navigation_integration() {
+        let (mut app, temp_dir) = create_test_app();
+        assert_eq!(app.active_tab, ActiveTab::Timer);
+
+        app.on_key_event(make_key(KeyCode::Char('3')));
+        assert_eq!(app.active_tab, ActiveTab::Stats);
+
+        app.on_key_event(make_key(KeyCode::Char('4')));
+        assert_eq!(app.active_tab, ActiveTab::Settings);
+
+        app.on_key_event(make_key(KeyCode::Char('1')));
+        assert_eq!(app.active_tab, ActiveTab::Timer);
+
+        app.on_key_event(make_key(KeyCode::Char('2')));
+        assert_eq!(app.active_tab, ActiveTab::Tasks);
+
+        let _ = std::fs::remove_dir_all(temp_dir);
+    }
+
+    #[test]
+    fn test_app_help_modal_all_dismiss_keys() {
+        let (mut app, temp_dir) = create_test_app();
+
+        for dismiss_key in [
+            KeyCode::Esc,
+            KeyCode::Char('q'),
+            KeyCode::Char('?'),
+            KeyCode::Enter,
+        ] {
+            app.show_help = true;
+            app.on_key_event(make_key(dismiss_key));
+            assert!(!app.show_help);
+        }
+
+        let _ = std::fs::remove_dir_all(temp_dir);
+    }
+
+    #[test]
+    fn test_app_settings_toggle_all_boolean_rows() {
+        let (mut app, temp_dir) = create_test_app();
+        app.active_tab = ActiveTab::Settings;
+
+        // Rows 4, 5, 6, 7 are booleans: auto_start_breaks, auto_start_work, desktop_notifications, sound_enabled
+        let initial_flags = (
+            app.config.auto_start_breaks,
+            app.config.auto_start_work,
+            app.config.desktop_notifications,
+            app.config.sound_enabled,
+        );
+
+        for row in 4..=7 {
+            app.settings_index = row;
+            app.on_key_event(make_key(KeyCode::Char(' ')));
+        }
+
+        assert_eq!(app.config.auto_start_breaks, !initial_flags.0);
+        assert_eq!(app.config.auto_start_work, !initial_flags.1);
+        assert_eq!(app.config.desktop_notifications, !initial_flags.2);
+        assert_eq!(app.config.sound_enabled, !initial_flags.3);
+
+        let _ = std::fs::remove_dir_all(temp_dir);
+    }
+
+    #[test]
+    fn test_app_task_target_binding_and_unbinding_e2e() {
+        let (mut app, temp_dir) = create_test_app();
+        app.tasks.add("Sprint Task".to_string(), 3);
+        app.active_tab = ActiveTab::Tasks;
+        app.tasks.selected_index = 0;
+
+        // 't' sets active target
+        app.on_key_event(make_key(KeyCode::Char('t')));
+        assert!(app
+            .status_message
+            .as_ref()
+            .unwrap()
+            .contains("Target set to"));
+        assert_eq!(app.tasks.active_task().unwrap().title, "Sprint Task");
+
+        // 'd' deletes active task
+        app.on_key_event(make_key(KeyCode::Char('d')));
+        assert!(app.tasks.active_task().is_none());
+        assert!(app
+            .status_message
+            .as_ref()
+            .unwrap()
+            .contains("Task deleted"));
+
+        let _ = std::fs::remove_dir_all(temp_dir);
+    }
 }

@@ -900,4 +900,100 @@ mod tests {
         assert_eq!(stats.sessions[1].task_title, None);
         assert_eq!(stats.sessions[2].task_title.as_deref(), Some("Task Two"));
     }
+
+    #[test]
+    fn test_stats_empty_distribution_window_zeroes() {
+        let stats = StatsHistory::new();
+        let dist = stats.last_days_distribution(14);
+        assert_eq!(dist.len(), 14);
+        for (_date, mins) in dist {
+            assert_eq!(mins, 0);
+        }
+    }
+
+    #[test]
+    fn test_stats_today_work_sessions_and_minutes_accuracy() {
+        let mut stats = StatsHistory::new();
+        assert_eq!(stats.today_work_sessions(), 0);
+        assert_eq!(stats.today_focus_minutes(), 0);
+
+        stats.record(PomodoroPhase::Work, 25, None, None);
+        stats.record(PomodoroPhase::ShortBreak, 5, None, None);
+        stats.record(PomodoroPhase::Work, 50, None, None);
+
+        assert_eq!(stats.today_work_sessions(), 2);
+        assert_eq!(stats.today_focus_minutes(), 75);
+    }
+
+    #[test]
+    fn test_stats_longest_streak_persists_after_streak_broken() {
+        let mut stats = StatsHistory::new();
+        let today = Local::now().date_naive();
+        // 5 consecutive days 10 days ago (10 to 6 days ago)
+        for offset in (6..=10).rev() {
+            let d = today - chrono::Duration::days(offset);
+            let dt = d
+                .and_hms_opt(12, 0, 0)
+                .unwrap()
+                .and_local_timezone(Local)
+                .unwrap()
+                .with_timezone(&Utc);
+            stats.sessions.push(CompletedSession {
+                timestamp: dt,
+                phase: PomodoroPhase::Work,
+                duration_mins: 25,
+                task_id: None,
+                task_title: None,
+            });
+        }
+
+        // Current streak should be 0 because 6 days have passed
+        assert_eq!(stats.current_streak_days(), 0);
+        // But longest streak should be preserved as 5
+        assert_eq!(stats.longest_streak_days(), 5);
+    }
+
+    #[test]
+    fn test_stats_recent_sessions_pagination_and_slice() {
+        let mut stats = StatsHistory::new();
+        for i in 1..=25 {
+            stats.record(PomodoroPhase::Work, 25, None, Some(format!("Task {}", i)));
+        }
+
+        let total = stats.sessions.len();
+        assert_eq!(total, 25);
+        let recent_10 = &stats.sessions[total.saturating_sub(10)..];
+        assert_eq!(recent_10.len(), 10);
+        // Most recent should be Task 25 at the end
+        assert_eq!(
+            recent_10.last().unwrap().task_title.as_deref(),
+            Some("Task 25")
+        );
+    }
+
+    #[test]
+    fn test_stats_distribution_sum_matches_total() {
+        let mut stats = StatsHistory::new();
+        let today = Local::now().date_naive();
+        for offset in 0..7 {
+            let d = today - chrono::Duration::days(offset);
+            let dt = d
+                .and_hms_opt(10, 0, 0)
+                .unwrap()
+                .and_local_timezone(Local)
+                .unwrap()
+                .with_timezone(&Utc);
+            stats.sessions.push(CompletedSession {
+                timestamp: dt,
+                phase: PomodoroPhase::Work,
+                duration_mins: 30,
+                task_id: None,
+                task_title: None,
+            });
+        }
+
+        let dist = stats.last_days_distribution(7);
+        let sum_dist: u64 = dist.iter().map(|(_, count)| *count).sum();
+        assert_eq!(sum_dist, 7);
+    }
 }

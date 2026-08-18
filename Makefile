@@ -7,7 +7,7 @@
 # Default target
 all: test-clean
 
-# Run 154 tests and automatically clean build cache to prevent disk bloat
+# Run 192 tests and automatically clean build cache to prevent disk bloat
 test:
 	./scripts/test_and_clean.sh
 
@@ -44,9 +44,9 @@ clippy:
 # Display available commands
 help:
 	@echo "Termodoro Makefile Commands:"
-	@echo "  make test        - Run full 154 tests and automatically clean target/ cache"
+	@echo "  make test        - Run full 192 tests and automatically clean target/ cache"
 	@echo "  make test-clean  - Run tests and auto-clean (reclaims ~1.8GB disk space)"
-	@echo "  make check       - Run fmt, clippy, 154 tests, and auto-clean"
+	@echo "  make check       - Run fmt, clippy, 192 tests, and auto-clean"
 	@echo "  make build       - Compile optimized release binary"
 	@echo "  make run         - Run Termodoro in release mode"
 	@echo "  make clean       - Reclaim disk space immediately via cargo clean"

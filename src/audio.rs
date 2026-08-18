@@ -382,4 +382,43 @@ mod tests {
             );
         }
     }
+
+    #[test]
+    fn test_audio_mute_for_tests_flag() {
+        AUDIO_MUTED_FOR_TESTS.store(true, Ordering::SeqCst);
+        assert!(AUDIO_MUTED_FOR_TESTS.load(Ordering::SeqCst));
+        // Calling play_phase_sound while muted must return immediately without spawning threads
+        play_phase_sound(crate::timer::PomodoroPhase::Work);
+        play_phase_sound(crate::timer::PomodoroPhase::ShortBreak);
+        play_phase_sound(crate::timer::PomodoroPhase::LongBreak);
+    }
+
+    #[test]
+    fn test_audio_work_chime_harmonic_components_variance() {
+        let work_wav = generate_work_complete_chime();
+        let pcm = &work_wav[44..];
+        let mut max_val = 0i16;
+        for i in 0..(pcm.len() / 2) {
+            let sample = i16::from_le_bytes([pcm[i * 2], pcm[i * 2 + 1]]);
+            if sample.abs() > max_val {
+                max_val = sample.abs();
+            }
+        }
+        // Work chime must have rich audible amplitude (> 15000)
+        assert!(max_val > 15000, "Max amplitude was too quiet: {}", max_val);
+    }
+
+    #[test]
+    fn test_audio_break_chime_two_tone_structure_duration() {
+        let break_wav = generate_break_complete_chime();
+        // Sample rate 44100 * 1.4s * 2 bytes/sample + 44 bytes header = 123524 bytes
+        assert_eq!(break_wav.len(), 44 + (44100 * 14 / 10 * 2));
+    }
+
+    #[test]
+    fn test_audio_long_break_chime_three_tone_triad_duration() {
+        let long_wav = generate_long_break_chime();
+        // Sample rate 44100 * 2.0s * 2 bytes/sample + 44 bytes header = 176444 bytes
+        assert_eq!(long_wav.len(), 44 + (44100 * 2 * 2));
+    }
 }

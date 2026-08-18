@@ -685,4 +685,98 @@ mod tests {
         assert!(!task.completed);
         assert!(!task.id.is_empty());
     }
+
+    #[test]
+    fn test_task_active_reassignment_on_deletion() {
+        let mut manager = TaskManager::new();
+        manager.add("Task 1".to_string(), 2);
+        manager.add("Task 2".to_string(), 3);
+        manager.add("Task 3".to_string(), 1);
+
+        manager.selected_index = 1;
+        manager.set_selected_active();
+        assert_eq!(manager.active_task().unwrap().title, "Task 2");
+
+        // Remove active task (index 1) -> active reassigned to first incomplete task ("Task 1")
+        manager.remove_selected();
+        assert_eq!(manager.tasks.len(), 2);
+        assert_eq!(manager.active_task().unwrap().title, "Task 1");
+
+        // Complete remaining tasks and delete
+        manager.selected_index = 0;
+        manager.toggle_selected(); // Task 1 completed
+        manager.selected_index = 1;
+        manager.toggle_selected(); // Task 3 completed
+
+        manager.selected_index = 0;
+        manager.remove_selected();
+        manager.selected_index = 0;
+        manager.remove_selected();
+        assert!(manager.active_task().is_none());
+    }
+
+    #[test]
+    fn test_task_filtered_list_view_integrity() {
+        let mut manager = TaskManager::new();
+        manager.add("Pending 1".to_string(), 1);
+        manager.add("Pending 2".to_string(), 2);
+        manager.add("Done 1".to_string(), 3);
+
+        manager.selected_index = 2;
+        manager.toggle_selected();
+
+        manager.filter = TaskFilter::All;
+        assert_eq!(manager.filtered_indices().len(), 3);
+
+        manager.filter = TaskFilter::Active;
+        assert_eq!(manager.filtered_indices().len(), 2);
+        assert_eq!(
+            manager.tasks[manager.filtered_indices()[0]].title,
+            "Pending 1"
+        );
+        assert_eq!(
+            manager.tasks[manager.filtered_indices()[1]].title,
+            "Pending 2"
+        );
+
+        manager.filter = TaskFilter::Completed;
+        assert_eq!(manager.filtered_indices().len(), 1);
+        assert_eq!(manager.tasks[manager.filtered_indices()[0]].title, "Done 1");
+    }
+
+    #[test]
+    fn test_task_navigation_empty_manager_safety() {
+        let mut manager = TaskManager::new();
+        assert_eq!(manager.selected_index, 0);
+        manager.next();
+        assert_eq!(manager.selected_index, 0);
+        manager.previous();
+        assert_eq!(manager.selected_index, 0);
+        manager.toggle_selected();
+        manager.remove_selected();
+        assert_eq!(manager.tasks.len(), 0);
+    }
+
+    #[test]
+    fn test_task_multiline_and_emoji_stress() {
+        let mut manager = TaskManager::new();
+        manager.add("🚀 Line 1\nLine 2\t\rLine 3".to_string(), 5);
+        assert_eq!(manager.tasks.len(), 1);
+        assert_eq!(manager.tasks[0].title, "🚀 Line 1\nLine 2\t\rLine 3");
+        assert_eq!(manager.tasks[0].pomodoros_estimated, 5);
+    }
+
+    #[test]
+    fn test_task_selected_index_bounds_wrapping() {
+        let mut manager = TaskManager::new();
+        manager.add("First".to_string(), 1);
+        manager.add("Second".to_string(), 2);
+
+        manager.selected_index = 0;
+        manager.previous(); // Up wraps to 1
+        assert_eq!(manager.selected_index, 1);
+
+        manager.next(); // Down wraps to 0
+        assert_eq!(manager.selected_index, 0);
+    }
 }

@@ -726,4 +726,100 @@ mod tests {
         timer.time_remaining_secs = 65;
         assert_eq!(timer.formatted_time(), (1, 5));
     }
+
+    #[test]
+    fn test_timer_status_transitions_and_predicates() {
+        let config = Config::default();
+        let mut timer = PomodoroTimer::new(&config);
+
+        assert_eq!(timer.status, TimerStatus::Stopped);
+        timer.toggle();
+        assert_eq!(timer.status, TimerStatus::Running);
+        timer.toggle();
+        assert_eq!(timer.status, TimerStatus::Paused);
+        timer.reset(&config);
+        assert_eq!(timer.status, TimerStatus::Stopped);
+    }
+
+    #[test]
+    fn test_timer_target_duration_all_phases_with_custom_config() {
+        let config = Config {
+            work_duration_mins: 90,
+            short_break_mins: 20,
+            long_break_mins: 45,
+            long_break_interval: 12,
+            ..Default::default()
+        };
+        let timer = PomodoroTimer::new(&config);
+
+        assert_eq!(
+            timer.target_duration_secs(PomodoroPhase::Work, &config),
+            90 * 60
+        );
+        assert_eq!(
+            timer.target_duration_secs(PomodoroPhase::ShortBreak, &config),
+            20 * 60
+        );
+        assert_eq!(
+            timer.target_duration_secs(PomodoroPhase::LongBreak, &config),
+            45 * 60
+        );
+    }
+
+    #[test]
+    fn test_timer_progress_ratio_bounds_and_rounding() {
+        let config = Config {
+            work_duration_mins: 10,
+            ..Default::default()
+        };
+        let mut timer = PomodoroTimer::new(&config);
+        // Total is 600s
+        assert_eq!(timer.total_duration_secs, 600);
+
+        timer.time_remaining_secs = 600;
+        assert!((timer.progress_ratio() - 0.0).abs() < f64::EPSILON);
+
+        timer.time_remaining_secs = 300;
+        assert!((timer.progress_ratio() - 0.5).abs() < f64::EPSILON);
+
+        timer.time_remaining_secs = 0;
+        assert!((timer.progress_ratio() - 1.0).abs() < f64::EPSILON);
+    }
+
+    #[test]
+    fn test_timer_long_break_to_work_cycle_reset() {
+        let config = Config {
+            long_break_interval: 3,
+            auto_start_work: false,
+            ..Default::default()
+        };
+        let mut timer = PomodoroTimer::new(&config);
+        timer.phase = PomodoroPhase::LongBreak;
+        timer.current_cycle = 1; // Cycle was reset to 1 when entering LongBreak
+        timer.time_remaining_secs = 1;
+        timer.status = TimerStatus::Running;
+
+        let event = timer.tick(&config);
+        assert_eq!(
+            event,
+            Some(TimerEvent::PhaseCompleted {
+                finished_phase: PomodoroPhase::LongBreak,
+                next_phase: PomodoroPhase::Work,
+            })
+        );
+        assert_eq!(timer.phase, PomodoroPhase::Work);
+        assert_eq!(timer.current_cycle, 1);
+        assert_eq!(timer.status, TimerStatus::Stopped);
+    }
+
+    #[test]
+    fn test_timer_phase_title_and_emoji_completeness() {
+        assert_eq!(PomodoroPhase::Work.title(), "FOCUS SESSION");
+        assert_eq!(PomodoroPhase::ShortBreak.title(), "SHORT BREAK");
+        assert_eq!(PomodoroPhase::LongBreak.title(), "LONG BREAK");
+
+        assert_eq!(PomodoroPhase::Work.emoji(), "🍅");
+        assert_eq!(PomodoroPhase::ShortBreak.emoji(), "☕");
+        assert_eq!(PomodoroPhase::LongBreak.emoji(), "🌴");
+    }
 }
