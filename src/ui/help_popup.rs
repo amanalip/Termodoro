@@ -60,21 +60,34 @@ pub fn render(f: &mut Frame, theme: &Theme, area: Rect) {
     // Define table of keybindings and descriptions
     let help_lines = vec![
         // Section: Navigation
-        Line::from(Span::styled("Navigation & Tabs", Style::default().fg(theme.primary).add_modifier(Modifier::BOLD))),
+        Line::from(Span::styled(
+            "Navigation & Tabs",
+            Style::default()
+                .fg(theme.primary)
+                .add_modifier(Modifier::BOLD),
+        )),
         Line::from("  [Tab] / [Shift+Tab]   Cycle tabs (Timer, Tasks, Stats, Settings)"),
         Line::from("  [1] - [4]             Jump to tab 1-4 (Timer, Tasks, Stats, Settings)"),
         Line::from("  [?]                   Toggle this Help dialog"),
         Line::from("  [q] / [Esc]           Close popup / Quit application"),
         Line::from(""),
         // Section: Pomodoro Timer Controls
-        Line::from(Span::styled("Timer Controls (Tab 1)", Style::default().fg(theme.work).add_modifier(Modifier::BOLD))),
+        Line::from(Span::styled(
+            "Timer Controls (Tab 1)",
+            Style::default().fg(theme.work).add_modifier(Modifier::BOLD),
+        )),
         Line::from("  [Space]               Start / Pause timer countdown"),
         Line::from("  [r]                   Reset timer to beginning of current phase"),
         Line::from("  [s]                   Skip current phase and advance to next"),
         Line::from("  [a]                   Quickly add a new task"),
         Line::from(""),
         // Section: Task Management Controls
-        Line::from(Span::styled("Task Management (Tab 2)", Style::default().fg(theme.secondary).add_modifier(Modifier::BOLD))),
+        Line::from(Span::styled(
+            "Task Management (Tab 2)",
+            Style::default()
+                .fg(theme.secondary)
+                .add_modifier(Modifier::BOLD),
+        )),
         Line::from("  [a]                   Create a new task"),
         Line::from("  [Space] / [Enter]     Toggle task completion status"),
         Line::from("  [t]                   Set selected task as active target for timer"),
@@ -83,7 +96,12 @@ pub fn render(f: &mut Frame, theme: &Theme, area: Rect) {
         Line::from("  [1] / [2] / [3]       Filter tasks (All, Active, Completed)"),
         Line::from(""),
         // Section: Settings & Preferences Controls
-        Line::from(Span::styled("Settings Controls (Tab 4)", Style::default().fg(theme.warning).add_modifier(Modifier::BOLD))),
+        Line::from(Span::styled(
+            "Settings Controls (Tab 4)",
+            Style::default()
+                .fg(theme.warning)
+                .add_modifier(Modifier::BOLD),
+        )),
         Line::from("  [↑ / k], [↓ / j]      Select setting option"),
         Line::from("  [← / h], [→ / l]      Adjust duration / cycle through color themes"),
         Line::from("  [+], [-]              Increment / Decrement values"),

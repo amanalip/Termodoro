@@ -37,8 +37,8 @@ fn render_buffer_to_svg(
     let char_w = 9.5;
     let char_h = 20.0;
     let padding_x = 24.0;
-    let padding_top = 48.0;
-    let padding_bottom = 24.0;
+    let padding_top = 44.0;
+    let padding_bottom = 20.0;
 
     let term_w = (cols as f64 * char_w) + (padding_x * 2.0);
     let term_h = (rows as f64 * char_h) + padding_top + padding_bottom;
@@ -50,7 +50,7 @@ fn render_buffer_to_svg(
     ));
     svg.push_str("<defs>\n");
     svg.push_str("  <filter id=\"shadow\" x=\"-5%\" y=\"-5%\" width=\"110%\" height=\"110%\">\n");
-    svg.push_str("    <feDropShadow dx=\"0\" dy=\"16\" stdDeviation=\"24\" flood-color=\"#000000\" flood-opacity=\"0.5\"/>\n");
+    svg.push_str("    <feDropShadow dx=\"0\" dy=\"12\" stdDeviation=\"18\" flood-color=\"#000000\" flood-opacity=\"0.6\"/>\n");
     svg.push_str("  </filter>\n");
     svg.push_str("  <style>\n");
     svg.push_str("    .terminal-text {\n");
@@ -61,39 +61,42 @@ fn render_buffer_to_svg(
     svg.push_str("      white-space: pre;\n");
     svg.push_str("    }\n");
     svg.push_str("    .window-title {\n");
-    svg.push_str("      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;\n");
-    svg.push_str("      font-size: 13px;\n");
+    svg.push_str("      font-family: 'Noto Sans', 'Inter', 'Ubuntu', 'Cantarell', 'Segoe UI', system-ui, sans-serif;\n");
+    svg.push_str("      font-size: 12.5px;\n");
     svg.push_str("      font-weight: 500;\n");
-    svg.push_str("      fill: #a6adc8;\n");
-    svg.push_str("      text-anchor: middle;\n");
+    svg.push_str("      fill: #eff0f1;\n");
+    svg.push_str("      dominant-baseline: central;\n");
+    svg.push_str("    }\n");
+    svg.push_str("    .window-title-muted {\n");
+    svg.push_str("      fill: #7f8c8d;\n");
+    svg.push_str("      font-weight: 400;\n");
     svg.push_str("    }\n");
     svg.push_str("  </style>\n");
     svg.push_str("</defs>\n\n");
 
-    // Outer shadow container
+    // Outer shadow container (KDE Plasma style rounded rectangle)
     svg.push_str("<g filter=\"url(#shadow)\">\n");
     svg.push_str(&format!(
-        "  <rect x=\"0\" y=\"0\" width=\"{:.1}\" height=\"{:.1}\" rx=\"14\" ry=\"14\" fill=\"rgb({},{},{})\" stroke=\"rgba(255,255,255,0.12)\" stroke-width=\"1\"/>\n",
+        "  <rect x=\"0\" y=\"0\" width=\"{:.1}\" height=\"{:.1}\" rx=\"8\" ry=\"8\" fill=\"rgb({},{},{})\" stroke=\"rgba(255,255,255,0.08)\" stroke-width=\"1\"/>\n",
         term_w, term_h, bg_r, bg_g, bg_b
     ));
     svg.push_str("</g>\n\n");
 
-    // Window title bar
+    // KDE Breeze Window Title Bar
     svg.push_str(&format!(
-        "  <rect x=\"0\" y=\"0\" width=\"{:.1}\" height=\"40\" rx=\"14\" ry=\"14\" fill=\"rgba(0,0,0,0.25)\"/>\n",
+        "  <rect x=\"0\" y=\"0\" width=\"{:.1}\" height=\"36\" rx=\"8\" ry=\"8\" fill=\"rgba(0,0,0,0.32)\"/>\n",
         term_w
     ));
     svg.push_str(&format!(
-        "  <line x1=\"0\" y1=\"40\" x2=\"{:.1}\" y2=\"40\" stroke=\"rgba(255,255,255,0.06)\" stroke-width=\"1\"/>\n",
+        "  <line x1=\"0\" y1=\"36\" x2=\"{:.1}\" y2=\"36\" stroke=\"rgba(255,255,255,0.06)\" stroke-width=\"1\"/>\n",
         term_w
     ));
 
-    // Traffic light buttons
-    svg.push_str("  <circle cx=\"24\" cy=\"20\" r=\"6\" fill=\"#ff5f56\" stroke=\"#e0443e\" stroke-width=\"0.5\"/>\n");
-    svg.push_str("  <circle cx=\"44\" cy=\"20\" r=\"6\" fill=\"#ffbd2e\" stroke=\"#dea123\" stroke-width=\"0.5\"/>\n");
-    svg.push_str("  <circle cx=\"64\" cy=\"20\" r=\"6\" fill=\"#27c93f\" stroke=\"#1aab29\" stroke-width=\"0.5\"/>\n");
+    // KDE Terminal App Icon (Left)
+    svg.push_str("  <rect x=\"14\" y=\"9\" width=\"18\" height=\"18\" rx=\"4\" fill=\"#232629\" stroke=\"#31363b\" stroke-width=\"1\"/>\n");
+    svg.push_str("  <text x=\"17\" y=\"20.5\" font-family=\"'JetBrains Mono', monospace\" font-size=\"9.5\" font-weight=\"bold\" fill=\"#3daee9\">&gt;_</text>\n");
 
-    // Window title
+    // Window title (Left-aligned next to icon)
     let escaped_title = title
         .replace('&', "&amp;")
         .replace('<', "&lt;")
@@ -101,9 +104,26 @@ fn render_buffer_to_svg(
         .replace('"', "&quot;");
 
     svg.push_str(&format!(
-        "  <text x=\"{:.1}\" y=\"24\" class=\"window-title\">{}</text>\n\n",
-        term_w / 2.0,
+        "  <text x=\"40\" y=\"19\" class=\"window-title\"><tspan class=\"window-title-muted\">amanap@cachyos:</tspan><tspan dx=\"6\">{}</tspan></text>\n\n",
         escaped_title
+    ));
+
+    // KDE Plasma / Breeze Window Controls (Top Right: Minimize, Maximize, Close)
+    let btn_y = 18.0;
+    // Minimize
+    svg.push_str(&format!(
+        "  <g opacity=\"0.8\"><circle cx=\"{:.1}\" cy=\"{:.1}\" r=\"10\" fill=\"rgba(255,255,255,0.04)\"/><line x1=\"{:.1}\" y1=\"{:.1}\" x2=\"{:.1}\" y2=\"{:.1}\" stroke=\"#eff0f1\" stroke-width=\"1.4\" stroke-linecap=\"round\"/></g>\n",
+        term_w - 74.0, btn_y, term_w - 79.0, btn_y, term_w - 69.0, btn_y
+    ));
+    // Maximize
+    svg.push_str(&format!(
+        "  <g opacity=\"0.8\"><circle cx=\"{:.1}\" cy=\"{:.1}\" r=\"10\" fill=\"rgba(255,255,255,0.04)\"/><rect x=\"{:.1}\" y=\"{:.1}\" width=\"9\" height=\"9\" rx=\"1.5\" fill=\"none\" stroke=\"#eff0f1\" stroke-width=\"1.3\"/></g>\n",
+        term_w - 48.0, btn_y, term_w - 52.5, btn_y - 4.5
+    ));
+    // Close
+    svg.push_str(&format!(
+        "  <g opacity=\"0.9\"><circle cx=\"{:.1}\" cy=\"{:.1}\" r=\"10\" fill=\"rgba(235,64,52,0.18)\"/><line x1=\"{:.1}\" y1=\"{:.1}\" x2=\"{:.1}\" y2=\"{:.1}\" stroke=\"#da4453\" stroke-width=\"1.4\" stroke-linecap=\"round\"/><line x1=\"{:.1}\" y1=\"{:.1}\" x2=\"{:.1}\" y2=\"{:.1}\" stroke=\"#da4453\" stroke-width=\"1.4\" stroke-linecap=\"round\"/></g>\n",
+        term_w - 22.0, btn_y, term_w - 25.5, btn_y - 3.5, term_w - 18.5, btn_y + 3.5, term_w - 18.5, btn_y - 3.5, term_w - 25.5, btn_y + 3.5
     ));
 
     // Terminal text group
