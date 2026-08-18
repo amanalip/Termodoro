@@ -52,8 +52,8 @@ pub fn centered_rect(percent_x: u16, percent_y: u16, r: Rect) -> Rect {
 
 // Renders the Help & Keybindings popup modal overlay
 pub fn render(f: &mut Frame, theme: &Theme, area: Rect) {
-    // Calculate centered rectangular area (60% width, 70% height)
-    let popup_area = centered_rect(65, 75, area);
+    // Calculate centered rectangular area (84% width, 94% height for comfortable reading)
+    let popup_area = centered_rect(84, 94, area);
     // Clear underlying background beneath popup area to avoid visual bleeding
     f.render_widget(Clear, popup_area);
 
@@ -61,8 +61,8 @@ pub fn render(f: &mut Frame, theme: &Theme, area: Rect) {
     let help_lines = vec![
         // Section: Navigation
         Line::from(Span::styled("Navigation & Tabs", Style::default().fg(theme.primary).add_modifier(Modifier::BOLD))),
-        Line::from("  [Tab] / [Shift+Tab]   Cycle between tabs (Timer, Tasks, Stats, Settings)"),
-        Line::from("  [1] - [4]             Jump directly to tab (1: Timer, 2: Tasks, 3: Stats, 4: Settings)"),
+        Line::from("  [Tab] / [Shift+Tab]   Cycle tabs (Timer, Tasks, Stats, Settings)"),
+        Line::from("  [1] - [4]             Jump to tab 1-4 (Timer, Tasks, Stats, Settings)"),
         Line::from("  [?]                   Toggle this Help dialog"),
         Line::from("  [q] / [Esc]           Close popup / Quit application"),
         Line::from(""),

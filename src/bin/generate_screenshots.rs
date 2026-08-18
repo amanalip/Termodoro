@@ -200,7 +200,7 @@ fn main() {
     fs::create_dir_all(out_dir).expect("Failed to create assets/screenshots directory");
 
     let width = 96;
-    let height = 28;
+    let height = 32;
 
     // Helper to create test app with isolated temporary storage
     let make_app = |theme: ThemeChoice| -> (App, std::path::PathBuf) {
