@@ -400,6 +400,58 @@ function showToast(msg) {
 
 // Setup common listeners across index.html and features.html
 function setupCommonListeners() {
+  // Mobile Navigation Drawer Toggle
+  const mobileToggle = document.getElementById('mobile-menu-toggle');
+  const mobileDrawer = document.getElementById('mobile-nav-drawer');
+  const mobileBackdrop = document.getElementById('mobile-nav-backdrop');
+  const mobileClose = document.getElementById('mobile-menu-close');
+
+  function openMobileMenu() {
+    if (mobileDrawer) mobileDrawer.classList.add('open');
+    if (mobileBackdrop) mobileBackdrop.classList.add('open');
+    if (mobileToggle) {
+      mobileToggle.classList.add('open');
+      mobileToggle.setAttribute('aria-expanded', 'true');
+    }
+    document.body.classList.add('mobile-menu-open');
+  }
+
+  function closeMobileMenu() {
+    if (mobileDrawer) mobileDrawer.classList.remove('open');
+    if (mobileBackdrop) mobileBackdrop.classList.remove('open');
+    if (mobileToggle) {
+      mobileToggle.classList.remove('open');
+      mobileToggle.setAttribute('aria-expanded', 'false');
+    }
+    document.body.classList.remove('mobile-menu-open');
+  }
+
+  if (mobileToggle) {
+    mobileToggle.addEventListener('click', () => {
+      const isOpen = mobileDrawer && mobileDrawer.classList.contains('open');
+      if (isOpen) {
+        closeMobileMenu();
+      } else {
+        openMobileMenu();
+      }
+    });
+  }
+
+  if (mobileClose) mobileClose.addEventListener('click', closeMobileMenu);
+  if (mobileBackdrop) mobileBackdrop.addEventListener('click', closeMobileMenu);
+
+  document.querySelectorAll('.mobile-nav-link').forEach(link => {
+    link.addEventListener('click', () => {
+      closeMobileMenu();
+    });
+  });
+
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && mobileDrawer && mobileDrawer.classList.contains('open')) {
+      closeMobileMenu();
+    }
+  });
+
   // Theme card click in gallery
   document.querySelectorAll('.theme-card').forEach(card => {
     card.addEventListener('click', () => {

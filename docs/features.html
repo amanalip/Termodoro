@@ -13,7 +13,7 @@
   
   <!-- Favicon & Stylesheet -->
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
-  <link rel="stylesheet" href="style.css?v=20260818_picker_v4" />
+  <link rel="stylesheet" href="style.css?v=20260818_mobile_v1" />
   <script>
     (function() {
       try {
@@ -68,15 +68,50 @@
           <option value="monokai_pro">Monokai Pro</option>
           <option value="oled_phosphor">OLED Phosphor</option>
         </select>
-        <a href="https://github.com/amanalip/Termodoro" target="_blank" rel="noopener noreferrer" class="btn btn-secondary" id="github-repo-btn">
+        <a href="https://github.com/amanalip/Termodoro" target="_blank" rel="noopener noreferrer" class="btn btn-secondary nav-github-btn" id="github-repo-btn" aria-label="View on GitHub">
           <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
             <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
           </svg>
           <span>GitHub</span>
         </a>
+        <button class="mobile-menu-toggle" id="mobile-menu-toggle" aria-label="Toggle Navigation Menu" aria-expanded="false">
+          <span class="hamburger-line"></span>
+          <span class="hamburger-line"></span>
+          <span class="hamburger-line"></span>
+        </button>
       </div>
     </div>
   </header>
+
+  <!-- Mobile Navigation Drawer -->
+  <div class="mobile-nav-drawer" id="mobile-nav-drawer">
+    <div class="mobile-nav-header">
+      <div class="brand">
+        <div class="brand-icon">
+          <img src="favicon.svg" alt="Termodoro Totoro Logo" width="26" height="26" style="display: block;" />
+        </div>
+        <span>Termodoro</span>
+      </div>
+      <button class="mobile-menu-close" id="mobile-menu-close" aria-label="Close menu">&times;</button>
+    </div>
+    <nav class="mobile-nav-links">
+      <a href="index.html" class="mobile-nav-link"><span>🏠</span> Overview</a>
+      <a href="features.html" class="mobile-nav-link active"><span>📖</span> Feature Guide</a>
+      <a href="faqs.html" class="mobile-nav-link"><span>❓</span> FAQs Hub</a>
+      <a href="index.html#themes" class="mobile-nav-link"><span>🎨</span> 18 Color Themes</a>
+      <a href="index.html#install" class="mobile-nav-link"><span>⚡</span> Installation</a>
+      <a href="index.html#keybindings" class="mobile-nav-link"><span>⌨️</span> Keybindings</a>
+    </nav>
+    <div class="mobile-nav-footer">
+      <a href="https://github.com/amanalip/Termodoro" target="_blank" rel="noopener noreferrer" class="btn btn-secondary mobile-github-btn">
+        <svg viewBox="0 0 16 16" width="16" height="16" fill="currentColor">
+          <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+        </svg>
+        <span>View on GitHub</span>
+      </a>
+    </div>
+  </div>
+  <div class="mobile-nav-backdrop" id="mobile-nav-backdrop"></div>
 
   <main>
     <!-- ========================================================================
@@ -384,6 +419,6 @@
   <div class="toast-notice" id="toast-notice">Action notification</div>
 
   <!-- Audio Synthesis & Interactive Engine -->
-  <script src="app.js?v=20260818_picker_v4"></script>
+  <script src="app.js?v=20260818_mobile_v1"></script>
 </body>
 </html>
