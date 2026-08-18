@@ -21,6 +21,9 @@ This document maintains a transparent, permanent, and structured audit log of re
    - [AUD-011: Cross-Platform Compatibility Audit & Multi-OS CI Matrix](#aud-011-cross-platform-compatibility-audit--multi-os-ci-matrix)
    - [AUD-012: Unicode Wide-Character Emoji Alignment & Cell Padding Optimization](#aud-012-unicode-wide-character-emoji-alignment--cell-padding-optimization)
    - [AUD-013: Privacy, Zero-Telemetry & Offline Isolation Formal Verification](#aud-013-privacy-zero-telemetry--offline-isolation-formal-verification)
+   - [AUD-014: GitHub Pages Project Website, Web Simulator & static.yml CI Configuration](#aud-014-github-pages-project-website-web-simulator--staticyml-ci-configuration)
+   - [AUD-015: 18-Theme Native CSS Engine, Navbar Selector & Headless Browser Certification](#aud-015-18-theme-native-css-engine-navbar-selector--headless-browser-certification)
+   - [AUD-016: Vector SVG Screenshots, Untruncated Task Backlog & Clean Window Title Headers](#aud-016-vector-svg-screenshots-untruncated-task-backlog--clean-window-title-headers)
 3. [Fact-Check, Sanity Audit & Certification Matrix](#3-fact-check-sanity-audit--certification-matrix)
 4. [Future Audit Protocol](#4-future-audit-protocol)
 
@@ -43,7 +46,9 @@ This document maintains a transparent, permanent, and structured audit log of re
 | [**AUD-011**](#aud-011-cross-platform-compatibility-audit--multi-os-ci-matrix) | 2026-08-17 | Cross-Platform Multi-OS CI Matrix | `814e434` | **CERTIFIED** |
 | [**AUD-012**](#aud-012-unicode-wide-character-emoji-alignment--cell-padding-optimization) | 2026-08-17 | Unicode Font Metrics & Cell Alignment | `d66fc10` | **VERIFIED** |
 | [**AUD-013**](#aud-013-privacy-zero-telemetry--offline-isolation-formal-verification) | 2026-08-17 | Zero-Telemetry & Offline Isolation | `8456222` | **CERTIFIED** |
-| [**AUD-014**](#aud-014-18-theme-native-css-engine-navbar-selector--headless-browser-certification) | 2026-08-18 | Web Architecture & Theme Engine | `c8cc114` | **CERTIFIED** |
+| [**AUD-014**](#aud-014-github-pages-project-website-web-simulator--staticyml-ci-configuration) | 2026-08-18 | GitHub Pages, Web Simulator & CI | `c8cc114` | **CERTIFIED** |
+| [**AUD-015**](#aud-015-18-theme-native-css-engine-navbar-selector--headless-browser-certification) | 2026-08-18 | Web Architecture & Theme Engine | `c8cc114` | **CERTIFIED** |
+| [**AUD-016**](#aud-016-vector-svg-screenshots-untruncated-task-backlog--clean-window-title-headers) | 2026-08-18 | Documentation Screenshots & Vector SVG Unification | `5fe415f` | **VERIFIED** |
 
 ---
 
@@ -284,10 +289,10 @@ This document maintains a transparent, permanent, and structured audit log of re
 
 ---
 
-### AUD-014: 18-Theme Native CSS Engine, Navbar Selector & Headless Browser Certification
+### AUD-015: 18-Theme Native CSS Engine, Navbar Selector & Headless Browser Certification
 - **Date:** August 18, 2026
 - **Category:** Web Architecture, Theme Persistence & Automated Browser QA
-- **Commit:** `c8cc114` $\rightarrow$ Current
+- **Commit:** [`c8cc114`](https://github.com/amanalip/Termodoro/commit/c8cc114)
 - **Severity:** User Experience & Cross-Page Persistence Certification
 - **Description:** 
   Conducted end-to-end browser testing and architectural remediation of website theme switching and cross-page persistence across [`index.html`](docs/index.html), [`features.html`](docs/features.html), and [`faqs.html`](docs/faqs.html).
@@ -298,6 +303,22 @@ This document maintains a transparent, permanent, and structured audit log of re
   4. **Responsive Mobile Optimization**: Calibrated header layout rules at `@media (max-width: 640px)` so the brand icon, theme selector, and GitHub button fit on mobile screens without overflow.
   5. **Headless Browser Automated QA**: Executed automated Firefox headless testing across all 18 themes in both Desktop ($1200\times 800$) and Mobile ($375\times 667$) viewports, asserting zero console errors, 100% theme token coverage, and visual integrity.
 - **Resolution Status:** **VERIFIED & CERTIFIED**
+
+---
+
+### AUD-016: Vector SVG Screenshots, Untruncated Task Backlog & Clean Window Title Headers
+- **Date:** August 18, 2026
+- **Category:** Documentation Screenshots & Vector SVG Unification
+- **Commit:** [`5fe415f`](https://github.com/amanalip/Termodoro/commit/5fe415f)
+- **Severity:** Documentation Clarity & Visual Quality
+- **Description:** 
+  Refactored screenshot generation to ensure zero text truncation in task lists and clean window headers across all documentation channels.
+- **Technical Remediation & Verification:**
+  1. **Task Title Calibration**: Shortened and sanitized demonstration task backlog entries to prevent column truncation under terminal table layout constraints (`📊 Track Daily Focus Goals`, `🦀 Build Ratatui TUI Framework`, `🎵 Synthesize 16-Bit Audio Chimes`).
+  2. **Window Header Formatting**: Eliminated em dashes (`—`), vertical pipes (`|`), and duplicate `Termodoro - ` prefixes in SVG terminal title bars.
+  3. **Vector SVG Markdown Unification**: Replaced raster PNG references in all Markdown files (`README.md`, `WALKTHROUGH.md`, and all `user_journeys/` docs) with vector SVG assets matching the documentation website.
+  4. **Zero-Delay Rendering**: Vector SVGs render instantaneously with crisp typography on all viewports without Camo CDN proxy cache collisions.
+- **Resolution Status:** **VERIFIED & CERTIFIED (All 192 Tests Passing)**
 
 ---
 
