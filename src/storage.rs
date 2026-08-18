@@ -33,6 +33,12 @@ pub struct Storage {
     custom_path: Option<PathBuf>,
 }
 
+impl Default for Storage {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Storage {
     // Constructor creating a default storage instance using system directories
     pub fn new() -> Self {

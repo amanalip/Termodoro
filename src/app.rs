@@ -63,6 +63,12 @@ pub struct App {
     pub status_message_ticks: usize,
 }
 
+impl Default for App {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl App {
     // Constructs and initializes the application state by loading saved data from disk
     pub fn new() -> Self {

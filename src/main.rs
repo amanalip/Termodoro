@@ -1,24 +1,6 @@
-// Declare application state module
-mod app;
-// Declare audio chime playback module
-pub mod audio;
-// Declare configuration module
-mod config;
-// Declare analytics and stats module
-mod stats;
-// Declare storage persistence module
-mod storage;
-// Declare task management module
-mod tasks;
-// Declare visual color themes module
-mod theme;
-// Declare Pomodoro timer engine module
-mod timer;
-// Declare terminal UI rendering module
-mod ui;
+// Import App struct and ui module from library crate
+use termodoro::{app::App, ui};
 
-// Import App struct from app module
-use app::App;
 // Import crossterm event poll and read functions
 use crossterm::{
     // Event types and polling

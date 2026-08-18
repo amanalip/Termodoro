@@ -52,6 +52,9 @@ Termodoro divides the terminal window into three main regions:
    cargo run --release
    ```
 2. **View the Timer**: By default, Termodoro opens on Tab 1 (**Timer**). The header indicates `🍅 FOCUS SESSION [■ READY] Cycle 1/4 [◉ ○ ○ ○]`.
+
+   ![Focus Timer Screen](assets/screenshots/01_timer_view.png)
+
 3. **Begin Focus Interval**: Press `Space`. The status changes to `[● RUNNING]`, and the 5-row digital clock begins counting down from `25:00`. The progress gauge fills smoothly as time elapses.
 4. **Pausing When Interrupted**: If you need to step away, press `Space` to pause the countdown (`[❚❚ PAUSED]`). Press `Space` again to resume.
 5. **Phase Completion**: When the timer reaches `00:00`:
@@ -67,7 +70,13 @@ Termodoro divides the terminal window into three main regions:
 ### Scenario 2: Creating, Estimating, and Tracking Tasks
 
 1. **Open Tasks View**: Press `2` or `Tab` to navigate to the **Tasks** tab.
+
+   ![Task Manager Screen](assets/screenshots/02_tasks_view.png)
+
 2. **Create a Task**: Press `a` to open the task creation dialog:
+
+   ![Add Task Dialog](assets/screenshots/05_task_modal.png)
+
    - Type your task description (e.g., `Write unit tests`).
    - Press `Tab` to move to the estimated Pomodoros field.
    - Use `←` / `→`, `h` / `l`, `+` / `-`, or `_` / `=` to set an estimated session count (clamped 1 to 20).
@@ -82,6 +91,9 @@ Termodoro divides the terminal window into three main regions:
 ### Scenario 3: Navigating and Interpreting Productivity Analytics
 
 1. **Open Analytics Dashboard**: Press `3` to view the **Stats** tab.
+
+   ![Analytics Screen](assets/screenshots/03_stats_view.png)
+
 2. **Interpret Summary Cards**:
    - **Today's Focus**: Total Pomodoro work sessions completed today and total minutes spent in focus.
    - **Current Streak**: Number of consecutive calendar days with logged work sessions.
@@ -94,6 +106,9 @@ Termodoro divides the terminal window into three main regions:
 ### Scenario 4: Customizing Preferences and Color Themes
 
 1. **Open Settings View**: Press `4` to enter the **Settings** tab.
+
+   ![Settings Screen](assets/screenshots/04_settings_view.png)
+
 2. **Customize Durations & Cycles**:
    - Highlight **Focus Duration** and press `→`, `l`, `+`, or `=` to increase focus sessions (1 - 120 mins).
    - Highlight **Short Break** (1 - 60 mins) or **Long Break** (1 - 90 mins) to tailor rest intervals.
@@ -122,6 +137,10 @@ Termodoro divides the terminal window into three main regions:
      - *Monokai Pro*
      - *OLED Phosphor*
 5. **Instant Persistence**: All changes are automatically saved to your storage file immediately.
+6. **Keybindings Reference**: Press `?` anytime to inspect the help cheat sheet overlay:
+
+   ![Help Dialog](assets/screenshots/06_help_modal.png)
+
 
 ---
 
