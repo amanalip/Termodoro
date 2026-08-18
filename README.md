@@ -32,7 +32,7 @@
    - [Step 6: Terminal Multiplexer Integration (tmux & Zellij)](#step-6-terminal-multiplexer-integration-tmux--zellij)
    - [Step 7: Verification & First Launch Checklist](#step-7-verification--first-launch-checklist)
    - [Step 8: Beginner Troubleshooting & Error Guide](#step-8-beginner-troubleshooting--error-guide)
-   - [Updating & Clean Uninstallation](#updating--clean-uninstallation)
+   - [Updating & Clean Uninstallation Guide](#updating--clean-uninstallation-guide)
 6. [User Interface and Navigation Guide](#6-user-interface-and-navigation-guide)
    - [Global Navigation Controls](#global-navigation-controls)
    - [Tab 1: Pomodoro Countdown Timer](#tab-1-pomodoro-countdown-timer)
@@ -407,30 +407,96 @@ To verify your installation:
 
 ---
 
-### Updating & Clean Uninstallation
+### Updating & Clean Uninstallation Guide
 
 #### Updating to the Latest Version
+To upgrade your installed Termodoro binary to the newest release from source:
+
 ```bash
+# 1. Navigate to the local repository folder
 cd Termodoro
+
+# 2. Fetch latest code updates
 git pull origin main
+
+# 3. Recompile and update the global binary
 cargo install --path . --force
+
+# 4. (Optional) Reclaim temporary compiler cache
+cargo clean
 ```
 
-#### Clean Uninstallation
-```bash
-# 1. Remove the installed binary
-cargo uninstall termodoro
+---
 
-# 2. (Optional) Remove local database, task records, and configuration
-# Linux / BSD:
-rm -rf ~/.local/share/termodoro ~/.config/termodoro
+#### How to Uninstall Termodoro on All Operating Systems
 
-# macOS:
-rm -rf ~/Library/Application\ Support/com.termodoro.termodoro
+Termodoro leaves no persistent background services, system daemons, or registry keys. Uninstallation is completely clean, fast, and straightforward across all operating systems.
 
-# Windows:
-Remove-Item -Recurse -Force "$env:APPDATA\termodoro"
-```
+##### Step 1: Remove the Executable Binary
+
+- **Method A: If installed via Cargo (`cargo install`) — Works on Linux, macOS & Windows**:
+  ```bash
+  cargo uninstall termodoro
+  ```
+
+- **Method B: If installed manually (`Option C`)**:
+  - **Linux / macOS**:
+    ```bash
+    rm -f ~/.local/bin/termodoro /usr/local/bin/termodoro
+    ```
+  - **Windows (PowerShell)**:
+    ```powershell
+    Remove-Item -Force "$env:USERPROFILE\.cargo\bin\termodoro.exe"
+    ```
+
+---
+
+##### Step 2: (Optional) Remove Local Data, Tasks & Configuration
+
+If you wish to perform a 100% complete purge and remove your historical tasks, streak records, and custom settings:
+
+- 🐧 **Linux & BSD**:
+  ```bash
+  # Remove data files and configuration directories
+  rm -rf ~/.local/share/termodoro ~/.config/termodoro
+  
+  # If you created a desktop launcher entry:
+  rm -f ~/.local/share/applications/termodoro.desktop
+  ```
+
+- 🍎 **macOS**:
+  ```bash
+  # Remove application support directory
+  rm -rf ~/Library/Application\ Support/com.termodoro.termodoro
+  ```
+
+- 🪟 **Windows (Command Prompt / PowerShell)**:
+  - **PowerShell**:
+    ```powershell
+    # Remove AppData roaming database folder
+    Remove-Item -Recurse -Force "$env:APPDATA\termodoro"
+    ```
+  - **Command Prompt (`cmd.exe`)**:
+    ```cmd
+    rmdir /s /q "%APPDATA%\termodoro"
+    ```
+
+---
+
+##### Step 3: (Optional) Delete the Cloned Repository Source
+
+To remove the source code folder and all Git artifacts:
+
+- **Linux / macOS**:
+  ```bash
+  cd ..
+  rm -rf Termodoro
+  ```
+- **Windows (PowerShell)**:
+  ```powershell
+  cd ..
+  Remove-Item -Recurse -Force .\Termodoro
+  ```
 
 ---
 
