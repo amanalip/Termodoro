@@ -3,7 +3,7 @@
 This document provides a detailed, beginner-friendly walkthrough of **Termodoro**. It covers user workflows, interface layouts, practical scenarios, codebase architecture tours, and testing procedures.
 
 > [!NOTE]
-> **Live Interactive Simulator**: You can also test and explore all the features described in this walkthrough directly in your web browser at **[https://amanalip.github.io/Termodoro/](https://amanalip.github.io/Termodoro/)**.
+> **Interactive Showcase & Documentation**: Explore the live showcase, interactive 18-theme switcher, and feature tour at **[https://amanalip.github.io/Termodoro/](https://amanalip.github.io/Termodoro/)**.
 
 ---
 

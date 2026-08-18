@@ -30,7 +30,7 @@ cargo run --release
 ```
 
 > [!TIP]
-> **Try the Interactive Web Simulator**: Experience Termodoro directly in your browser with real-time countdowns, 18-theme live switching, and Web Audio acoustic chimes at **[https://amanalip.github.io/Termodoro/](https://amanalip.github.io/Termodoro/)**.
+> **Explore the Official Website & Showcase**: Explore Termodoro with interactive KDE terminal screenshots, 18-theme live switcher, audio chime previews, and in-depth feature breakdown at **[https://amanalip.github.io/Termodoro/](https://amanalip.github.io/Termodoro/)**.
 
 ---
 

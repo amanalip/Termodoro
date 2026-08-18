@@ -1,7 +1,7 @@
 # Termodoro System Design Document
 
 This document provides a comprehensive architectural and systems engineering specification for **Termodoro**, a terminal-native Pomodoro productivity timer, task lifecycle coordinator, and streak analytics platform written in pure Safe Rust.
-Official Project Website & Web Simulator: **[https://amanalip.github.io/Termodoro/](https://amanalip.github.io/Termodoro/)**
+Official Project Website & Showcase: **[https://amanalip.github.io/Termodoro/](https://amanalip.github.io/Termodoro/)**
 
 ---
 
