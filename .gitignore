@@ -16,3 +16,7 @@ target/
 
 # Ignore macOS metadata files
 .DS_Store
+
+# Ignore Node.js dependencies and local test screenshot artifacts
+node_modules/
+docs/assets/tests/

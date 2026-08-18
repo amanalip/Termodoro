@@ -41,11 +41,16 @@ fmt:
 clippy:
 	cargo clippy --all-targets --all-features -- -D warnings
 
+# Run Playwright E2E responsive test suite for project website
+test-e2e:
+	node scripts/e2e-website-test.mjs
+
 # Display available commands
 help:
 	@echo "Termodoro Makefile Commands:"
 	@echo "  make test        - Run full 192 tests and automatically clean target/ cache"
 	@echo "  make test-clean  - Run tests and auto-clean (reclaims ~1.8GB disk space)"
+	@echo "  make test-e2e    - Run Playwright E2E test suite (desktop + mobile viewports)"
 	@echo "  make check       - Run fmt, clippy, 192 tests, and auto-clean"
 	@echo "  make build       - Compile optimized release binary"
 	@echo "  make run         - Run Termodoro in release mode"

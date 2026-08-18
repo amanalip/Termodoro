@@ -639,16 +639,18 @@ button {
   box-shadow: -8px 0 32px rgba(0, 0, 0, 0.45);
   z-index: 2000;
   transform: translateX(100%);
-  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.3s ease;
   display: flex;
   flex-direction: column;
   padding: 1.25rem 1.25rem 2rem;
   visibility: hidden;
+  pointer-events: none;
 }
 
 .mobile-nav-drawer.open {
   transform: translateX(0);
   visibility: visible;
+  pointer-events: auto;
 }
 
 .mobile-nav-header {
@@ -1723,63 +1725,100 @@ button {
   background: var(--highlight-bg);
 }
 
-.code-box {
+.code-card {
   background: var(--bg-surface);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
-  padding: 2.5rem 1.25rem 1.25rem;
-  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+}
+
+.code-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.55rem 1rem;
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border-color);
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  gap: 0.75rem;
+}
+
+.code-card-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  color: var(--text-main);
+  font-size: 0.82rem;
+}
+
+.code-card-body {
+  padding: 1.15rem 1.25rem;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  background: var(--bg-surface);
   font-family: var(--font-mono);
   font-size: 0.88rem;
   line-height: 1.6;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
   scrollbar-width: thin;
   scrollbar-color: var(--border-color) var(--bg-surface);
 }
 
-.code-box::-webkit-scrollbar {
+.code-card-body::-webkit-scrollbar {
   height: 6px;
   width: 6px;
 }
 
-.code-box::-webkit-scrollbar-track {
+.code-card-body::-webkit-scrollbar-track {
   background: var(--bg-surface);
   border-radius: 3px;
 }
 
-.code-box::-webkit-scrollbar-thumb {
+.code-card-body::-webkit-scrollbar-thumb {
   background: var(--border-color);
   border-radius: 3px;
 }
 
-.code-box::-webkit-scrollbar-thumb:hover {
+.code-card-body::-webkit-scrollbar-thumb:hover {
   background: var(--color-primary);
 }
 
-.code-box pre {
+.code-card-body pre {
   margin: 0;
   white-space: pre;
+  color: var(--text-main);
 }
 
 .copy-btn {
-  position: absolute;
-  top: 0.75rem;
-  right: 0.75rem;
-  background: var(--bg-card);
+  background: var(--bg-surface);
   border: 1px solid var(--border-color);
   color: var(--text-muted);
-  padding: 0.35rem 0.65rem;
+  padding: 0.3rem 0.75rem;
   border-radius: var(--radius-sm);
-  font-size: 0.75rem;
+  font-size: 0.78rem;
   font-family: var(--font-mono);
+  font-weight: 600;
   transition: all var(--transition-fast);
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-shrink: 0;
 }
 
 .copy-btn:hover {
-  color: var(--text-main);
+  color: var(--color-primary);
   border-color: var(--color-primary);
+  background: var(--bg-card-hover);
+}
+
+.copy-btn:active {
+  transform: scale(0.96);
 }
 
 /* ==========================================================================
@@ -2304,14 +2343,19 @@ button {
     padding: 0.45rem 0.75rem;
     font-size: 0.78rem;
   }
-  .code-box {
-    padding: 2.4rem 0.85rem 0.85rem;
+  .code-card-header {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.76rem;
+  }
+  .code-card-title {
+    font-size: 0.76rem;
+  }
+  .code-card-body {
+    padding: 0.9rem 0.85rem;
     font-size: 0.78rem;
   }
   .copy-btn {
-    top: 0.45rem;
-    right: 0.45rem;
-    padding: 0.25rem 0.5rem;
+    padding: 0.25rem 0.6rem;
     font-size: 0.72rem;
   }
   .faq-search-box {

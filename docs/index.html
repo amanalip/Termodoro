@@ -511,9 +511,15 @@
 
           <!-- Panel 1: Linux -->
           <div class="install-code-panel" id="install-panel-linux">
-            <div class="code-box">
-              <button type="button" class="copy-btn" data-target="code-linux">📋 Copy</button>
-              <pre><code id="code-linux"># 1. Install build headers &amp; ALSA audio packages (one-time setup)
+            <div class="code-card">
+              <div class="code-card-header">
+                <div class="code-card-title">
+                  <span>🐧 Linux Terminal (Ubuntu / Debian / Arch / Fedora)</span>
+                </div>
+                <button type="button" class="copy-btn" data-target="code-linux">📋 Copy</button>
+              </div>
+              <div class="code-card-body">
+                <pre><code id="code-linux"># 1. Install build headers &amp; ALSA audio packages (one-time setup)
 # Ubuntu/Debian:
 #   sudo apt update &amp;&amp; sudo apt install -y build-essential git libasound2-dev pkg-config libdbus-1-dev
 # Arch Linux:
@@ -531,14 +537,21 @@ cargo install --git https://github.com/amanalip/Termodoro.git
 
 # 3. Launch Termodoro from anywhere
 termodoro</code></pre>
+              </div>
             </div>
           </div>
 
           <!-- Panel 2: macOS -->
           <div class="install-code-panel" id="install-panel-macos" style="display: none;">
-            <div class="code-box">
-              <button type="button" class="copy-btn" data-target="code-macos">📋 Copy</button>
-              <pre><code id="code-macos"># 1. Install Xcode Command Line Tools &amp; Rust (if not already installed)
+            <div class="code-card">
+              <div class="code-card-header">
+                <div class="code-card-title">
+                  <span>🍎 macOS Terminal (Apple Silicon M1-M4 &amp; Intel)</span>
+                </div>
+                <button type="button" class="copy-btn" data-target="code-macos">📋 Copy</button>
+              </div>
+              <div class="code-card-body">
+                <pre><code id="code-macos"># 1. Install Xcode Command Line Tools &amp; Rust (if not already installed)
 xcode-select --install
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 source "$HOME/.cargo/env"
@@ -557,14 +570,21 @@ source ~/.zshrc
 
 # 4. Launch Termodoro in iTerm2, Ghostty, Alacritty, or Terminal.app
 termodoro</code></pre>
+              </div>
             </div>
           </div>
 
           <!-- Panel 3: Windows -->
           <div class="install-code-panel" id="install-panel-windows" style="display: none;">
-            <div class="code-box">
-              <button type="button" class="copy-btn" data-target="code-windows">📋 Copy</button>
-              <pre><code id="code-windows"># 1. Install Rust via rustup-init.exe with C++ Build Tools (https://rustup.rs)
+            <div class="code-card">
+              <div class="code-card-header">
+                <div class="code-card-title">
+                  <span>🪟 Windows PowerShell (x86_64 &amp; ARM64)</span>
+                </div>
+                <button type="button" class="copy-btn" data-target="code-windows">📋 Copy</button>
+              </div>
+              <div class="code-card-body">
+                <pre><code id="code-windows"># 1. Install Rust via rustup-init.exe with C++ Build Tools (https://rustup.rs)
 
 # 2. Option A: Install globally in PowerShell from local clone
 git clone https://github.com/amanalip/Termodoro.git
@@ -579,14 +599,21 @@ cargo install --git https://github.com/amanalip/Termodoro.git
 
 # 4. Launch Termodoro in Windows Terminal or PowerShell
 termodoro</code></pre>
+              </div>
             </div>
           </div>
 
           <!-- Panel 4: Multiplexers (tmux & Zellij) -->
           <div class="install-code-panel" id="install-panel-multiplexer" style="display: none;">
-            <div class="code-box">
-              <button type="button" class="copy-btn" data-target="code-multiplexer">📋 Copy</button>
-              <pre><code id="code-multiplexer"># --- tmux Floating Modal Popup (~/.tmux.conf - tmux 3.2+) ---
+            <div class="code-card">
+              <div class="code-card-header">
+                <div class="code-card-title">
+                  <span>🪟 Multiplexers (tmux &amp; Zellij Configuration)</span>
+                </div>
+                <button type="button" class="copy-btn" data-target="code-multiplexer">📋 Copy</button>
+              </div>
+              <div class="code-card-body">
+                <pre><code id="code-multiplexer"># --- tmux Floating Modal Popup (~/.tmux.conf - tmux 3.2+) ---
 bind-key P display-popup -E -w 75% -h 75% "termodoro"
 
 # --- tmux 30% Horizontal Split Pane ---
@@ -594,14 +621,21 @@ bind-key T split-window -h -p 30 "termodoro"
 
 # --- Zellij Floating Modal Window ---
 # zellij run --floating --width 75% --height 75% -- termodoro</code></pre>
+              </div>
             </div>
           </div>
 
           <!-- Panel 5: Manual Binary -->
           <div class="install-code-panel" id="install-panel-binary" style="display: none;">
-            <div class="code-box">
-              <button type="button" class="copy-btn" data-target="code-binary">📋 Copy</button>
-              <pre><code id="code-binary"># 1. Compile the standalone release artifact
+            <div class="code-card">
+              <div class="code-card-header">
+                <div class="code-card-title">
+                  <span>📦 Standalone Release Binary (~5.1 MB)</span>
+                </div>
+                <button type="button" class="copy-btn" data-target="code-binary">📋 Copy</button>
+              </div>
+              <div class="code-card-body">
+                <pre><code id="code-binary"># 1. Compile the standalone release artifact
 cargo build --release
 
 # 2. Copy binary to your local bin directory (~/.local/bin)
@@ -611,6 +645,7 @@ chmod +x ~/.local/bin/termodoro
 
 # 3. Launch Termodoro
 termodoro</code></pre>
+              </div>
             </div>
           </div>
 
