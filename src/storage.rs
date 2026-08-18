@@ -235,14 +235,16 @@ mod tests {
         let file_path = temp_dir.join("data.json");
         let storage = Storage::with_path(file_path.clone());
 
-        let mut config = Config::default();
-        config.theme = crate::theme::ThemeChoice::OledPhosphor;
-        config.work_duration_mins = 50;
-        config.short_break_mins = 10;
-        config.long_break_mins = 30;
-        config.long_break_interval = 6;
-        config.sound_enabled = false;
-        config.desktop_notifications = true;
+        let config = Config {
+            theme: crate::theme::ThemeChoice::OledPhosphor,
+            work_duration_mins: 50,
+            short_break_mins: 10,
+            long_break_mins: 30,
+            long_break_interval: 6,
+            sound_enabled: false,
+            desktop_notifications: true,
+            ..Default::default()
+        };
 
         let mut tasks = TaskManager::new();
         for i in 0..20 {
@@ -295,4 +297,3 @@ mod tests {
         let _ = fs::remove_dir_all(temp_dir);
     }
 }
-

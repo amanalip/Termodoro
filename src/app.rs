@@ -1608,9 +1608,14 @@ mod tests {
     #[test]
     fn test_unhandled_keys_and_modifier_combinations() {
         let (mut app, temp_dir) = create_test_app();
-        
+
         // Random / unhandled keys across all tabs
-        for tab in [ActiveTab::Timer, ActiveTab::Tasks, ActiveTab::Stats, ActiveTab::Settings] {
+        for tab in [
+            ActiveTab::Timer,
+            ActiveTab::Tasks,
+            ActiveTab::Stats,
+            ActiveTab::Settings,
+        ] {
             app.active_tab = tab;
             app.on_key_event(make_key(KeyCode::F(1)));
             app.on_key_event(make_key(KeyCode::F(12)));
@@ -1761,4 +1766,3 @@ mod tests {
         let _ = std::fs::remove_dir_all(temp_dir);
     }
 }
-

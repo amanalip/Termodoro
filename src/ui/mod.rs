@@ -520,7 +520,8 @@ mod tests {
         let (mut app, temp_dir) = create_test_app();
 
         // Add extreme length task titles with emojis and special characters
-        let long_title = "🔥 ".repeat(40) + "Very Long Task Name with Special Characters & Symbols #123456789";
+        let long_title =
+            "🔥 ".repeat(40) + "Very Long Task Name with Special Characters & Symbols #123456789";
         app.tasks.add(long_title, 20);
         app.tasks.tasks[0].pomodoros_spent = 50;
 
@@ -562,4 +563,3 @@ mod tests {
         let _ = std::fs::remove_dir_all(temp_dir);
     }
 }
-

@@ -615,7 +615,10 @@ mod tests {
     fn test_tasks_unicode_and_estimate_limits() {
         let mut manager = TaskManager::new();
         // Emoji and multilingual text
-        manager.add("⚡ Build CLI in Rust 🦀 (日本語 / العربية / 中文)".to_string(), 20);
+        manager.add(
+            "⚡ Build CLI in Rust 🦀 (日本語 / العربية / 中文)".to_string(),
+            20,
+        );
         assert_eq!(manager.tasks.len(), 1);
         assert_eq!(
             manager.tasks[0].title,
@@ -630,4 +633,3 @@ mod tests {
         assert_eq!(manager.tasks[0].pomodoros_spent, 25);
     }
 }
-

@@ -1,22 +1,72 @@
-name: Rust
+# Workflow Name displayed in GitHub Actions tab
+name: Rust Continuous Integration & Quality Assurance
 
+# Define triggers that automatically execute this CI pipeline
 on:
+  # Trigger workflow on git push to the main branch
   push:
+    # Target branches
     branches: [ "main" ]
+  # Trigger workflow on pull requests targeting the main branch
   pull_request:
+    # Target branches
     branches: [ "main" ]
 
+# Global environment variables applied to all jobs and steps
 env:
+  # Force Cargo to output colored terminal text for enhanced readability in logs
   CARGO_TERM_COLOR: always
+  # Ensure backtraces are captured and printed if an assertion fails
+  RUST_BACKTRACE: 1
 
+# Define automated execution jobs
 jobs:
-  build:
-
+  # Primary build, lint, and test validation job
+  test:
+    # Human-readable job name displayed in GitHub UI
+    name: Build & Test Suite (120 Tests)
+    # Target runner virtual machine operating system
     runs-on: ubuntu-latest
 
+    # Ordered list of sequence steps to execute within the job
     steps:
-    - uses: actions/checkout@v4
-    - name: Build
-      run: cargo build --verbose
-    - name: Run tests
-      run: cargo test --verbose
+      # Step 1: Check out git repository source code into the runner workspace
+      - name: Check out repository code
+        # Official GitHub Actions checkout action
+        uses: actions/checkout@v4
+
+      # Step 2: Install required Linux development headers for audio and system integration
+      - name: Install Linux audio and system libraries
+        # Update apt package index and install ALSA audio dev packages for Rodio sound playback
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y pkg-config libasound2-dev
+
+      # Step 3: Install Rust toolchain with cargo components
+      - name: Set up Rust toolchain
+        # dtolnay rust toolchain action with stable channel
+        uses: dtolnay/rust-toolchain@stable
+        # Toolchain configuration options
+        with:
+          # Include clippy for linting and rustfmt for format checks
+          components: clippy, rustfmt
+
+      # Step 4: Verify source code formatting compliance
+      - name: Verify code formatting with rustfmt
+        # Check that all Rust code conforms to canonical style without making modifications
+        run: cargo fmt --all -- --check
+
+      # Step 5: Run compiler lint checks with Clippy
+      - name: Run Clippy lints
+        # Execute clippy analyzer across all targets and treat warnings as fatal errors
+        run: cargo clippy --all-targets --all-features -- -D warnings
+
+      # Step 6: Compile the application binary and all test harnesses
+      - name: Compile application binary and test suite
+        # Build binary with verbose compiler output
+        run: cargo build --verbose --all-targets
+
+      # Step 7: Execute the complete 120-test QA suite across all 9 modules
+      - name: Run all 120 unit, integration, and E2E test cases
+        # Run test binary with verbose reporting and show individual test output
+        run: cargo test --verbose -- --nocapture --show-output

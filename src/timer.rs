@@ -426,9 +426,11 @@ mod tests {
 
     #[test]
     fn test_auto_start_settings_on_transition() {
-        let mut config = Config::default();
-        config.auto_start_breaks = true;
-        config.auto_start_work = false;
+        let config = Config {
+            auto_start_breaks: true,
+            auto_start_work: false,
+            ..Default::default()
+        };
 
         let mut timer = PomodoroTimer::new(&config);
         // Work -> ShortBreak: auto_start_breaks is true, so should be Running
@@ -575,8 +577,10 @@ mod tests {
 
     #[test]
     fn test_timer_multiple_consecutive_skips() {
-        let mut config = Config::default();
-        config.long_break_interval = 4;
+        let config = Config {
+            long_break_interval: 4,
+            ..Default::default()
+        };
         let mut timer = PomodoroTimer::new(&config);
 
         // Skip 50 times in a row
