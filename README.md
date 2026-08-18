@@ -98,7 +98,7 @@ Modern productivity apps are frequently bloated with heavy web-view containers (
 1. **Instantaneous Startup ($< 10\text{ ms}$)**: Compiled directly to native machine code with zero runtime overhead.
 2. **Minimal Memory Footprint ($< 15\text{ MB}$ RAM)**: Operates silently in a terminal tab, tmux pane, or Zellij floating window without consuming gigabytes of system memory.
 3. **100% Offline & Private**: All tasks, metrics, and streaks are stored strictly on your local disk with zero network requests or telemetry.
-4. **Keyboard-Driven Fluidity**: Every single action—from task creation to duration adjustment—can be executed via ergonomic vim-inspired keybindings without reaching for a mouse.
+4. **Keyboard-Driven Fluidity**: Every single action (from task creation to duration adjustment) can be executed via ergonomic vim-inspired keybindings without reaching for a mouse.
 5. **Aesthetic Visual Excellence**: Designed with 18 high-contrast color themes, smooth Unicode gauges, block-font big digits, and real-time status banners.
 
 ---
@@ -413,7 +413,7 @@ Keywords=pomodoro;timer;focus;productivity;
 
 ### Step 6: Terminal Multiplexer Integration (tmux & Zellij)
 
-Termodoro works seamlessly in split panes and dedicated popups inside terminal multiplexers:
+Termodoro runs directly in split panes and dedicated popups inside terminal multiplexers:
 
 #### tmux Dedicated Window or Floating Popup
 Add these keybindings to your `~/.tmux.conf`:
@@ -486,7 +486,7 @@ Termodoro leaves no persistent background services, system daemons, or registry 
 
 ##### Step 1: Remove the Executable Binary
 
-- **Method A: If installed via Cargo (`cargo install`) — Works on Linux, macOS & Windows**:
+- **Method A: If installed via Cargo (`cargo install`) on Linux, macOS & Windows**:
   ```bash
   cargo uninstall termodoro
   ```
@@ -655,7 +655,7 @@ The Settings view allows you to customize durations, toggles, and visual appeara
 ### Modal Overlays & Interactive Dialogs
 
 #### 1. Add Task Modal Dialog
-Quickly create new tasks, assign titles, and define estimated Pomodoro intervals with seamless input navigation:
+Quickly create new tasks, assign titles, and define estimated Pomodoro intervals with direct input navigation:
 
 ![Add Task Modal Dialog](assets/screenshots/kde_05_task_modal.png)
 

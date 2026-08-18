@@ -14,7 +14,7 @@ Master your daily workflow with **Termodoro**'s primary operational loop: runnin
    - [Step 4: Completing a Work Phase & Acoustic Chimes](#step-4-completing-a-work-phase--acoustic-chimes)
    - [Step 5: Taking a Restorative Short Break](#step-5-taking-a-restorative-short-break)
    - [Step 6: Progressing Through 4 Cycles to the Long Break](#step-6-progressing-through-4-cycles-to-the-long-break)
-3. [Visual Layout & Interface Deep Dive](#3-visual-layout--interface-deep-dive)
+3. [Visual Layout & Interface Details](#3-visual-layout--interface-details)
 4. [Under the Hood: Engineering & Logic Architecture](#4-under-the-hood-engineering--logic-architecture)
 5. [Pro Tips & Power Workflows](#5-pro-tips--power-workflows)
 6. [Complete Keybinding Reference](#6-complete-keybinding-reference)
@@ -92,7 +92,7 @@ Upon finishing the 4th session, Termodoro automatically enters a **15-minute Lon
 
 ---
 
-## 3. Visual Layout & Interface Deep Dive
+## 3. Visual Layout & Interface Details
 
 Below is the live operational layout of Tab 1 during an active focus session:
 
@@ -127,7 +127,7 @@ Below is the live operational layout of Tab 1 during an active focus session:
 > ```
 
 > [!NOTE]
-> **Auto-Start Automation**: If you prefer seamless transitions without pressing `Space` after each break, navigate to **Settings (Tab 4)** and toggle **Auto-start Breaks** and **Auto-start Pomodoros** to `[Enabled]`.
+> **Auto-Start Automation**: If you prefer automatic transitions without pressing `Space` after each break, navigate to **Settings (Tab 4)** and toggle **Auto-start Breaks** and **Auto-start Pomodoros** to `[Enabled]`.
 
 ---
 

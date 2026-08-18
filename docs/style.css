@@ -811,21 +811,21 @@ button {
 }
 
 /* ==========================================================================
-   Dedicated Features Deep-Dive Layouts (features.html)
+   Dedicated Features Section Layouts (features.html)
    ========================================================================== */
-.feature-deep-dive {
+.feature-card-full {
   display: grid;
   grid-template-columns: 1.1fr 1fr;
   gap: 3.5rem;
   align-items: center;
 }
 
-.feature-deep-dive.reverse {
+.feature-card-full.reverse {
   grid-template-columns: 1fr 1.1fr;
 }
 
 @media (max-width: 900px) {
-  .feature-deep-dive, .feature-deep-dive.reverse {
+  .feature-card-full, .feature-card-full.reverse {
     grid-template-columns: 1fr;
     gap: 2rem;
   }

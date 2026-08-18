@@ -13,7 +13,7 @@ Track your focus metrics, analyze 7-day productivity distribution charts, preser
    - [Step 3: Analyzing the 7-Day Activity Distribution Histogram](#step-3-analyzing-the-7-day-activity-distribution-histogram)
    - [Step 4: Building & Preserving Consecutive Day Streaks](#step-4-building--preserving-consecutive-day-streaks)
    - [Step 5: Reviewing the Chronological Session Activity Log](#step-5-reviewing-the-chronological-session-activity-log)
-3. [Visual Layout & Interface Deep Dive](#3-visual-layout--interface-deep-dive)
+3. [Visual Layout & Interface Details](#3-visual-layout--interface-details)
 4. [Under the Hood: Streak Algorithms & Mathematical Guarantees](#4-under-the-hood-streak-algorithms--mathematical-guarantees)
 5. [Complete Keybinding Reference](#5-complete-keybinding-reference)
 
@@ -72,7 +72,7 @@ The bottom panel displays an activity history table detailing your recent sessio
 
 ---
 
-## 3. Visual Layout & Interface Deep Dive
+## 3. Visual Layout & Interface Details
 
 Below is the live operational layout of Tab 3:
 

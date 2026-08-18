@@ -14,7 +14,7 @@ Organize your projects, estimate effort in discrete Pomodoro blocks, bind active
    - [Step 4: Real-Time Focus Binding & Automatic Effort Logging](#step-4-real-time-focus-binding--automatic-effort-logging)
    - [Step 5: Filtering Views & Toggling Completion](#step-5-filtering-views--toggling-completion)
    - [Step 6: Deleting Obsolete Tasks](#step-6-deleting-obsolete-tasks)
-3. [Visual Layout & Interface Deep Dive](#3-visual-layout--interface-deep-dive)
+3. [Visual Layout & Interface Details](#3-visual-layout--interface-details)
 4. [Under the Hood: Engineering & Logic Architecture](#4-under-the-hood-engineering--logic-architecture)
 5. [Pro Tips & Power Workflows](#5-pro-tips--power-workflows)
 6. [Complete Keybinding Reference](#6-complete-keybinding-reference)
@@ -82,7 +82,7 @@ From anywhere in Termodoro, press `2` (or press `Tab`) to navigate to **Tab 2: T
 
 ---
 
-## 3. Visual Layout & Interface Deep Dive
+## 3. Visual Layout & Interface Details
 
 ### Interactive Tasks Table View
 ![Termodoro Tasks View](../assets/screenshots/02_tasks_view.png)

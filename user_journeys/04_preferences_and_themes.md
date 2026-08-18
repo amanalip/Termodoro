@@ -14,7 +14,7 @@ Personalize your focus environment in **Termodoro**: adjust interval durations, 
    - [Step 4: Audio Synthesis & Desktop Notification Toggles](#step-4-audio-synthesis--desktop-notification-toggles)
    - [Step 5: Automated Flow with Auto-Start Transitions](#step-5-automated-flow-with-auto-start-transitions)
    - [Step 6: Real-Time Cycling Across 18 Handcrafted Color Themes](#step-6-real-time-cycling-across-18-handcrafted-color-themes)
-3. [Visual Layout & Interface Deep Dive](#3-visual-layout--interface-deep-dive)
+3. [Visual Layout & Interface Details](#3-visual-layout--interface-details)
 4. [Complete 18-Theme Palette Catalog](#4-complete-18-theme-palette-catalog)
 5. [Under the Hood: Real-Time Configuration Architecture](#5-under-the-hood-real-time-configuration-architecture)
 6. [Complete Keybinding Reference](#6-complete-keybinding-reference)
@@ -60,7 +60,7 @@ From any tab in Termodoro, press `4` to enter **Tab 4: Settings View**.
 ### Step 4: Audio Synthesis & Desktop Notification Toggles
 - Select **Desktop Notifications** (row 6) or **Sound Enabled** (row 7).
 - Press `Space` or `Enter` to toggle `[Enabled]` / `[Disabled]`.
-- **Sound Alert**: Generates clean, click-free mathematical PCM WAV audio ($f = 44.1\text{ kHz}$) directly in memory—no sound files or codecs required.
+- **Sound Alert**: Generates clean, click-free mathematical PCM WAV audio ($f = 44.1\text{ kHz}$) directly in memory, without sound files or codecs required.
 - **Desktop Notifications**: Dispatches native OS notifications that notify you even when your terminal window is minimized.
 
 ---
@@ -79,7 +79,7 @@ From any tab in Termodoro, press `4` to enter **Tab 4: Settings View**.
 
 ---
 
-## 3. Visual Layout & Interface Deep Dive
+## 3. Visual Layout & Interface Details
 
 ### Live Settings View Editor
 ![Termodoro Settings View](../assets/screenshots/04_settings_view.png)

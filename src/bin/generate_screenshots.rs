@@ -108,7 +108,7 @@ fn render_buffer_to_svg(
         .replace('"', "&quot;");
 
     svg.push_str(&format!(
-        "  <text x=\"40\" y=\"19\" class=\"window-title\"><tspan font-weight=\"600\">Termodoro</tspan><tspan class=\"window-title-muted\" dx=\"8\">—</tspan><tspan class=\"window-title-muted\" dx=\"8\">{}</tspan></text>\n\n",
+        "  <text x=\"40\" y=\"19\" class=\"window-title\"><tspan font-weight=\"600\">Termodoro</tspan><tspan class=\"window-title-muted\" dx=\"8\">|</tspan><tspan class=\"window-title-muted\" dx=\"8\">{}</tspan></text>\n\n",
         escaped_title
     ));
 

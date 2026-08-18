@@ -660,6 +660,6 @@ To guarantee that proposed themes and architectural expansions satisfy terminal 
 5. **Schoonover, Ethan (2011)**: *Solarized: Precision colors for machines and people*. https://ethanschoonover.com/solarized/
 6. **Catppuccin Palette Guild (2023)**: *Soothing pastel theme for the high-spirited*. https://github.com/catppuccin/catppuccin
 7. **Rose Pine Project (2023)**: *All natural pine, faux fur and a bit of soho vibes for classy minimalists*. https://rosepinetheme.com/
-8. **Voss, R. F., & Clarke, J. (1978)**: *"1/f noise in music: Music from 1/f noise"*. *Journal of the Acoustical Society of America*, 63(1), 258–263.
+8. **Voss, R. F., & Clarke, J. (1978)**: *"1/f noise in music: Music from 1/f noise"*. *Journal of the Acoustical Society of America*, 63(1), 258-263.
 9. **tmux Manual (2024)**: *tmux: Terminal Multiplexer Status Line Customization and Format Strings*. OpenBSD Project.
 10. **W3C (2018)**: *Web Content Accessibility Guidelines (WCAG) 2.1: Contrast (Minimum & Enhanced)*. W3C Recommendation. https://www.w3.org/TR/WCAG21/
