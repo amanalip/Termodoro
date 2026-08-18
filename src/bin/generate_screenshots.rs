@@ -214,6 +214,29 @@ fn render_buffer_to_svg(
     svg
 }
 
+// Helper to save SVG and convert to crisp PNG (with cache-busting kde_ copies)
+fn save_screenshot(svg: &str, out_dir: &Path, name: &str) {
+    let svg_path = out_dir.join(format!("{}.svg", name));
+    let png_path = out_dir.join(format!("{}.png", name));
+    let kde_png_path = out_dir.join(format!("kde_{}.png", name));
+    fs::write(&svg_path, svg).unwrap();
+
+    let _ = Command::new("rsvg-convert")
+        .args([
+            "-d",
+            "144",
+            "-p",
+            "144",
+            svg_path.to_str().unwrap(),
+            "-o",
+            png_path.to_str().unwrap(),
+        ])
+        .output();
+
+    let _ = fs::copy(&png_path, &kde_png_path);
+    println!("  ✓ Saved {}.png & kde_{}.png", name, name);
+}
+
 fn main() {
     println!("🎨 Generating Termodoro High-Res Screenshots...");
     let out_dir = Path::new("assets/screenshots");
@@ -260,24 +283,9 @@ fn main() {
             "Termodoro — Pomodoro Focus Timer",
             app.config.theme,
         );
-        let svg_path = out_dir.join("01_timer_view.svg");
-        let png_path = out_dir.join("01_timer_view.png");
-        fs::write(&svg_path, svg).unwrap();
-
-        let _ = Command::new("rsvg-convert")
-            .args([
-                "-d",
-                "144",
-                "-p",
-                "144",
-                svg_path.to_str().unwrap(),
-                "-o",
-                png_path.to_str().unwrap(),
-            ])
-            .output();
+        save_screenshot(&svg, out_dir, "01_timer_view");
 
         let _ = fs::remove_dir_all(temp_dir);
-        println!("  ✓ Saved 01_timer_view.png");
     }
 
     // 2. Tasks View
@@ -329,24 +337,9 @@ fn main() {
             "Termodoro — Task Management & Targets",
             app.config.theme,
         );
-        let svg_path = out_dir.join("02_tasks_view.svg");
-        let png_path = out_dir.join("02_tasks_view.png");
-        fs::write(&svg_path, svg).unwrap();
-
-        let _ = Command::new("rsvg-convert")
-            .args([
-                "-d",
-                "144",
-                "-p",
-                "144",
-                svg_path.to_str().unwrap(),
-                "-o",
-                png_path.to_str().unwrap(),
-            ])
-            .output();
+        save_screenshot(&svg, out_dir, "02_tasks_view");
 
         let _ = fs::remove_dir_all(temp_dir);
-        println!("  ✓ Saved 02_tasks_view.png");
     }
 
     // 3. Stats & Productivity Dashboard
@@ -394,24 +387,9 @@ fn main() {
             "Termodoro — Productivity Analytics & Streaks",
             app.config.theme,
         );
-        let svg_path = out_dir.join("03_stats_view.svg");
-        let png_path = out_dir.join("03_stats_view.png");
-        fs::write(&svg_path, svg).unwrap();
-
-        let _ = Command::new("rsvg-convert")
-            .args([
-                "-d",
-                "144",
-                "-p",
-                "144",
-                svg_path.to_str().unwrap(),
-                "-o",
-                png_path.to_str().unwrap(),
-            ])
-            .output();
+        save_screenshot(&svg, out_dir, "03_stats_view");
 
         let _ = fs::remove_dir_all(temp_dir);
-        println!("  ✓ Saved 03_stats_view.png");
     }
 
     // 4. Settings & 18 Color Schemes
@@ -430,24 +408,9 @@ fn main() {
             "Termodoro — Preferences & Color Themes",
             app.config.theme,
         );
-        let svg_path = out_dir.join("04_settings_view.svg");
-        let png_path = out_dir.join("04_settings_view.png");
-        fs::write(&svg_path, svg).unwrap();
-
-        let _ = Command::new("rsvg-convert")
-            .args([
-                "-d",
-                "144",
-                "-p",
-                "144",
-                svg_path.to_str().unwrap(),
-                "-o",
-                png_path.to_str().unwrap(),
-            ])
-            .output();
+        save_screenshot(&svg, out_dir, "04_settings_view");
 
         let _ = fs::remove_dir_all(temp_dir);
-        println!("  ✓ Saved 04_settings_view.png");
     }
 
     // 5. Add Task Modal Dialog
@@ -469,24 +432,9 @@ fn main() {
             "Termodoro — Add Task Modal Dialog",
             app.config.theme,
         );
-        let svg_path = out_dir.join("05_task_modal.svg");
-        let png_path = out_dir.join("05_task_modal.png");
-        fs::write(&svg_path, svg).unwrap();
-
-        let _ = Command::new("rsvg-convert")
-            .args([
-                "-d",
-                "144",
-                "-p",
-                "144",
-                svg_path.to_str().unwrap(),
-                "-o",
-                png_path.to_str().unwrap(),
-            ])
-            .output();
+        save_screenshot(&svg, out_dir, "05_task_modal");
 
         let _ = fs::remove_dir_all(temp_dir);
-        println!("  ✓ Saved 05_task_modal.png");
     }
 
     // 6. Help Shortcuts Modal Dialog
@@ -504,24 +452,9 @@ fn main() {
             "Termodoro — Keyboard Shortcuts & Navigation",
             app.config.theme,
         );
-        let svg_path = out_dir.join("06_help_modal.svg");
-        let png_path = out_dir.join("06_help_modal.png");
-        fs::write(&svg_path, svg).unwrap();
-
-        let _ = Command::new("rsvg-convert")
-            .args([
-                "-d",
-                "144",
-                "-p",
-                "144",
-                svg_path.to_str().unwrap(),
-                "-o",
-                png_path.to_str().unwrap(),
-            ])
-            .output();
+        save_screenshot(&svg, out_dir, "06_help_modal");
 
         let _ = fs::remove_dir_all(temp_dir);
-        println!("  ✓ Saved 06_help_modal.png");
     }
 
     println!("✨ All 6 high-res screenshots generated in assets/screenshots/");
