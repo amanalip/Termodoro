@@ -89,7 +89,7 @@ Termodoro/
 ├── README.md              # Main user manual and project overview
 ├── IMPLEMENTATION.md      # In-depth engineering specification and algorithms
 ├── WALKTHROUGH.md         # Operational workflows, code tour, and test benchmarks
-├── test_report.md         # Comprehensive 91-test QA audit & test suite report
+├── test_report.md         # Comprehensive 93-test QA audit & test suite report
 └── src/
     ├── main.rs            # Terminal runtime initialization, event loop, panic hook
     ├── app.rs             # Central application state, keyboard event dispatcher
@@ -643,7 +643,7 @@ Because the database is standard JSON, you can easily back up, version-control, 
 
 ## 9. Development, Testing & Contribution
 
-### Running Automated Unit & Integration Tests (91 Tests)
+### Running Automated Unit & Integration Tests (93 Tests)
 ```bash
 cargo test
 ```
