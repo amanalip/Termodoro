@@ -1604,4 +1604,161 @@ mod tests {
 
         let _ = std::fs::remove_dir_all(temp_dir);
     }
+
+    #[test]
+    fn test_unhandled_keys_and_modifier_combinations() {
+        let (mut app, temp_dir) = create_test_app();
+        
+        // Random / unhandled keys across all tabs
+        for tab in [ActiveTab::Timer, ActiveTab::Tasks, ActiveTab::Stats, ActiveTab::Settings] {
+            app.active_tab = tab;
+            app.on_key_event(make_key(KeyCode::F(1)));
+            app.on_key_event(make_key(KeyCode::F(12)));
+            app.on_key_event(make_key(KeyCode::PageUp));
+            app.on_key_event(make_key(KeyCode::PageDown));
+            app.on_key_event(make_key(KeyCode::Home));
+            app.on_key_event(make_key(KeyCode::End));
+            app.on_key_event(make_key(KeyCode::Insert));
+            app.on_key_event(make_key(KeyCode::Delete));
+            app.on_key_event(make_key_with_mod(KeyCode::Char('z'), KeyModifiers::CONTROL));
+            app.on_key_event(make_key_with_mod(KeyCode::Char('x'), KeyModifiers::ALT));
+        }
+
+        assert!(!app.should_quit);
+        let _ = std::fs::remove_dir_all(temp_dir);
+    }
+
+    #[test]
+    fn test_modal_backspace_empty_and_focus_toggle_chain() {
+        let (mut app, temp_dir) = create_test_app();
+        app.open_task_modal();
+        assert!(app.show_task_modal);
+
+        // Backspacing on an already empty string should not underflow or crash
+        for _ in 0..10 {
+            app.on_key_event(make_key(KeyCode::Backspace));
+        }
+        assert_eq!(app.task_input_title, "");
+
+        // Type Unicode emojis and international text
+        let unicode_text = "🍅 Focus on Rust 🚀 日本語";
+        for c in unicode_text.chars() {
+            app.on_key_event(make_key(KeyCode::Char(c)));
+        }
+        assert_eq!(app.task_input_title, unicode_text);
+
+        // Rapid focus switching between title and estimate
+        for _ in 0..5 {
+            app.on_key_event(make_key(KeyCode::Tab));
+            assert_eq!(app.task_modal_focus, 1);
+            app.on_key_event(make_key(KeyCode::BackTab));
+            assert_eq!(app.task_modal_focus, 0);
+        }
+
+        // Switch to estimate, adjust with keys
+        app.on_key_event(make_key(KeyCode::Down));
+        assert_eq!(app.task_modal_focus, 1);
+        app.on_key_event(make_key(KeyCode::Char('8')));
+        assert_eq!(app.task_input_estimated, 8);
+
+        // Submit task
+        app.on_key_event(make_key(KeyCode::Enter));
+        assert!(!app.show_task_modal);
+        assert_eq!(app.tasks.tasks.len(), 1);
+        assert_eq!(app.tasks.tasks[0].title, unicode_text);
+        assert_eq!(app.tasks.tasks[0].pomodoros_estimated, 8);
+
+        let _ = std::fs::remove_dir_all(temp_dir);
+    }
+
+    #[test]
+    fn test_task_reassignment_on_deletion_and_completion_chain() {
+        let (mut app, temp_dir) = create_test_app();
+        app.active_tab = ActiveTab::Tasks;
+
+        // Add 3 tasks: A, B, C
+        app.tasks.add("Task A".to_string(), 1);
+        app.tasks.add("Task B".to_string(), 2);
+        app.tasks.add("Task C".to_string(), 3);
+        assert_eq!(app.tasks.active_task().unwrap().title, "Task A");
+
+        // Complete Task A -> active task should reassign to Task B
+        app.tasks.selected_index = 0;
+        app.on_key_event(make_key(KeyCode::Char(' ')));
+        assert!(app.tasks.tasks[0].completed);
+        assert_eq!(app.tasks.active_task().unwrap().title, "Task B");
+
+        // Complete Task B -> active task should reassign to Task C
+        app.tasks.selected_index = 1;
+        app.on_key_event(make_key(KeyCode::Char(' ')));
+        assert!(app.tasks.tasks[1].completed);
+        assert_eq!(app.tasks.active_task().unwrap().title, "Task C");
+
+        // Delete Task C -> all tasks are completed, active task becomes None
+        app.tasks.selected_index = 2;
+        app.on_key_event(make_key(KeyCode::Char('d')));
+        assert_eq!(app.tasks.active_task_id, None);
+
+        // Now run a Pomodoro tick with None active task -> stats should still record without error
+        app.timer.phase = PomodoroPhase::Work;
+        app.timer.status = crate::timer::TimerStatus::Running;
+        app.timer.time_remaining_secs = 1;
+        app.on_tick();
+        assert_eq!(app.stats.sessions.len(), 1);
+        assert_eq!(app.stats.sessions[0].task_id, None);
+
+        let _ = std::fs::remove_dir_all(temp_dir);
+    }
+
+    #[test]
+    fn test_phase_transitions_with_auto_start_disabled_combinations() {
+        let (mut app, temp_dir) = create_test_app();
+        crate::audio::set_audio_muted_for_tests(true);
+        app.config.auto_start_breaks = false;
+        app.config.auto_start_work = false;
+
+        // Work finishes -> ShortBreak should be STOPPED (awaiting user start)
+        app.timer.phase = PomodoroPhase::Work;
+        app.timer.status = crate::timer::TimerStatus::Running;
+        app.timer.time_remaining_secs = 1;
+        app.on_tick();
+
+        assert_eq!(app.timer.phase, PomodoroPhase::ShortBreak);
+        assert_eq!(app.timer.status, crate::timer::TimerStatus::Stopped);
+
+        // User starts break with Space
+        app.on_key_event(make_key(KeyCode::Char(' ')));
+        assert_eq!(app.timer.status, crate::timer::TimerStatus::Running);
+
+        // Break finishes -> Work should be STOPPED (awaiting user start)
+        app.timer.time_remaining_secs = 1;
+        app.on_tick();
+
+        assert_eq!(app.timer.phase, PomodoroPhase::Work);
+        assert_eq!(app.timer.status, crate::timer::TimerStatus::Stopped);
+
+        crate::audio::set_audio_muted_for_tests(false);
+        let _ = std::fs::remove_dir_all(temp_dir);
+    }
+
+    #[test]
+    fn test_long_break_interval_boundary_one_and_twenty_four() {
+        let (mut app, temp_dir) = create_test_app();
+        crate::audio::set_audio_muted_for_tests(true);
+
+        // Test long_break_interval = 1 (every focus session leads directly to long break)
+        app.config.long_break_interval = 1;
+        app.timer.phase = PomodoroPhase::Work;
+        app.timer.current_cycle = 1;
+        app.timer.status = crate::timer::TimerStatus::Running;
+        app.timer.time_remaining_secs = 1;
+        app.on_tick();
+
+        assert_eq!(app.timer.phase, PomodoroPhase::LongBreak);
+        assert_eq!(app.timer.current_cycle, 1);
+
+        crate::audio::set_audio_muted_for_tests(false);
+        let _ = std::fs::remove_dir_all(temp_dir);
+    }
 }
+

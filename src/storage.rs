@@ -271,4 +271,28 @@ mod tests {
 
         let _ = fs::remove_dir_all(temp_dir);
     }
+
+    #[test]
+    fn test_storage_empty_file_and_partial_json_fallback() {
+        let temp_dir =
+            std::env::temp_dir().join(format!("termodoro_emptyfile_{}", uuid::Uuid::new_v4()));
+        let file_path = temp_dir.join("empty.json");
+        let storage = Storage::with_path(file_path.clone());
+
+        let _ = create_dir_all(&temp_dir);
+        // Write completely empty file (0 bytes)
+        let _ = fs::write(&file_path, "");
+        let loaded = storage.load();
+        assert_eq!(loaded.config, Config::default());
+        assert_eq!(loaded.tasks.tasks.len(), 0);
+
+        // Write partial JSON without required keys
+        let _ = fs::write(&file_path, "{\"unexpected_key\": 123}");
+        let loaded_partial = storage.load();
+        assert_eq!(loaded_partial.config, Config::default());
+        assert_eq!(loaded_partial.tasks.tasks.len(), 0);
+
+        let _ = fs::remove_dir_all(temp_dir);
+    }
 }
+

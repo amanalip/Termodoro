@@ -514,4 +514,52 @@ mod tests {
 
         let _ = std::fs::remove_dir_all(temp_dir);
     }
+
+    #[test]
+    fn test_render_extreme_content_and_dimensions() {
+        let (mut app, temp_dir) = create_test_app();
+
+        // Add extreme length task titles with emojis and special characters
+        let long_title = "🔥 ".repeat(40) + "Very Long Task Name with Special Characters & Symbols #123456789";
+        app.tasks.add(long_title, 20);
+        app.tasks.tasks[0].pomodoros_spent = 50;
+
+        // Add 50 sessions
+        for i in 0..50 {
+            app.stats.record(
+                crate::timer::PomodoroPhase::Work,
+                120,
+                Some(format!("id-{}", i)),
+                Some("Task with high minutes".to_string()),
+            );
+        }
+
+        // Test extreme small dimensions
+        for (w, h) in [(20, 10), (30, 15), (40, 12), (300, 100)] {
+            let backend = TestBackend::new(w, h);
+            let mut terminal = Terminal::new(backend).unwrap();
+
+            for tab in [
+                ActiveTab::Timer,
+                ActiveTab::Tasks,
+                ActiveTab::Stats,
+                ActiveTab::Settings,
+            ] {
+                app.active_tab = tab;
+                terminal.draw(|f| render(f, &app)).unwrap();
+            }
+
+            // Also test modals with extreme dimensions
+            app.show_help = true;
+            terminal.draw(|f| render(f, &app)).unwrap();
+            app.show_help = false;
+
+            app.show_task_modal = true;
+            terminal.draw(|f| render(f, &app)).unwrap();
+            app.show_task_modal = false;
+        }
+
+        let _ = std::fs::remove_dir_all(temp_dir);
+    }
 }
+

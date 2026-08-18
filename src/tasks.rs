@@ -589,4 +589,45 @@ mod tests {
         assert_eq!(manager.filtered_indices().len(), 0);
         assert_eq!(manager.active_task(), None);
     }
+
+    #[test]
+    fn test_tasks_filtered_zero_matches_safety() {
+        let mut manager = TaskManager::new();
+        manager.add("Incomplete 1".to_string(), 1);
+        manager.add("Incomplete 2".to_string(), 2);
+
+        // Filter to Completed (0 items)
+        manager.filter = TaskFilter::Completed;
+        assert_eq!(manager.filtered_indices().len(), 0);
+
+        // All mutations and movements on 0 filtered items must be safe no-ops
+        manager.next();
+        manager.previous();
+        manager.toggle_selected();
+        manager.remove_selected();
+        manager.set_selected_active();
+
+        // Tasks list remains intact
+        assert_eq!(manager.tasks.len(), 2);
+    }
+
+    #[test]
+    fn test_tasks_unicode_and_estimate_limits() {
+        let mut manager = TaskManager::new();
+        // Emoji and multilingual text
+        manager.add("⚡ Build CLI in Rust 🦀 (日本語 / العربية / 中文)".to_string(), 20);
+        assert_eq!(manager.tasks.len(), 1);
+        assert_eq!(
+            manager.tasks[0].title,
+            "⚡ Build CLI in Rust 🦀 (日本語 / العربية / 中文)"
+        );
+        assert_eq!(manager.tasks[0].pomodoros_estimated, 20);
+
+        // Increment spent beyond estimated
+        for _ in 0..25 {
+            manager.increment_active_spent();
+        }
+        assert_eq!(manager.tasks[0].pomodoros_spent, 25);
+    }
 }
+

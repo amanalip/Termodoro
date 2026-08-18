@@ -1,8 +1,8 @@
 # Termodoro Test Report & Quality Assurance Audit
 
 **Execution Date:** August 17, 2026  
-**Result:** **111 / 111 Tests Passed (100% Success Rate)**  
-**Duration:** ~1.20s  
+**Result:** **120 / 120 Tests Passed (100% Success Rate)**  
+**Duration:** ~1.17s  
 
 ---
 
@@ -10,7 +10,7 @@
 
 A comprehensive, rigorous quality assurance (QA) overhaul across all layers of the **Termodoro** application was conducted.
 
-Test coverage now spans all **9 core modules** with **111 unit, integration, and end-to-end tests** (expanded from 93, 91, 74, and originally 7). The expanded test suite verifies synthesized audio signal integrity (amplitude bounds, headroom, custom sample rates, thread safety, byte-level RIFF alignment), full 24-cycle progression, streak calculations across year/month boundaries, keyboard input handling, 18-theme forward/backward cycling, modal key capturing, full dataset storage persistence roundtrips, multi-tab terminal rendering stress tests, and large-volume task and stats aggregation.
+Test coverage now spans all **9 core modules** with **120 unit, integration, and end-to-end tests** (expanded across all iterations from 7 -> 74 -> 91 -> 93 -> 111 -> 120). The test suite verifies every button, key combination, modal state, unhandled modifier, phase transition combinations with auto-start flags, interval boundaries (1 to 24), Unicode & emoji task handling, empty & partial JSON storage error recovery, synthesized audio signal integrity, multi-tab terminal rendering stress tests, and extreme viewport geometries.
 
 ---
 
@@ -18,17 +18,17 @@ Test coverage now spans all **9 core modules** with **111 unit, integration, and
 
 | Module | Test File | Test Cases | Category | Status |
 | :--- | :--- | :---: | :---: | :---: |
-| **Audio Engine & Chimes** | [`src/audio.rs`](file:///home/amanap/Documents/GitHub/Termodoro/src/audio.rs) | 12 (+7) | Acoustic QA, WAV Signals & Headroom | PASS |
-| **Timer Engine** | [`src/timer.rs`](file:///home/amanap/Documents/GitHub/Termodoro/src/timer.rs) | 18 (+6) | 24-Cycle State Machine & Formats | PASS |
-| **Task Management** | [`src/tasks.rs`](file:///home/amanap/Documents/GitHub/Termodoro/src/tasks.rs) | 17 (+6) | UUIDs, Volume, Positions & Filters | PASS |
-| **Productivity Analytics & Streaks** | [`src/stats.rs`](file:///home/amanap/Documents/GitHub/Termodoro/src/stats.rs) | 18 (+6) | Boundaries, Formats & Aggregations | PASS |
-| **Application State & End-to-End** | [`src/app.rs`](file:///home/amanap/Documents/GitHub/Termodoro/src/app.rs) | 20 (+7) | 18 Themes E2E, Keybindings & Modals | PASS |
-| **Persistence & File Storage** | [`src/storage.rs`](file:///home/amanap/Documents/GitHub/Termodoro/src/storage.rs) | 5 (+1) | Full Dataset I/O & Error Resilience | PASS |
+| **Audio Engine & Chimes** | [`src/audio.rs`](file:///home/amanap/Documents/GitHub/Termodoro/src/audio.rs) | 12 | Acoustic QA, WAV Signals & Headroom | PASS |
+| **Timer Engine** | [`src/timer.rs`](file:///home/amanap/Documents/GitHub/Termodoro/src/timer.rs) | 18 | 24-Cycle State Machine & Formats | PASS |
+| **Task Management** | [`src/tasks.rs`](file:///home/amanap/Documents/GitHub/Termodoro/src/tasks.rs) | 19 | UUIDs, Unicode, Boundaries & Zero-Match Filters | PASS |
+| **Productivity Analytics & Streaks** | [`src/stats.rs`](file:///home/amanap/Documents/GitHub/Termodoro/src/stats.rs) | 18 | Boundaries, Formats & Aggregations | PASS |
+| **Application State & End-to-End** | [`src/app.rs`](file:///home/amanap/Documents/GitHub/Termodoro/src/app.rs) | 25 | Key Matrix, Modals, Auto-start Flags & Reassignment | PASS |
+| **Persistence & File Storage** | [`src/storage.rs`](file:///home/amanap/Documents/GitHub/Termodoro/src/storage.rs) | 6 | Full Dataset, Empty/Partial File Recovery | PASS |
 | **Configuration & Preferences** | [`src/config.rs`](file:///home/amanap/Documents/GitHub/Termodoro/src/config.rs) | 2 | Serde & Defaults | PASS |
-| **Themes & Color Palettes** | [`src/theme.rs`](file:///home/amanap/Documents/GitHub/Termodoro/src/theme.rs) | 4 (+1) | 18 Palettes, Contrast & Serde | PASS |
-| **ASCII Big Digits Graphic UI** | [`src/ui/digits.rs`](file:///home/amanap/Documents/GitHub/Termodoro/src/ui/digits.rs) | 4 (+1) | Glyphs & Block Typography Bounds | PASS |
-| **Terminal UI Rendering** | [`src/ui/mod.rs`](file:///home/amanap/Documents/GitHub/Termodoro/src/ui/mod.rs) | 11 (+2) | 24-Dot Views & Geometry Stress | PASS |
-| **Total** | | **111** | **ALL PASSED** | **100%** |
+| **Themes & Color Palettes** | [`src/theme.rs`](file:///home/amanap/Documents/GitHub/Termodoro/src/theme.rs) | 4 | 18 Palettes, Contrast & Serde | PASS |
+| **ASCII Big Digits Graphic UI** | [`src/ui/digits.rs`](file:///home/amanap/Documents/GitHub/Termodoro/src/ui/digits.rs) | 4 | Glyphs & Block Typography Bounds | PASS |
+| **Terminal UI Rendering** | [`src/ui/mod.rs`](file:///home/amanap/Documents/GitHub/Termodoro/src/ui/mod.rs) | 12 | 24-Dot Views, Extreme Geometries & Content | PASS |
+| **Total** | | **120** | **ALL PASSED** | **100%** |
 
 ---
 
