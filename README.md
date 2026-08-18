@@ -599,21 +599,85 @@ Because the database is standard JSON, you can easily back up, version-control, 
 
 ## 8. Troubleshooting & Frequently Asked Questions (FAQ)
 
-### 1. The colors look washed out or inaccurate.
-- **Cause**: Your terminal emulator might be running in 16-color or 256-color mode rather than 24-bit TrueColor mode.
-- **Solution**: Set the environment variable `COLORTERM=truecolor` in your shell configuration (`export COLORTERM=truecolor`). Most modern terminals (Alacritty, Kitty, WezTerm, iTerm2) enable this by default.
+### General & Core Workflow Questions
 
-### 2. The audio bell does not make any sound.
-- **Cause**: Audio output stream could not be initialized or hardware audio device is muted.
-- **Solution**: Check your system volume, verify that `Sound / Bell Alert` is enabled in Settings (Tab 4), and ensure your terminal emulator or desktop environment allows sound output.
+#### Q1: Why is my `target/` directory huge (~1-2 GB) after building, and will `cargo clean` delete my saved data?
+- **Answer**: `target/` is Rust's temporary compiler build cache containing intermediary compilation artifacts (`.rlib`, object code, build scripts). It is **not** where your user data or installed app lives.
+- Running `cargo clean` (or `make clean`) only clears this compiler cache and reclaims ~1.8 GB of disk space.
+- Your saved tasks, streaks, custom durations, and theme choices are stored separately in `~/.local/share/termodoro/data.json` (on Linux) or `%APPDATA%\termodoro\termodoro\data.json` (on Windows) and will **never** be deleted or affected by `cargo clean`.
 
-### 3. Desktop notifications are not appearing on Linux.
-- **Cause**: A desktop notification daemon (such as `dunst`, `mako`, `swaync`, or `xfce4-notifyd`) may not be running.
-- **Solution**: Install and start a notification daemon compatible with your desktop environment or window manager.
+#### Q2: What is the recommended way to install Termodoro without keeping large build files?
+- **Answer**: Run `cargo install --path .` from inside the repository folder. This compiles and installs a tiny, standalone binary (**~5.1 MB**) into `~/.cargo/bin/termodoro`.
+- Afterwards, run `cargo clean`. You can now run `termodoro` from any terminal directory instantly (0.01s launch time) with zero background disk bloat.
 
-### 4. My terminal output became garbled after closing abnormally.
-- **Cause**: If the process was terminated forcefully with `kill -9`, the terminal raw mode might not have been reset.
-- **Solution**: Type `reset` in your terminal and press `Enter` to restore normal terminal state.
+#### Q3: Does Termodoro work offline, and does it collect telemetry?
+- **Answer**: Termodoro is **100% offline, private, and local-first**. It contains zero telemetry, zero analytics tracking, zero cloud dependencies, and zero internet requests during runtime. All data resides exclusively on your local machine in plain JSON format.
+
+#### Q4: How does Termodoro calculate daily streaks and personal bests?
+- **Answer**: A streak increments when you complete at least one focus Pomodoro interval on consecutive calendar days according to your local machine timezone (`chrono::Local`). If you completed focus work yesterday, your streak remains active today. If you skip a full calendar day, the streak resets gracefully while your **Personal Best** record remains permanently saved.
+
+---
+
+### Terminal, Visuals & Display Questions
+
+#### Q5: The colors look washed out or different from the screenshots.
+- **Cause**: Your terminal emulator might be running in legacy 16-color or 256-color mode rather than 24-bit TrueColor mode.
+- **Solution**: Export `COLORTERM=truecolor` in your shell configuration (`~/.bashrc` or `~/.zshrc`):
+  ```bash
+  export COLORTERM=truecolor
+  ```
+  Modern terminal emulators (such as Alacritty, Kitty, WezTerm, Konsole, Ghostty, iTerm2, and Windows Terminal) enable TrueColor out of the box.
+
+#### Q6: Some icons, emojis, or borders appear misaligned or broken.
+- **Cause**: Your terminal font lacks Unicode emoji glyphs or modern box-drawing characters.
+- **Solution**: Install and use a modern monospace font with Nerd Font glyphs or dedicated emoji coverage (e.g. `JetBrains Mono Nerd Font`, `Fira Code`, `Cascadia Code`, or `Noto Color Emoji`).
+
+#### Q7: My terminal output became garbled after closing abnormally.
+- **Cause**: If the process was terminated forcefully with `kill -9` or a terminal crash, the terminal raw mode might not have been reset.
+- **Solution**: Type `reset` or run `stty sane` in your terminal and press `Enter` to restore normal terminal state.
+
+---
+
+### Audio & Notification Questions
+
+#### Q8: The audio bell does not make any sound.
+- **Cause**: Audio output stream could not be initialized, hardware output is muted, or sound is disabled in settings.
+- **Solution**:
+  1. Open Settings (Tab `4`) and ensure `Sound / Bell Alert` is toggled **[Enabled]**.
+  2. Verify that your system audio output is unmuted.
+  3. On Linux systems without PulseAudio/PipeWire running, ensure the ALSA audio driver is active.
+  4. Termodoro synthesizes pure in-memory 16-bit PCM WAV audio at 44.1 kHz, requiring no external media files or codecs.
+
+#### Q9: Desktop notifications are not appearing on Linux.
+- **Cause**: A desktop notification daemon (such as `dunst`, `mako`, `swaync`, `fnott`, or `xfce4-notifyd`) may not be running.
+- **Solution**: Install and start a notification daemon compatible with your desktop environment or window manager. Desktop notifications use native D-Bus protocols via `notify-rust` without shell subprocessing.
+
+---
+
+### Multiplexer, Cross-Platform & Advanced Questions
+
+#### Q10: How do I run Termodoro in a floating window in tmux or Zellij?
+- **tmux (3.2+)**: Add this keybinding to your `~/.tmux.conf` to toggle Termodoro in a floating center popup with `Prefix + P`:
+  ```tmux
+  bind-key P display-popup -w 85% -h 80% -E "termodoro"
+  ```
+- **Zellij**: Run Termodoro in a floating pane:
+  ```bash
+  zellij run --floating --width 85% --height 80% -- termodoro
+  ```
+
+#### Q11: Does Termodoro work on macOS and Windows?
+- **Answer**: **Yes!** Termodoro is fully cross-platform:
+  - **Linux**: Supported natively on all distributions (Arch, Ubuntu, Fedora, Debian, Void, Alpine, etc.).
+  - **macOS**: Supported on both Apple Silicon (M1/M2/M3/M4) and Intel Macs via standard `cargo install --path .`.
+  - **Windows**: Supported natively on Windows 10, 11, and Server (via Windows Terminal, PowerShell, or Command Prompt with Visual Studio C++ build tools installed).
+
+#### Q12: How do I backup or transfer my tasks and history to another computer?
+- **Answer**: Simply copy your `data.json` file to the new machine:
+  - **Linux / BSD**: `~/.local/share/termodoro/data.json`
+  - **macOS**: `~/Library/Application Support/com.termodoro.termodoro/data.json`
+  - **Windows**: `%APPDATA%\termodoro\termodoro\data.json`
+  Because the schema is standard JSON, you can also inspect, edit, or version-control your productivity data with Git.
 
 ---
 
