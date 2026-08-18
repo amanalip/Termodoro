@@ -179,7 +179,10 @@ pub fn render(f: &mut Frame, app: &App, theme: &Theme, area: Rect) {
             // Format pomodoros counter string
             let pomodoros_str = if task.pomodoros_estimated > 0 {
                 // Show spent and estimated
-                format!(" 🍅 {} / {}", task.pomodoros_spent, task.pomodoros_estimated)
+                format!(
+                    " 🍅 {} / {}",
+                    task.pomodoros_spent, task.pomodoros_estimated
+                )
             } else {
                 // Show spent only
                 format!(" 🍅 {}", task.pomodoros_spent)
