@@ -70,6 +70,7 @@ jobs:
 
       # Step 6: Security & Privacy Audit: Verify zero network crates and zero unsafe code
       - name: Verify Zero Network Dependencies & Zero Unsafe Blocks
+        shell: bash
         run: |
           # 1. Ensure zero unsafe code blocks across all source files
           ! grep -rn "unsafe" src/
