@@ -272,7 +272,7 @@ fn main() {
         app.timer.time_remaining_secs = 24 * 60 + 18; // 24:18
         app.timer.current_cycle = 2;
         app.timer.completed_pomodoros = 1;
-        app.set_status_message("Focus mode active — Stay in the zone! 🔥".to_string());
+        app.set_status_message("Focus mode active - Stay in the zone! 🔥".to_string());
 
         let backend = TestBackend::new(width, height);
         let mut terminal = Terminal::new(backend).unwrap();
@@ -280,7 +280,7 @@ fn main() {
 
         let svg = render_buffer_to_svg(
             terminal.backend().buffer(),
-            "Termodoro — Pomodoro Focus Timer",
+            "Termodoro - Pomodoro Focus Timer",
             app.config.theme,
         );
         save_screenshot(&svg, out_dir, "01_timer_view");
@@ -334,7 +334,7 @@ fn main() {
 
         let svg = render_buffer_to_svg(
             terminal.backend().buffer(),
-            "Termodoro — Task Management & Targets",
+            "Termodoro - Task Management & Targets",
             app.config.theme,
         );
         save_screenshot(&svg, out_dir, "02_tasks_view");
@@ -384,7 +384,7 @@ fn main() {
 
         let svg = render_buffer_to_svg(
             terminal.backend().buffer(),
-            "Termodoro — Productivity Analytics & Streaks",
+            "Termodoro - Productivity Analytics & Streaks",
             app.config.theme,
         );
         save_screenshot(&svg, out_dir, "03_stats_view");
@@ -405,7 +405,7 @@ fn main() {
 
         let svg = render_buffer_to_svg(
             terminal.backend().buffer(),
-            "Termodoro — Preferences & Color Themes",
+            "Termodoro - Preferences & Color Themes",
             app.config.theme,
         );
         save_screenshot(&svg, out_dir, "04_settings_view");
@@ -429,7 +429,7 @@ fn main() {
 
         let svg = render_buffer_to_svg(
             terminal.backend().buffer(),
-            "Termodoro — Add Task Modal Dialog",
+            "Termodoro - Add Task Modal Dialog",
             app.config.theme,
         );
         save_screenshot(&svg, out_dir, "05_task_modal");
@@ -449,7 +449,7 @@ fn main() {
 
         let svg = render_buffer_to_svg(
             terminal.backend().buffer(),
-            "Termodoro — Keyboard Shortcuts & Navigation",
+            "Termodoro - Keyboard Shortcuts & Navigation",
             app.config.theme,
         );
         save_screenshot(&svg, out_dir, "06_help_modal");
