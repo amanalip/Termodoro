@@ -449,9 +449,12 @@
             <div class="code-box">
               <button type="button" class="copy-btn" data-target="code-linux">📋 Copy</button>
               <pre><code id="code-linux"># 1. Install build headers &amp; ALSA audio packages (one-time setup)
-# Ubuntu/Debian: sudo apt update &amp;&amp; sudo apt install -y build-essential git libasound2-dev pkg-config libdbus-1-dev
-# Arch Linux:    sudo pacman -S --needed base-devel git alsa-lib pkgconf
-# Fedora/RHEL:   sudo dnf install -y git alsa-lib-devel pkgconf-pkg-config
+# Ubuntu/Debian:
+#   sudo apt update &amp;&amp; sudo apt install -y build-essential git libasound2-dev pkg-config libdbus-1-dev
+# Arch Linux:
+#   sudo pacman -S --needed base-devel git alsa-lib pkgconf
+# Fedora/RHEL:
+#   sudo dnf install -y git alsa-lib-devel pkgconf-pkg-config
 
 # 2. Option A: Global Installation from local clone (Recommended - ~5.1 MB binary)
 git clone https://github.com/amanalip/Termodoro.git
