@@ -59,6 +59,7 @@ cargo run --release
    - [Tab 2: Interactive Task Manager](#tab-2-interactive-task-manager)
    - [Tab 3: Productivity Analytics & Streak Tracking](#tab-3-productivity-analytics--streak-tracking)
    - [Tab 4: Preferences, Durations & Theme Selector](#tab-4-preferences-durations--theme-selector)
+   - [Modal Overlays & Interactive Dialogs](#modal-overlays--interactive-dialogs)
 8. [Local Database, Persistence & Restart Recovery](#8-local-database-persistence--restart-recovery)
 9. [Troubleshooting & Frequently Asked Questions (FAQ)](#9-troubleshooting--frequently-asked-questions-faq)
 10. [Development, Testing & Contribution](#10-development-testing--contribution)
@@ -571,7 +572,7 @@ The Timer view is the central hub for running focus sessions and breaks.
 - `Space`: Toggle timer state between Running and Paused.
 - `r`: Reset timer back to its initial full duration for the current phase.
 - `s`: Skip the remaining time in the active phase and advance to the next interval.
-- `a`: Open the task creation dialog to quickly add a new item without leaving the timer.
+- `a` or `n`: Open the task creation dialog to quickly add a new item without leaving the timer.
 
 ---
 
@@ -582,12 +583,12 @@ The Tasks view provides a structured environment for managing tasks, estimating 
 ![Tab 2: Task Management & Targets](assets/screenshots/kde_02_tasks_view.png)
 
 #### Controls in Tasks View
-- `a`: Open the **Add Task** dialog.
+- `a` or `n`: Open the **Add Task** dialog.
 - `Space` or `Enter`: Toggle completion status on the selected task.
 - `t`: Mark the selected task as the active focus target. As work sessions finish, Pomodoros are automatically credited to this item.
 - `d` or `x`: Delete the selected task.
-- `↑` / `k` and `↓` / `j`: Move selection up or down.
-- `1`, `2`, `3`: Filter task list by `All`, `Active`, or `Completed`.
+- `↑` / `k` and `↓` / `j`: Move selection up or down (with wrapping).
+- `1`, `2`, `3`: Filter task list by `All` (`1`), `Active` (`2`), or `Completed` (`3`).
 
 ---
 
@@ -649,10 +650,19 @@ Quickly create new tasks, assign titles, and define estimated Pomodoro intervals
 
 ![Add Task Modal Dialog](assets/screenshots/kde_05_task_modal.png)
 
+##### Controls in Add Task Modal
+- `Tab` / `Shift+Tab` / `↓` / `↑`: Switch focus between **Task Title** and **Pomodoro Estimate** fields.
+- `←` / `→` (or `-` / `+`): In the estimate field, decrement or increment estimated Pomodoro count ($1 \le N \le 20$).
+- `Enter`: Save and create the new task immediately.
+- `Esc` or `q`: Cancel and close modal without saving.
+
 #### 2. Help & Keybindings Dialog
-Press `?` at any point to open the interactive keyboard cheat sheet:
+Press `?` at any point from any screen to open the interactive keyboard cheat sheet:
 
 ![Help & Keybindings Dialog](assets/screenshots/kde_06_help_modal.png)
+
+##### Dismissing the Help Modal
+- Press `?`, `Esc`, `q`, or `Enter` to dismiss the overlay and return instantly to your current view.
 
 
 
