@@ -24,7 +24,7 @@ jobs:
   # Primary build, lint, and test validation job
   test:
     # Human-readable job name displayed in GitHub UI
-    name: Build & Test Suite (126 Tests)
+    name: Build & Test Suite (137 Tests)
     # Target runner virtual machine operating system
     runs-on: ubuntu-latest
 
@@ -66,7 +66,7 @@ jobs:
         # Build binary with verbose compiler output
         run: cargo build --verbose --all-targets
 
-      # Step 7: Execute the complete 126-test QA suite across all 9 modules
-      - name: Run all 126 unit, integration, and E2E test cases
+      # Step 7: Execute the complete 137-test QA suite across all 9 modules
+      - name: Run all 137 unit, integration, and E2E test cases
         # Run test binary with verbose reporting and show individual test output
         run: cargo test --verbose -- --nocapture --show-output

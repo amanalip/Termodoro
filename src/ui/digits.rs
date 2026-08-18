@@ -246,4 +246,17 @@ mod tests {
             assert_eq!(line.chars().count(), len0);
         }
     }
+
+    #[test]
+    fn test_big_digits_various_large_minutes_formatting() {
+        for (m, s) in [(0, 0), (1, 5), (25, 30), (99, 59), (999, 0)] {
+            let lines = render_big_time(m, s);
+            assert_eq!(lines.len(), 5);
+            let first_width = lines[0].chars().count();
+            assert!(first_width > 0);
+            for line in &lines {
+                assert_eq!(line.chars().count(), first_width);
+            }
+        }
+    }
 }

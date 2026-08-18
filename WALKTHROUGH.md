@@ -143,8 +143,8 @@ If you are new to Rust or TUI development, here is how the code flows:
 
 ## 4. Verification, Testing & Quality Assurance
 
-### Running the Test Suite (126 Tests)
-Termodoro includes a comprehensive suite of **126 automated unit, integration, and UI rendering tests**:
+### Running the Test Suite (137 Tests)
+Termodoro includes a comprehensive suite of **137 automated unit, integration, and UI rendering tests**:
 
 ```bash
 cargo test

@@ -358,7 +358,7 @@ If an unhandled error triggers a panic, this hook executes first:
 
 ## 11. Automated Testing Strategy & Benchmarks
 
-Termodoro includes **126 automated unit, integration, and UI rendering tests** across all 9 modules:
+Termodoro includes **137 automated unit, integration, and UI rendering tests** across all 9 modules:
 
 - **Audio Engine (`src/audio.rs`)**: Tests 16-bit PCM RIFF headers, signal clipping bounds ($>10000$, $<32000$), custom sample rates ($8\text{kHz}$ to $96\text{kHz}$), byte-level RIFF alignment, and atomic muting flags.
 - **Timer Engine (`src/timer.rs`)**: Tests 24-cycle state machine progression, large duration formatting (up to 120 mins), 50 rapid skips, zero-duration progress calculations, pause, toggle, and reset transitions.

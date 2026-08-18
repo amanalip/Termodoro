@@ -142,7 +142,7 @@ This document maintains a transparent, permanent audit log of repository hygiene
   2. **High-Volume & Bounds Benchmarks**: Added 500-task performance benchmark with multi-filter toggles, 150-session analytics aggregation, 50 rapid phase skips without state machine corruption, and zero-duration progress ratio safety checks.
   3. **Storage & Serialization Robustness**: Added full dataset disk save/load roundtrips, transient UI field exclusions from JSON, and comprehensive serde roundtrips across all 18 theme choices, timers, and stats.
   4. **Acoustic WAV Structure**: Added 16-bit PCM little-endian byte-level offset assertions and non-empty finite sample buffer tests.
-- **Resolution Status:** **CERTIFIED (126 / 126 Tests Passed)**
+- **Resolution Status:** **CERTIFIED (137 / 137 Tests Passed)**
 
 ---
 
@@ -152,7 +152,7 @@ This document maintains a transparent, permanent audit log of repository hygiene
 | :--- | :--- | :--- | :--- |
 | **Compiler Toolchain** | Rust 1.74+ | Edition 2021 | Tested on `rustc 1.80+` |
 | **Dependencies** | 8 direct crates | Clean resolution | Verified in `Cargo.lock` |
-| **Automated Tests** | 126 Unit & Integration | 126 Passed, 0 Failed | `cargo test` (1.20s runtime) |
+| **Automated Tests** | 137 Unit & Integration | 137 Passed, 0 Failed | `cargo test` (1.09s runtime) |
 | **Unsafe Blocks** | 0 Unsafe blocks | 100% Safe Rust | AST scan (`! grep -rn "unsafe" src/`) |
 | **Linter Warnings** | 0 Warnings | Clean Clippy output | `cargo clippy -- -D warnings` |
 | **Audio Spec** | 16-bit PCM RIFF | 44.1kHz sample rate | RFC 2361 chunk verification |

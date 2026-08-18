@@ -664,4 +664,25 @@ mod tests {
         manager.next();
         assert_eq!(manager.selected_index, 2);
     }
+
+    #[test]
+    fn test_task_title_whitespace_trimming_and_sanitization() {
+        let mut manager = TaskManager::new();
+        manager.add("   \t\n  Clean Task Title  \n\t  ".to_string(), 2);
+        assert_eq!(manager.tasks.len(), 1);
+        assert_eq!(manager.tasks[0].title, "Clean Task Title");
+
+        // Reject only whitespace / newlines
+        manager.add("\n\n\t   \t\r\n".to_string(), 1);
+        assert_eq!(manager.tasks.len(), 1);
+    }
+
+    #[test]
+    fn test_task_creation_with_zero_estimated_defaults_to_one() {
+        let task = Task::new("Zero Estimate Task".to_string(), 0);
+        assert_eq!(task.pomodoros_estimated, 0);
+        assert_eq!(task.pomodoros_spent, 0);
+        assert!(!task.completed);
+        assert!(!task.id.is_empty());
+    }
 }

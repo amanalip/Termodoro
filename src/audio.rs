@@ -321,4 +321,36 @@ mod tests {
             assert!(samples.len() > 44);
         }
     }
+
+    #[test]
+    fn test_audio_sample_rate_conversion_and_duration_math() {
+        let sample_rate = 44100u32;
+        let duration_secs = 0.5f32;
+        let total_samples = (sample_rate as f32 * duration_secs) as usize;
+        assert_eq!(total_samples, 22050);
+
+        let mut samples = Vec::with_capacity(total_samples);
+        for i in 0..total_samples {
+            let t = i as f32 / sample_rate as f32;
+            let sample = (t * 440.0 * 2.0 * std::f32::consts::PI).sin();
+            samples.push((sample * 16000.0) as i16);
+        }
+
+        let wav = create_riff_wav_pcm16(&samples, sample_rate);
+        // 44-byte header + 22050 * 2 bytes = 44144 bytes
+        assert_eq!(wav.len(), 44 + (22050 * 2));
+    }
+
+    #[test]
+    fn test_wav_header_subchunk2_size_consistency() {
+        let test_sizes = [1, 10, 100, 1024, 44100];
+        for size in test_sizes {
+            let dummy_samples = vec![500i16; size];
+            let wav = create_riff_wav_pcm16(&dummy_samples, 44100);
+            let subchunk2_size = u32::from_le_bytes([wav[40], wav[41], wav[42], wav[43]]);
+            assert_eq!(subchunk2_size, (size * 2) as u32);
+            let chunk_size = u32::from_le_bytes([wav[4], wav[5], wav[6], wav[7]]);
+            assert_eq!(chunk_size, 36 + (size * 2) as u32);
+        }
+    }
 }

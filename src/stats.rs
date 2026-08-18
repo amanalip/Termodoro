@@ -820,4 +820,44 @@ mod tests {
         assert_eq!(stats.total_work_sessions(), 17);
         assert_eq!(stats.total_focus_minutes(), 17 * 30);
     }
+
+    #[test]
+    fn test_stats_streak_calculation_single_day_session_history() {
+        let mut stats = StatsHistory::new();
+        // 1 session today -> streak = 1
+        stats.record(PomodoroPhase::Work, 25, None, None);
+        assert_eq!(stats.current_streak_days(), 1);
+        assert_eq!(stats.longest_streak_days(), 1);
+
+        let mut stats_yesterday = StatsHistory::new();
+        let yesterday = (Local::now() - chrono::Duration::days(1)).date_naive();
+        let dt = yesterday
+            .and_hms_opt(12, 0, 0)
+            .unwrap()
+            .and_local_timezone(Local)
+            .unwrap()
+            .with_timezone(&Utc);
+        stats_yesterday.sessions.push(CompletedSession {
+            timestamp: dt,
+            phase: PomodoroPhase::Work,
+            duration_mins: 25,
+            task_id: None,
+            task_title: None,
+        });
+        // Streak preserved from yesterday
+        assert_eq!(stats_yesterday.current_streak_days(), 1);
+        assert_eq!(stats_yesterday.longest_streak_days(), 1);
+    }
+
+    #[test]
+    fn test_break_sessions_ignored_by_distinct_dates() {
+        let mut stats = StatsHistory::new();
+        // Only record breaks
+        stats.record(PomodoroPhase::ShortBreak, 5, None, None);
+        stats.record(PomodoroPhase::LongBreak, 15, None, None);
+        assert_eq!(stats.distinct_work_dates().len(), 0);
+        assert_eq!(stats.current_streak_days(), 0);
+        assert_eq!(stats.longest_streak_days(), 0);
+        assert_eq!(stats.total_work_sessions(), 0);
+    }
 }

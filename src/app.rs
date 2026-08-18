@@ -1866,4 +1866,65 @@ mod tests {
 
         let _ = std::fs::remove_dir_all(temp_dir);
     }
+
+    #[test]
+    fn test_app_status_message_overwrite_and_expiry() {
+        let (mut app, temp_dir) = create_test_app();
+        app.set_status_message("First Notification".to_string());
+        assert_eq!(app.status_message.as_deref(), Some("First Notification"));
+        assert_eq!(app.status_message_ticks, 40);
+
+        // Tick 20 times
+        for _ in 0..20 {
+            app.on_tick();
+        }
+        assert_eq!(app.status_message_ticks, 20);
+
+        // Overwrite with second notification
+        app.set_status_message("Second Notification".to_string());
+        assert_eq!(app.status_message.as_deref(), Some("Second Notification"));
+        assert_eq!(app.status_message_ticks, 40); // Reset to 40
+
+        // Tick 39 times
+        for _ in 0..39 {
+            app.on_tick();
+        }
+        assert_eq!(app.status_message.as_deref(), Some("Second Notification"));
+        assert_eq!(app.status_message_ticks, 1);
+
+        // 40th tick clears notification
+        app.on_tick();
+        assert_eq!(app.status_message, None);
+        assert_eq!(app.status_message_ticks, 0);
+
+        let _ = std::fs::remove_dir_all(temp_dir);
+    }
+
+    #[test]
+    fn test_app_settings_navigation_bounds_with_all_key_variants() {
+        let (mut app, temp_dir) = create_test_app();
+        app.active_tab = ActiveTab::Settings;
+        assert_eq!(app.settings_index, 0);
+
+        // Step down using Down arrow
+        for i in 1..=8 {
+            app.on_key_event(make_key(KeyCode::Down));
+            assert_eq!(app.settings_index, i);
+        }
+        // Down wraps to 0
+        app.on_key_event(make_key(KeyCode::Down));
+        assert_eq!(app.settings_index, 0);
+
+        // Step up using Up arrow (wraps to 8)
+        app.on_key_event(make_key(KeyCode::Up));
+        assert_eq!(app.settings_index, 8);
+
+        // Step up with 'k'
+        for i in (0..=7).rev() {
+            app.on_key_event(make_key(KeyCode::Char('k')));
+            assert_eq!(app.settings_index, i);
+        }
+
+        let _ = std::fs::remove_dir_all(temp_dir);
+    }
 }

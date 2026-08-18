@@ -635,4 +635,68 @@ mod tests {
         assert_eq!(restored.current_cycle, 3);
         assert_eq!(restored.status, TimerStatus::Paused);
     }
+
+    #[test]
+    fn test_timer_rapid_status_flipping_under_tick_loop() {
+        let config = Config::default();
+        let mut timer = PomodoroTimer::new(&config);
+        let start_time = timer.time_remaining_secs;
+
+        // 1. Start and tick 5 times
+        timer.toggle();
+        assert_eq!(timer.status, TimerStatus::Running);
+        for _ in 0..5 {
+            timer.tick(&config);
+        }
+        assert_eq!(timer.time_remaining_secs, start_time - 5);
+
+        // 2. Pause and tick 5 times (time remaining must NOT change)
+        timer.toggle();
+        assert_eq!(timer.status, TimerStatus::Paused);
+        for _ in 0..5 {
+            timer.tick(&config);
+        }
+        assert_eq!(timer.time_remaining_secs, start_time - 5);
+
+        // 3. Resume and tick 3 times
+        timer.toggle();
+        assert_eq!(timer.status, TimerStatus::Running);
+        for _ in 0..3 {
+            timer.tick(&config);
+        }
+        assert_eq!(timer.time_remaining_secs, start_time - 8);
+    }
+
+    #[test]
+    fn test_timer_exact_phase_transition_cycle_counting() {
+        for interval in [2, 3, 6, 8] {
+            let config = Config {
+                long_break_interval: interval,
+                auto_start_breaks: true,
+                auto_start_work: true,
+                ..Default::default()
+            };
+            let mut timer = PomodoroTimer::new(&config);
+
+            for c in 1..=interval {
+                assert_eq!(timer.current_cycle, c);
+                assert_eq!(timer.phase, PomodoroPhase::Work);
+                timer.time_remaining_secs = 1;
+                timer.status = TimerStatus::Running;
+                timer.tick(&config);
+
+                if c < interval {
+                    assert_eq!(timer.phase, PomodoroPhase::ShortBreak);
+                    assert_eq!(timer.current_cycle, c + 1);
+                    timer.time_remaining_secs = 1;
+                    timer.status = TimerStatus::Running;
+                    timer.tick(&config);
+                    assert_eq!(timer.phase, PomodoroPhase::Work);
+                } else {
+                    assert_eq!(timer.phase, PomodoroPhase::LongBreak);
+                    assert_eq!(timer.current_cycle, 1);
+                }
+            }
+        }
+    }
 }
