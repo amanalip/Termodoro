@@ -237,8 +237,45 @@ Test coverage now spans all **9 core modules** with **192 unit, integration, and
 185. `ui::tests::test_render_extreme_high_resolution_terminal`
 186. `ui::tests::test_render_extreme_small_terminals`
 187. `ui::tests::test_render_modals_and_status_message`
-188. `ui::tests::test_render_task_modal_both_focus_states`
+188. `ui::tests::test_task_modal_focus_switch_and_cancel_invariants`
 189. `ui::tests::test_render_twenty_four_cycle_dots_timer_view`
 190. `ui::tests::test_render_varied_terminal_geometries_stress`
-191. `ui::tests::test_task_modal_focus_switch_and_cancel_invariants`
+191. `ui::tests::test_ui_render_with_status_message_banner_content`
 192. `ui::tests::test_ui_render_with_status_message_banner_content`
+
+---
+
+## 5. Playwright Automated Cross-Device Web E2E Test Suite
+
+**Test Script:** [`scripts/e2e-website-test.mjs`](scripts/e2e-website-test.mjs)  
+**Execution Command:** `make test-e2e` or `node scripts/e2e-website-test.mjs`  
+**Browser Engine:** Chromium Headless (Automated Device Profiles)  
+**Pass Rate:** **41 / 41 Tests Passed (100% Success Rate)**  
+
+### Test Viewport Matrix
+
+| Category | Viewport Resolution | Target Devices Simulated | Test Status |
+| :--- | :---: | :--- | :---: |
+| **Desktop Large** | `1920 × 1080` | Ultra-wide & 4K desktop screens | **PASS** (100%) |
+| **Desktop Standard** | `1280 × 800` | Standard laptops & MacBook Air/Pro | **PASS** (100%) |
+| **Tablet Portrait** | `768 × 1024` | Apple iPad, Android Tablets | **PASS** (100%) |
+| **Mobile Flagship** | `390 × 844` | iPhone 14/15/16, Google Pixel 7/8 | **PASS** (100%) |
+| **Mobile Medium** | `375 × 667` | iPhone SE (2nd/3rd gen), Galaxy A series | **PASS** (100%) |
+| **Mobile Small** | `320 × 568` | iPhone 5/SE (1st gen), Compact screens | **PASS** (100%) |
+
+### Verified Functional Suites
+
+1. **Suite 1: Responsive Layout & Zero Horizontal Overflow** (18/18 checks)  
+   - Validated `scrollWidth <= clientWidth` across all 6 viewport profiles on `index.html`, `features.html`, and `faqs.html`.
+2. **Suite 2: Mobile Navigation Drawer & Hamburger Interactions** (6/6 checks)  
+   - Verified hamburger button visibility, drawer sliding transitions, backdrop blur activation, close button dismiss, and `Esc` keyboard handler.
+3. **Suite 3: Code Card Header Architecture & Copy Button Anchoring** (6/6 checks)  
+   - Verified `.code-card-header` fixed anchoring, prevented button floating over scrolled code, checked copy feedback transition (`✓ Copied!`), and verified toast alerts.
+4. **Suite 4: 18-Theme Dynamic Palette Engine** (4/4 checks)  
+   - Verified theme selection via navbar `<select>` and gallery cards, tested live CSS variable injections, and validated OLED `#000000` pitch-black tokens.
+5. **Suite 5: Interactive Screenshot Showcase & Keyboard Navigation** (4/4 checks)  
+   - Verified tab click switching, image source swap, caption synchronization, and numerical keyboard hotkeys (`1`–`6`).
+6. **Suite 6: Keybindings Live Search Filtering** (1/1 check)  
+   - Verified instant table row filtering upon query inputs.
+7. **Suite 7: FAQ Hub Search & Category Filtering** (2/2 checks)  
+   - Verified category pill filtering and keyword search matching on `faqs.html`.

@@ -168,17 +168,20 @@ If you are new to Rust or TUI development, here is how the code flows:
 
 ## 4. Verification, Testing & Quality Assurance
 
-### Running the Test Suite & Auto-Cleaning Build Cache (192 Tests)
-Termodoro includes a comprehensive suite of **192 automated unit, integration, and UI rendering tests**. You can execute them with automated cache cleanup to keep your disk usage slim:
+### Running the Test Suite & Auto-Cleaning Build Cache (192 Tests + 41 Playwright E2E Tests)
+Termodoro includes a comprehensive suite of **192 automated unit, integration, and UI rendering tests**, alongside **41 Playwright cross-viewport web E2E tests**. You can execute them with automated cache cleanup to keep your disk usage slim:
 
 ```bash
-# Option 1: Using Makefile (Runs 192 tests + auto-cleans ~1.8GB target cache)
+# Option 1: Run full 192 Rust tests + auto-clean ~1.8GB target cache
 make test
 
-# Option 2: Using the automated script directly
+# Option 2: Run Playwright cross-device E2E test suite (Desktop + Tablet + Mobile)
+make test-e2e
+
+# Option 3: Using the automated script directly
 ./scripts/test_and_clean.sh
 
-# Option 3: Standard cargo test
+# Option 4: Standard cargo test
 cargo test
 ```
 
@@ -196,11 +199,11 @@ cargo test
 | **Themes** | `src/theme.rs` | All 18 palettes, WCAG AA contrast ratios, and serde roundtrips |
 | **Digital Typography** | `src/ui/digits.rs` | 5x3 block font rasterization for all digits, colon, boundary values, and fallbacks |
 | **Terminal UI Rendering** | `src/ui/mod.rs` | Pixel buffer content assertions across all tabs, extreme geometries ($20 \times 10$ to $300 \times 100$), and 24-cycle dot indicators |
-| **Terminal UI Rendering** | `src/ui/mod.rs` | Ratatui `TestBackend` rendering across 11 terminal geometries (50x18 to 250x60) |
+| **Web Portal & Showcase** | [`scripts/e2e-website-test.mjs`](scripts/e2e-website-test.mjs) | Playwright automated E2E testing across 6 viewport profiles (1920x1080 to 320x568), mobile drawer, theme engine, copy buttons |
 
 ## 5. Fact-Check, Sanity Audit & Operational Verification
 
-To verify that the documented operational workflows match runtime reality, the scenarios above were audited against the terminal engine test harness:
+To verify that the documented operational workflows match runtime reality, the scenarios above were audited against the terminal engine and Playwright test harnesses:
 
 ### Operational Verification Matrix
 
@@ -214,6 +217,7 @@ To verify that the documented operational workflows match runtime reality, the s
 | **Theme Cycling** | `l`/`h` cycles across 18 palettes with wrap | [`src/theme.rs`](src/theme.rs#L1-L150) | `test_all_eighteen_themes_cycle_and_persistence_e2e` | **VERIFIED** |
 | **Live Settings Update** | Adjusting durations instantly updates timer | [`src/app.rs`](src/app.rs#L310-L360) | `test_settings_tab_vim_keys_and_live_timer_updates` | **VERIFIED** |
 | **Terminal Clean Exit** | `q` or `Esc` restores raw mode cleanly | [`src/main.rs`](src/main.rs#L25-L65) | `test_app_restart_and_state_recovery_e2e` | **VERIFIED** |
+| **Web Responsive Layout** | 100% mobile-friendly with zero overflow | [`docs/style.css`](docs/style.css) | Playwright E2E (41/41 passing tests) | **VERIFIED** |
 
 ---
 

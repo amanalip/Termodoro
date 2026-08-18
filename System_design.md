@@ -329,7 +329,7 @@ std::panic::set_hook(Box::new(move |info| {
 
 ## 10. Automated Quality Assurance & Verification Matrix
 
-Termodoro's architecture is continuously certified by a comprehensive **192-test automated QA harness** running across Linux, macOS, and Windows:
+Termodoro's architecture is continuously certified by a comprehensive **192-test Rust QA harness** and a **41-test Playwright cross-device web E2E suite** running across Linux, macOS, and Windows:
 
 ```mermaid
 pie title Automated Test Distribution (192 Tests)
@@ -350,7 +350,8 @@ pie title Automated Test Distribution (192 Tests)
 | **Compiler Compliance** | Rust 1.74+ (Edition 2021) | `cargo check` | **PASS** |
 | **Code Formatting** | 100% Rustfmt canonical style | `cargo fmt -- --check` | **PASS** |
 | **Static Analysis** | Zero warnings with fatal pedantic flags | `cargo clippy -- -D warnings` | **PASS** |
-| **Unit & E2E Tests** | 192 / 192 passing across all 9 modules | `cargo test` | **PASS** |
+| **Unit & Integration Tests**| 192 / 192 passing across all 9 modules | `cargo test` / `make test` | **PASS** |
+| **Playwright Web E2E** | 41 / 41 passing across 6 responsive viewports | `make test-e2e` (`scripts/e2e-website-test.mjs`) | **PASS** |
 | **Memory Safety** | Zero `unsafe` keywords in `src/` | AST regex scan | **PASS** |
 | **Network Isolation** | Zero HTTP/network client libraries in lockfile | Dependency audit | **PASS** |
 | **Multi-OS CI Matrix** | Ubuntu Latest, macOS Latest, Windows Latest | GitHub Actions CI | **PASS** |

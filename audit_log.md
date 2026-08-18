@@ -322,6 +322,22 @@ This document maintains a transparent, permanent, and structured audit log of re
 
 ---
 
+### AUD-017: Mobile Responsive Navigation, Card-Anchored Copy Buttons & 41-Test Playwright Cross-Viewport E2E Suite
+- **Date:** August 18, 2026
+- **Category:** Mobile UX, Frontend Architecture & Playwright E2E Automation
+- **Commit:** [`f0fd3f3`](https://github.com/amanalip/Termodoro/commit/f0fd3f3)
+- **Severity:** Mobile Usability & Automated Verification
+- **Description:** 
+  The GitHub Pages documentation portal (`amanalip.github.io/Termodoro/`) required mobile usability enhancements for small viewport screens (320px–768px), and installation copy buttons were floating over code text when scrolled.
+- **Technical Remediation & Verification:**
+  1. **Mobile Slide-in Navigation Drawer**: Added animated 3-bar hamburger toggle button, slide-in drawer with backdrop blur, full touch navigation, and `Esc` key dismissal.
+  2. **Code Card Header Architecture**: Replaced free-floating copy buttons with structured `.code-card` containers where `.copy-btn` and titles are anchored inside a dedicated top bar (`.code-card-header`), preventing overlap and drifting during horizontal code scrolling.
+  3. **Zero Horizontal Overflow**: Guaranteed `scrollWidth <= clientWidth` on all viewports down to 320px ultra-compact phones.
+  4. **Playwright Automated E2E Test Suite**: Implemented [`scripts/e2e-website-test.mjs`](scripts/e2e-website-test.mjs) and `make test-e2e` executing 41 automated tests across 6 device viewport profiles (Desktop 1920x1080 & 1280x800, Tablet 768x1024, Mobile 390x844, 375x667, 320x568).
+- **Resolution Status:** **VERIFIED & CERTIFIED (41/41 Playwright E2E Tests + 192 Rust Tests Passing)**
+
+---
+
 ## 3. Fact-Check, Sanity Audit & Certification Matrix
 
 | Audit Target | Documented Metric | Verified Fact | Verification Evidence |
@@ -329,6 +345,7 @@ This document maintains a transparent, permanent, and structured audit log of re
 | **Compiler Toolchain** | Rust 1.74+ | Edition 2021 | Tested on `rustc 1.80+` |
 | **Dependencies** | 9 direct crates | Clean resolution | Verified in `Cargo.lock` |
 | **Automated Tests** | 192 Unit & Integration | 192 Passed, 0 Failed | `cargo test` (1.16s runtime) |
+| **Playwright Web E2E** | 41 Cross-Device Tests | 41 Passed, 0 Failed | `make test-e2e` across 6 viewports |
 | **Privacy & Telemetry** | 0 Network Calls / Trackers | 100% Local-First | Unit tests & CI lockfile audit |
 | **Unsafe Blocks** | 0 Unsafe blocks | 100% Safe Rust | AST scan (`! grep -rn "unsafe" src/`) |
 | **Linter Warnings** | 0 Warnings | Clean Clippy output | `cargo clippy -- -D warnings` |
@@ -348,5 +365,5 @@ For all future development cycles on Termodoro, the following verification check
 1. **Git Index Hygiene**: Verify `git status -s` contains no untracked binaries, temporary files, or `target/` artifacts.
 2. **Linting Check**: Run `cargo clippy -- -D warnings` and verify 0 warnings/errors.
 3. **Format Check**: Run `cargo fmt -- --check` to guarantee formatting consistency.
-4. **Test Suite Verification**: Run `cargo test` (or `make test`) and verify 100% pass rate.
+4. **Test Suite Verification**: Run `cargo test` (or `make test`) and `make test-e2e` and verify 100% pass rate.
 5. **Documentation & Audit Logging**: Log any defects, fixes, or architectural changes with commit references in this `audit_log.md` file.

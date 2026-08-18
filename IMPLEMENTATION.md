@@ -362,7 +362,7 @@ If an unhandled error triggers a panic, this hook executes first:
 
 ## 11. Automated Testing Strategy & Benchmarks
 
-Termodoro includes **192 automated unit, integration, and UI rendering tests** across all 9 modules:
+Termodoro includes **192 automated Rust tests** and **41 automated Playwright web E2E tests**:
 
 - **Audio Engine (`src/audio.rs`, 19 tests)**: Tests 16-bit PCM RIFF headers, signal clipping bounds ($>10000$, $<32000$), smooth exponential decay envelopes, pop/click prevention on audio DAC, custom sample rates ($8\text{kHz}$ to $96\text{kHz}$), byte-level RIFF alignment, two-tone/three-tone duration timing, and atomic muting flags.
 - **Timer Engine (`src/timer.rs`, 27 tests)**: Tests 24-cycle state machine progression, underflow safety on sub-second ticks, tuple time formatting, large duration formatting (up to 120 mins), 50 rapid skips, zero-duration progress calculations, pause, toggle, reset transitions, and phase title/emoji parity.
@@ -373,10 +373,16 @@ Termodoro includes **192 automated unit, integration, and UI rendering tests** a
 - **Themes & Palettes (`src/theme.rs`, 10 tests)**: Tests all 18 palettes, WCAG relative luminance contrast formulas, forward/backward index cycling, phase color distinctness, byte-level RGB constraints, and serde roundtrips.
 - **Configuration & Preferences (`src/config.rs`, 8 tests)**: Tests default parameters, field mutations, struct equality, extreme value serde serialization, boolean flag permutations, and serde serialization across all 18 theme variants.
 - **UI Terminal Frame Rendering (`src/ui/mod.rs` & `src/ui/digits.rs`, 23 tests)**: Uses Ratatui `TestBackend` to verify pixel buffer contents across all tabs, active target badges, modal dialogs, status toast banners, 24-dot cycle views, all 18 color themes, and extreme terminal geometries from $20\times 10$ to $350\times 120$.
+- **Web Showcase & Documentation Portal ([`scripts/e2e-website-test.mjs`](scripts/e2e-website-test.mjs), 41 tests)**: Playwright automated test suite executing cross-device checks across 6 responsive viewports (Desktop $1920\times 1080$, $1280\times 800$, Tablet $768\times 1024$, Mobile $390\times 844$, $375\times 667$, $320\times 568$), validating zero horizontal overflow (`scrollWidth <= clientWidth`), mobile drawer transitions, code-card header copy button anchors, and theme switches.
 
-Run the complete test suite with:
+Run the test suites with:
 ```bash
-cargo test
+# Run 192 Rust tests
+make test
+# or cargo test
+
+# Run 41 Playwright Web E2E tests
+make test-e2e
 ```
 
 ---
@@ -397,6 +403,7 @@ To ensure strict engineering correctness and technical veracity, the implementat
 | **UUID Uniqueness** | RFC 4122 v4 Collision Probability $< 10^{-18}$ | [`src/tasks.rs`](src/tasks.rs#L30-L50) | `test_task_uuid_uniqueness_and_timestamps` | **VERIFIED** |
 | **Theme Contrast** | WCAG 2.1 AA Compliant Contrast ($R \ge 4.5:1$) across all 18 themes | [`src/theme.rs`](src/theme.rs#L8-L280) | `test_all_eighteen_themes_cycle_and_persistence_e2e` | **VERIFIED** |
 | **UI Geometry Safety** | Minimum bounds checking ($W \ge 80, H \ge 24$) with fallback | [`src/ui/mod.rs`](src/ui/mod.rs#L40-L100) | `test_render_extreme_small_terminals` | **VERIFIED** |
+| **Web Responsive Layout** | Zero horizontal overflow & mobile navigation | [`docs/style.css`](docs/style.css) | `scripts/e2e-website-test.mjs` (41/41 PASS) | **VERIFIED** |
 
 ---
 

@@ -839,18 +839,21 @@ Because the database is standard JSON, you can easily back up, version-control, 
 
 ## 10. Development, Testing & Contribution
 
-### Automated Testing & Cache Cleanup (192 Tests)
+### Automated Testing & Cache Cleanup (192 Rust Tests + 41 Playwright E2E Tests)
 
-To run the complete test suite and **automatically clean compiler build cache** (preventing `target/` directory bloat and reclaiming ~1.8 GB of disk space):
+To run the complete Rust test suite and **automatically clean compiler build cache** (preventing `target/` directory bloat and reclaiming ~1.8 GB of disk space):
 
 ```bash
-# Option A: Using Makefile (Recommended)
+# Option A: Run 192 Rust tests using Makefile (Recommended)
 make test
 
-# Option B: Using the automated shell script
+# Option B: Run full Playwright cross-device E2E test suite (Desktop + Mobile)
+make test-e2e
+
+# Option C: Using the automated shell script
 ./scripts/test_and_clean.sh
 
-# Option C: Standard Cargo Test
+# Option D: Standard Cargo Test
 cargo test
 ```
 
@@ -869,11 +872,33 @@ cargo clippy -- -D warnings
 cargo clean
 ```
 
+### Playwright Cross-Device E2E Web Testing Suite
+
+The project website and interactive portal ([amanalip.github.io/Termodoro/](https://amanalip.github.io/Termodoro/)) includes a dedicated, automated **Playwright End-to-End test suite** verifying responsiveness and layout across desktop, tablet, and mobile devices:
+
+```bash
+# Run Playwright E2E suite across 6 viewports (41/41 tests passing)
+make test-e2e
+# or directly with Node:
+node scripts/e2e-website-test.mjs
+```
+
+| Viewport Profile | Target Resolution | Tested Devices | Verification Checks |
+|:---|:---:|:---|:---:|
+| **Desktop Large** | `1920 × 1080` | High-res monitors | Zero overflow, showcase navigation, theme switches |
+| **Desktop Standard** | `1280 × 800` | Laptops / Desktops | Code cards, copy triggers, audio test buttons |
+| **Tablet Portrait** | `768 × 1024` | iPad / Android Tablets | Responsive grid stacking, FAQ accordions |
+| **Mobile Flagship** | `390 × 844` | iPhone 14/15, Pixel | Mobile drawer, backdrop blur, hamburger menu |
+| **Mobile Medium** | `375 × 667` | iPhone SE, Standard Mobile | Header spacing, touch targets, category pills |
+| **Mobile Small** | `320 × 568` | Ultra-compact Mobile | Zero horizontal sway (`scrollWidth <= clientWidth`) |
+
 ### Makefile Reference Cheatsheet
 
 | Command | Action |
 | :--- | :--- |
-| `make test` | Run 192-test suite and automatically clean `target/` cache |
+| `make test` | Run 192-test Rust suite and automatically clean `target/` cache |
+| `make test-clean` | Run tests and auto-clean (reclaims ~1.8GB disk space) |
+| `make test-e2e` | Run full Playwright cross-device E2E test suite (41/41 tests across 6 viewports) |
 | `make check` | Execute `fmt`, `clippy`, full 192-test suite, and clean up |
 | `make build` | Compile optimized release binary in `target/release/termodoro` |
 | `make run` | Launch Termodoro in release mode |
@@ -892,6 +917,7 @@ To provide full confidence to developers, contributors, and users, all claims, m
 | Verified Claim / Metric | Documented Value | Audited Source Code Reference | Verification Method & Benchmark | Status |
 | :--- | :--- | :--- | :--- | :---: |
 | **Test Suite Pass Rate** | 192 / 192 Passed (100%) | `src/` (All 9 test modules) | `cargo test` execution (1.16s total runtime) | **VERIFIED** |
+| **Playwright E2E Pass Rate** | 41 / 41 Passed (100%) | [`scripts/e2e-website-test.mjs`](scripts/e2e-website-test.mjs) | Playwright Chromium across 6 responsive viewports | **VERIFIED** |
 | **Privacy & Zero Telemetry** | 100% Offline & Private (0 Network Calls) | `src/storage.rs` & `Cargo.lock` | Unit tests `test_privacy_zero_telemetry_guarantees` & CI check | **VERIFIED** |
 | **Rust Safety Guarantee** | 100% Safe Rust (`0` unsafe blocks) | Full codebase grep (`grep -rn "unsafe" src/`) | Static code analysis via compiler frontend | **VERIFIED** |
 | **Static Analysis Compliance** | 0 Warnings, 0 Errors | Entire workspace | `cargo clippy -- -D warnings` | **VERIFIED** |

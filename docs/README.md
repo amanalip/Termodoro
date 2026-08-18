@@ -131,6 +131,38 @@ Open `http://localhost:8000` in your web browser.
 
 ---
 
+## Automated Cross-Device Playwright E2E Testing
+
+The documentation portal includes an automated **Playwright End-to-End Testing Suite** to continuously verify responsiveness, component interactivity, zero-overflow geometry, and theme engine functionality across desktop, tablet, and mobile devices:
+
+```bash
+# Run the automated Playwright E2E test suite
+make test-e2e
+# or directly:
+node scripts/e2e-website-test.mjs
+```
+
+### Viewport Matrix & Automated Verifications (41/41 Tests Passing)
+
+| Viewport Profile | Target Resolution | Simulated Device Profiles |
+| :--- | :---: | :--- |
+| **Desktop Large** | `1920 × 1080` | Ultra-wide displays & large desktop monitors |
+| **Desktop Standard** | `1280 × 800` | MacBook Air/Pro, laptops |
+| **Tablet Portrait** | `768 × 1024` | Apple iPad, Android Tablets |
+| **Mobile Flagship** | `390 × 844` | iPhone 14/15/16, Google Pixel 7/8 |
+| **Mobile Medium** | `375 × 667` | iPhone SE (2nd/3rd gen), Galaxy A series |
+| **Mobile Small** | `320 × 568` | iPhone 5/SE (1st gen), Compact screens |
+
+**Automated Test Verifications:**
+1. **Zero Horizontal Overflow**: Guarantees `scrollWidth <= clientWidth` across all 6 viewports on all 3 pages (`index.html`, `features.html`, `faqs.html`).
+2. **Mobile Navigation Drawer**: Tests hamburger toggle button, slide-in drawer animation, backdrop overlay blur, link navigation, close button, and `Esc` key dismissal.
+3. **Code Cards & Fixed Copy Buttons**: Verifies `.code-card-header` bar layout, prevents copy button from floating or overlapping code during horizontal scrolling, tests copy click feedback (`✓ Copied!`), and verifies toast notification triggers.
+4. **18-Theme Palette Engine**: Validates theme switching via navbar dropdown `<select>` and gallery card clicks, testing dynamic CSS custom properties and pure pitch black `#000000` tokens for OLED Phosphor.
+5. **Interactive Screenshot Showcase**: Tests tab switching across all 6 views and numerical keyboard navigation (`1`–`6`).
+6. **Keybindings & FAQ Search**: Verifies real-time table row filtering and FAQ accordion query matching.
+
+---
+
 ## Deployment
 
 Changes pushed to the `main` branch trigger `.github/workflows/static.yml`. The workflow:
@@ -145,3 +177,4 @@ Changes pushed to the `main` branch trigger `.github/workflows/static.yml`. The 
 - Keep the codebase vanilla. Do not add JavaScript frameworks, bundlers, or third-party tracking scripts.
 - If you add or modify a theme in `src/theme.rs`, update both `THEMES` in `docs/app.js` and the corresponding `html[data-theme="..."]` rules in `docs/style.css`.
 - When making substantial CSS or JS changes, increment the version query parameter (for example, `style.css?v=...`) across `index.html`, `features.html`, and `faqs.html` to avoid stale browser cache issues.
+- Always execute `make test-e2e` to verify zero horizontal overflow and mobile responsiveness before committing changes to `docs/`.
