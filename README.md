@@ -3,6 +3,7 @@
 <div align="center">
 
 [![CI](https://github.com/amanalip/Termodoro/actions/workflows/rust.yml/badge.svg)](https://github.com/amanalip/Termodoro/actions)
+[![Website](https://img.shields.io/badge/website-live%20demo-blue.svg)](https://amanalip.github.io/Termodoro/)
 [![Tests](https://img.shields.io/badge/tests-192%20passed%20(100%25)-brightgreen.svg)](test_report.md)
 [![Rust](https://img.shields.io/badge/rust-1.74%2B%20(Edition%202021)-orange.svg)](https://www.rust-lang.org)
 [![License: GPL-3.0](https://img.shields.io/badge/license-GPL--3.0-blue.svg)](LICENSE)
@@ -27,6 +28,9 @@ cd Termodoro
 # 2. Build and launch in release mode
 cargo run --release
 ```
+
+> [!TIP]
+> **Try the Interactive Web Simulator**: Experience Termodoro directly in your browser with real-time countdowns, 18-theme live switching, and Web Audio acoustic chimes at **[https://amanalip.github.io/Termodoro/](https://amanalip.github.io/Termodoro/)**.
 
 ---
 

@@ -266,6 +266,23 @@ This document maintains a transparent, permanent, and structured audit log of re
 
 ---
 
+### AUD-014: GitHub Pages Project Website, Web Simulator & static.yml CI Configuration
+- **Date:** August 18, 2026
+- **Category:** GitHub Pages, Web Simulator & Continuous Deployment
+- **Commit:** Current
+- **Severity:** Feature Addition & Automated CI/CD Certification
+- **Description:** 
+  Designed and built a static project website and in-browser interactive terminal simulator deployed to GitHub Pages via automated GitHub Actions (`static.yml`).
+- **Technical Scope & Verification:**
+  1. **Automated Deployment Workflow**: Configured `.github/workflows/static.yml` to target the `./docs` publication directory using `actions/upload-pages-artifact@v3` and `actions/deploy-pages@v4`.
+  2. **In-Browser Terminal Simulator**: Created a vanilla HTML/CSS/JS engine in `docs/` implementing real-time Pomodoro FSM countdowns, 5x3 block font digits, all 4 functional tabs (Timer, Tasks, Analytics, Settings), and interactive modal overlays.
+  3. **18-Theme Palette Engine**: Implemented dynamic CSS variables mirroring all 18 palettes from `src/theme.rs` with instant live switching across the entire page.
+  4. **Web Audio Chime Synthesis**: Synthesized exact 528 Hz Zen Tibetan singing bowl harmonics and D5 -> A5 break alerts in-memory via Web Audio API.
+  5. **Documentation Integration**: Updated `README.md`, `WALKTHROUGH.md`, `System_design.md`, `IMPLEMENTATION.md`, `user_journeys/README.md`, and `new_features_tracker.md` with official website links.
+- **Resolution Status:** **VERIFIED & CERTIFIED**
+
+---
+
 ## 3. Fact-Check, Sanity Audit & Certification Matrix
 
 | Audit Target | Documented Metric | Verified Fact | Verification Evidence |

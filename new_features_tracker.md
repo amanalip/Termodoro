@@ -88,6 +88,7 @@ This document serves as the master roadmap, specification catalog, architectural
 | **FE-20** | Mini HUD / Compact Pane View Mode | UI / UX | Medium | [ ] |
 | **FE-21** | Zen / Cinema Immersion View Mode | UI / UX | Low | [ ] |
 | **FE-22** | CLI Subcommands (`start`, `status`, `add`) | CLI | High | [ ] |
+| **FE-23** | GitHub Pages Interactive Web Simulator & 18-Theme Palette Explorer | Web / Docs | Medium | [x] |
 
 ---
 

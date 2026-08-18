@@ -2,6 +2,9 @@
 
 Welcome to the **Termodoro User Journeys** documentation suite. This directory contains detailed, step-by-step interactive walkthroughs with embedded terminal interface screenshots, workflow diagrams, under-the-hood engineering callouts, and keybinding cheat sheets designed to help developers, students, and knowledge workers master every feature of Termodoro.
 
+> [!TIP]
+> **Try the Interactive Web Simulator**: Practice these workflows live in your browser at **[https://amanalip.github.io/Termodoro/](https://amanalip.github.io/Termodoro/)**.
+
 ---
 
 ## Table of Contents
