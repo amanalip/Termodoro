@@ -57,8 +57,12 @@ fn render_buffer_to_svg(
     svg.push_str("      font-family: 'JetBrains Mono', 'Fira Code', 'DejaVu Sans Mono', 'Cascadia Code', Menlo, Monaco, monospace;\n");
     svg.push_str("      font-size: 14px;\n");
     svg.push_str(&format!("      line-height: {:.1}px;\n", char_h));
-    svg.push_str("      dominant-baseline: hanging;\n");
+    svg.push_str("      dominant-baseline: alphabetic;\n");
     svg.push_str("      white-space: pre;\n");
+    svg.push_str("    }\n");
+    svg.push_str("    .emoji-icon {\n");
+    svg.push_str("      font-family: 'Noto Color Emoji', 'Apple Color Emoji', 'Segoe UI Emoji', 'JetBrains Mono', monospace;\n");
+    svg.push_str("      font-size: 13px;\n");
     svg.push_str("    }\n");
     svg.push_str("    .window-title {\n");
     svg.push_str("      font-family: 'Noto Sans', 'Inter', 'Ubuntu', 'Cantarell', 'Segoe UI', system-ui, sans-serif;\n");
@@ -137,6 +141,15 @@ fn render_buffer_to_svg(
             let cell = buffer.cell((x as u16, y as u16)).unwrap();
             let cell_x = padding_x + (x as f64 * char_w);
 
+            let sym = cell.symbol();
+            // Skip empty continuation cells (ratatui leaves them as empty string "" for wide 2-column chars)
+            if sym.is_empty() {
+                continue;
+            }
+
+            let sym_width = unicode_width::UnicodeWidthStr::width(sym).max(1);
+            let cell_w = char_w * sym_width as f64;
+
             let (cell_fg_r, cell_fg_g, cell_fg_b) = match cell.fg {
                 ratatui::style::Color::Rgb(r, g, b) => (r, g, b),
                 ratatui::style::Color::Black => (24, 24, 37),
@@ -170,12 +183,11 @@ fn render_buffer_to_svg(
                 if (r, g, b) != (bg_r, bg_g, bg_b) {
                     svg.push_str(&format!(
                         "  <rect x=\"{:.1}\" y=\"{:.1}\" width=\"{:.1}\" height=\"{:.1}\" fill=\"rgb({},{},{})\"/>\n",
-                        cell_x, cell_y, char_w, char_h, r, g, b
+                        cell_x, cell_y, cell_w, char_h, r, g, b
                     ));
                 }
             }
 
-            let sym = cell.symbol();
             if !sym.trim().is_empty() {
                 let escaped = sym
                     .replace('&', "&amp;")
@@ -195,15 +207,28 @@ fn render_buffer_to_svg(
                     ""
                 };
 
+                let extra_class = if sym_width > 1 {
+                    " class=\"emoji-icon\""
+                } else {
+                    ""
+                };
+
+                let text_y = if sym_width > 1 {
+                    cell_y + 14.0
+                } else {
+                    cell_y + 14.5
+                };
+
                 svg.push_str(&format!(
-                    "  <text x=\"{:.1}\" y=\"{:.1}\" fill=\"rgb({},{},{})\"{weight}{opacity}>{sym}</text>\n",
+                    "  <text x=\"{:.1}\" y=\"{:.1}\" fill=\"rgb({},{},{})\"{weight}{opacity}{extra_class}>{sym}</text>\n",
                     cell_x,
-                    cell_y + 2.0,
+                    text_y,
                     cell_fg_r,
                     cell_fg_g,
                     cell_fg_b,
                     weight = weight,
                     opacity = opacity,
+                    extra_class = extra_class,
                     sym = escaped
                 ));
             }

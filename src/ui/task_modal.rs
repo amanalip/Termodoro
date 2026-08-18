@@ -77,7 +77,7 @@ pub fn render(f: &mut Frame, app: &App, theme: &Theme, area: Rect) {
     let title_text = if app.task_input_title.is_empty() && app.task_modal_focus != 0 {
         // Placeholder text
         Span::styled(
-            "Enter task description...",
+            " Enter task description...",
             Style::default()
                 .fg(theme.muted)
                 .add_modifier(Modifier::ITALIC),
@@ -85,12 +85,15 @@ pub fn render(f: &mut Frame, app: &App, theme: &Theme, area: Rect) {
     } else if app.task_modal_focus == 0 {
         // Show entered text with blinking cursor block
         Span::styled(
-            format!("{}█", app.task_input_title),
+            format!(" {}█", app.task_input_title),
             Style::default().fg(theme.fg),
         )
     } else {
         // Show entered text without cursor
-        Span::styled(&app.task_input_title, Style::default().fg(theme.fg))
+        Span::styled(
+            format!(" {}", app.task_input_title),
+            Style::default().fg(theme.fg),
+        )
     };
 
     // Build title input paragraph widget
@@ -122,7 +125,7 @@ pub fn render(f: &mut Frame, app: &App, theme: &Theme, area: Rect) {
 
     // Estimated pomodoros display
     let est_text = format!(
-        "🍅 {} pomodoros (Use ← / → or +/- to adjust)",
+        " 🍅 {} pomodoros (Use ← / → or +/- to adjust)",
         app.task_input_estimated
     );
     // Build estimated pomodoros paragraph widget

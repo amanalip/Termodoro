@@ -179,14 +179,14 @@ pub fn render(f: &mut Frame, app: &App, theme: &Theme, area: Rect) {
             // Format pomodoros counter string
             let pomodoros_str = if task.pomodoros_estimated > 0 {
                 // Show spent and estimated
-                format!("🍅 {} / {}", task.pomodoros_spent, task.pomodoros_estimated)
+                format!(" 🍅 {} / {}", task.pomodoros_spent, task.pomodoros_estimated)
             } else {
                 // Show spent only
-                format!("🍅 {}", task.pomodoros_spent)
+                format!(" 🍅 {}", task.pomodoros_spent)
             };
 
             // Active target indicator badge
-            let active_label = if is_active { "🎯 ACTIVE" } else { "" };
+            let active_label = if is_active { " 🎯 ACTIVE" } else { "" };
             // Style active target badge
             let active_style = Style::default().fg(theme.work).add_modifier(Modifier::BOLD);
 
@@ -200,7 +200,7 @@ pub fn render(f: &mut Frame, app: &App, theme: &Theme, area: Rect) {
                 // Checkmark status cell
                 Cell::from(check_mark).style(check_style),
                 // Task title cell
-                Cell::from(task.title.clone()).style(title_style),
+                Cell::from(format!(" {}", task.title)).style(title_style),
                 // Pomodoro counter cell
                 Cell::from(pomodoros_str).style(Style::default().fg(theme.secondary)),
                 // Active badge cell

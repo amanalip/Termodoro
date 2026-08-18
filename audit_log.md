@@ -222,6 +222,19 @@ This document maintains a transparent, permanent audit log of repository hygiene
 
 ---
 
+### [AUD-012] Unicode Wide-Character Emoji Alignment & Cell Padding Optimization
+- **Date:** August 17, 2026
+- **Severity:** Visual Polish & Font Metric Precision
+- **Description:** 
+  In terminal SVG/PNG screenshot rendering and table cells, 2-column wide Unicode emoji glyphs (such as `🎯`, `🚀`, `🍅`, `📝`, `⚡`) exhibited visual misalignment relative to adjacent single-width text and left cell border boundaries.
+- **Root Cause & Technical Remediation:**
+  1. **Unicode Cell Width Calculation**: Integrated `unicode-width` crate (`UnicodeWidthStr::width(sym)`) into [`src/bin/generate_screenshots.rs`](file:///home/amanap/Documents/GitHub/Termodoro/src/bin/generate_screenshots.rs) to compute dynamic cell widths for background highlights and skip empty zero-width continuation cells.
+  2. **Font Stack & Baseline Alignment**: Configured `.emoji-icon` font fallback hierarchy (`Noto Color Emoji`, `Apple Color Emoji`, `Segoe UI Emoji`, `JetBrains Mono`) with `dominant-baseline: alphabetic` and precise vertical font baseline coordinates (`text_y = cell_y + 14.0px`).
+  3. **Internal Cell Padding**: Added consistent 1-character left padding to table cells in [`src/ui/tasks_view.rs`](file:///home/amanap/Documents/GitHub/Termodoro/src/ui/tasks_view.rs) and input fields in [`src/ui/task_modal.rs`](file:///home/amanap/Documents/GitHub/Termodoro/src/ui/task_modal.rs) preventing glyphs from colliding with border borders.
+- **Resolution Status:** **VERIFIED & CERTIFIED (All 151 Tests Passing)**
+
+---
+
 ## Fact-Check, Sanity Audit & Certification Matrix
 
 | Audit Target | Documented Metric | Verified Fact | Verification Evidence |
