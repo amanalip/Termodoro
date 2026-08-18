@@ -3,7 +3,7 @@
 # Termodoro Automated Test & Build Cache Cleanup Utility
 # 
 # Purpose:
-# Executes the 151-test suite and automatically runs `cargo clean` upon completion
+# Executes the 154-test suite and automatically runs `cargo clean` upon completion
 # to reclaim ~1.8 GB of compiler cache and prevent repository directory bloat.
 # ==============================================================================
 
