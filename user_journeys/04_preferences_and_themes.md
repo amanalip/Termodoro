@@ -38,7 +38,7 @@ From any tab in Termodoro, press `4` to enter **Tab 4: Settings View**.
 1. Use `j` / `k` (or `↑` / `↓` arrows) to select duration rows:
    - **Work Duration**: Default 25 min (configurable from $1 \le N \le 120\text{ min}$).
    - **Short Break Duration**: Default 5 min (configurable from $1 \le N \le 60\text{ min}$).
-   - **Long Break Duration**: Default 15 min (configurable from $1 \le N \le 60\text{ min}$).
+   - **Long Break Duration**: Default 15 min (configurable from $1 \le N \le 90\text{ min}$).
 2. Use `h` / `l` (or `Left` / `Right` arrows, `-` / `+`) to increment or decrement the duration.
 3. The active countdown clock on Tab 1 immediately recalibrates to your new duration!
 

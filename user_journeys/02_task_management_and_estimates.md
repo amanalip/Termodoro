@@ -45,7 +45,7 @@ From anywhere in Termodoro, press `2` (or press `Tab`) to navigate to **Tab 2: T
 
 ### Step 3: Setting an Active Target Task
 1. Use `j` / `k` (or `↑` / `↓` arrow keys) to navigate through your task list.
-2. Press `Enter` (or `t`) on a selected task.
+2. Press `t` on a selected task.
 3. A glowing `🎯 [ACTIVE]` badge instantly appears on the row, and a confirmation banner alerts: *"Target set to: ⚡ Refactor Storage Engine..."*.
 4. Switch to **Tab 1 (`1`)**: Notice the task is now pinned in the prominent active target card directly beneath the big digital countdown clock!
 
@@ -59,18 +59,17 @@ From anywhere in Termodoro, press `2` (or press `Tab`) to navigate to **Tab 2: T
 ---
 
 ### Step 5: Filtering Views & Toggling Completion
-- When you finish an objective, highlight the task on Tab 2 and press `Space` to toggle its checkbox (`[ ]` $\rightarrow$ `[x]`).
-- Press `f` to cycle through filter views:
-  - **All Tasks**: Shows everything in your queue.
-  - **Active Only**: Hides completed items for a clean, distraction-free backlog.
-  - **Completed Only**: Displays finished items for end-of-day retrospectives and standup notes.
+- When you finish an objective, highlight the task on Tab 2 and press `Space` (or `Enter`) to toggle its checkbox (`[ ]` $\rightarrow$ `[x]`).
+- Press `1`, `2`, or `3` while on the Tasks tab to switch filter views:
+  - **`1` (All Tasks)**: Shows everything in your backlog.
+  - **`2` (Active Only)**: Hides completed items for a clean, distraction-free view.
+  - **`3` (Completed Only)**: Displays finished items for end-of-day retrospectives and standup notes.
 
 ---
 
 ### Step 6: Adjusting Estimates & Task Pruning
-- Underestimated a tricky bug? Press `+` / `=` on the selected task to increment its estimate (`3` $\rightarrow$ `4`).
-- Overestimated? Press `-` / `_` to decrement.
-- Completed or obsolete task? Press `d` (or `x` / `Delete`) to remove it. If you delete the currently active target task, Termodoro gracefully unbinds the target without breaking timer state.
+- Underestimated a tricky bug? When creating a task in the modal, adjust Pomodoros via `+` / `-` or direct digits `1` - `9`.
+- Completed or obsolete task? Press `d` (or `x`) on Tab 2 to remove it. If you delete the currently active target task, Termodoro gracefully unbinds the target without breaking timer state.
 
 ---
 
@@ -83,7 +82,7 @@ From anywhere in Termodoro, press `2` (or press `Tab`) to navigate to **Tab 2: T
 ![Termodoro Task Modal](../assets/screenshots/05_task_modal.png)
 
 ### Tasks View Components:
-1. **Filter Selector Bar**: Visual badges showing `[● All]`, `[  Active]`, `[  Completed]`.
+1. **Filter Selector Bar**: Visual badges showing `[● All (1)]`, `[  Active (2)]`, `[  Completed (3)]`.
 2. **Interactive Table Rows**:
    - **Status Checkbox**: `[ ]` (Pending) or `[x]` (Completed).
    - **Active Badge**: `🎯 [ACTIVE]` indicating timer binding.
@@ -99,7 +98,7 @@ From anywhere in Termodoro, press `2` (or press `Tab`) to navigate to **Tab 2: T
 > **Quick Add from Timer View**: You don't need to switch tabs to add a task! Press `a` while on Tab 1 (Timer View) to pop up the task creation modal instantly.
 
 > [!IMPORTANT]
-> **Atomic Persistence**: Every task edit, completion toggle, and estimate change is saved immediately to `~/.local/share/termodoro/data.json` with zero risk of state loss upon closing.
+> **Atomic Persistence**: Every task edit, completion toggle, and target change is saved immediately to `~/.local/share/termodoro/data.json` with zero risk of state loss upon closing.
 
 ---
 
@@ -109,12 +108,13 @@ From anywhere in Termodoro, press `2` (or press `Tab`) to navigate to **Tab 2: T
 | :---: | :--- | :--- |
 | `j` / `↓` | **Select Next** | Move selection cursor down |
 | `k` / `↑` | **Select Previous** | Move selection cursor up |
-| `a` / `n` | **Add Task** | Open task creation modal overlay |
-| `Space` | **Toggle Done** | Toggle completion checkmark (`[ ]` / `[x]`) |
-| `Enter` / `t` | **Set Active Target** | Bind highlighted task to countdown timer |
+| `a` | **Add Task** | Open task creation modal overlay |
+| `Space` / `Enter` | **Toggle Done** | Toggle completion checkmark (`[ ]` / `[x]`) |
+| `t` | **Set Active Target** | Bind highlighted task to countdown timer |
 | `d` / `x` | **Delete Task** | Remove highlighted task permanently |
-| `f` | **Cycle Filter** | Cycle between All, Active, and Completed views |
-| `+` / `=` | **Increase Estimate** | Increment estimated Pomodoros |
-| `-` / `_` | **Decrease Estimate** | Decrement estimated Pomodoros |
-| `1` - `4` | **Switch Tab** | Jump directly to Timer, Tasks, Stats, or Settings |
+| `1` | **Filter: All** | Display all tasks in the list |
+| `2` | **Filter: Active** | Display only uncompleted tasks |
+| `3` | **Filter: Completed** | Display only finished tasks |
+| `Tab` / `BackTab` | **Switch Tabs** | Cycle across Timer, Tasks, Stats, and Settings |
 | `?` | **Help Overlay** | View global keybinding reference dialog |
+| `q` / `Esc` | **Quit** | Save state and exit application |
