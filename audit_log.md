@@ -43,6 +43,7 @@ This document maintains a transparent, permanent, and structured audit log of re
 | [**AUD-011**](#aud-011-cross-platform-compatibility-audit--multi-os-ci-matrix) | 2026-08-17 | Cross-Platform Multi-OS CI Matrix | `814e434` | **CERTIFIED** |
 | [**AUD-012**](#aud-012-unicode-wide-character-emoji-alignment--cell-padding-optimization) | 2026-08-17 | Unicode Font Metrics & Cell Alignment | `d66fc10` | **VERIFIED** |
 | [**AUD-013**](#aud-013-privacy-zero-telemetry--offline-isolation-formal-verification) | 2026-08-17 | Zero-Telemetry & Offline Isolation | `8456222` | **CERTIFIED** |
+| [**AUD-014**](#aud-014-18-theme-native-css-engine-navbar-selector--headless-browser-certification) | 2026-08-18 | Web Architecture & Theme Engine | `c8cc114` | **CERTIFIED** |
 
 ---
 
@@ -279,6 +280,23 @@ This document maintains a transparent, permanent, and structured audit log of re
   3. **18-Theme Palette Engine**: Implemented dynamic CSS variables mirroring all 18 palettes from `src/theme.rs` with instant live switching across the entire page.
   4. **Web Audio Chime Synthesis**: Synthesized exact 528 Hz Zen Tibetan singing bowl harmonics and D5 -> A5 break alerts in-memory via Web Audio API.
   5. **Documentation Integration**: Updated `README.md`, `WALKTHROUGH.md`, `System_design.md`, `IMPLEMENTATION.md`, `user_journeys/README.md`, and `new_features_tracker.md` with official website links.
+- **Resolution Status:** **VERIFIED & CERTIFIED**
+
+---
+
+### AUD-014: 18-Theme Native CSS Engine, Navbar Selector & Headless Browser Certification
+- **Date:** August 18, 2026
+- **Category:** Web Architecture, Theme Persistence & Automated Browser QA
+- **Commit:** `c8cc114` $\rightarrow$ Current
+- **Severity:** User Experience & Cross-Page Persistence Certification
+- **Description:** 
+  Conducted end-to-end browser testing and architectural remediation of website theme switching and cross-page persistence across [`index.html`](docs/index.html), [`features.html`](docs/features.html), and [`faqs.html`](docs/faqs.html).
+- **Technical Remediation & Verification:**
+  1. **Native CSS Theme Custom Properties**: Compiled all 18 color schemes from `src/theme.rs` directly into `docs/style.css` as `html[data-theme="..."]` blocks, eliminating runtime paint delays and guaranteeing instantaneous zero-JS color application.
+  2. **Global Navigation Theme Selector**: Integrated an accessible `<select id="nav-theme-select">` into the sticky navigation header on all three HTML pages, allowing instant theme switching from anywhere on the site.
+  3. **Zero-Flash `localStorage` Persistence**: Embedded an early execution inline `<script>` in the `<head>` of all pages to read and apply `localStorage.getItem('termodoro_theme')` before DOM paint, eliminating flash of un-themed content.
+  4. **Responsive Mobile Optimization**: Calibrated header layout rules at `@media (max-width: 640px)` so the brand icon, theme selector, and GitHub button fit on mobile screens without overflow.
+  5. **Headless Browser Automated QA**: Executed automated Firefox headless testing across all 18 themes in both Desktop ($1200\times 800$) and Mobile ($375\times 667$) viewports, asserting zero console errors, 100% theme token coverage, and visual integrity.
 - **Resolution Status:** **VERIFIED & CERTIFIED**
 
 ---

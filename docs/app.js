@@ -545,6 +545,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const stored = localStorage.getItem('termodoro_theme');
     if (stored && THEMES[stored]) {
       savedTheme = stored;
+    } else {
+      const docTheme = document.documentElement.getAttribute('data-theme');
+      if (docTheme && THEMES[docTheme]) {
+        savedTheme = docTheme;
+      }
     }
   } catch (e) {}
 
