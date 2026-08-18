@@ -5,7 +5,7 @@
 [![CI](https://github.com/amanalip/Termodoro/actions/workflows/rust.yml/badge.svg)](https://github.com/amanalip/Termodoro/actions)
 [![Tests](https://img.shields.io/badge/tests-192%20passed%20(100%25)-brightgreen.svg)](test_report.md)
 [![Rust](https://img.shields.io/badge/rust-1.74%2B%20(Edition%202021)-orange.svg)](https://www.rust-lang.org)
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![License: GPL-3.0](https://img.shields.io/badge/license-GPL--3.0-blue.svg)](LICENSE)
 [![Safety](https://img.shields.io/badge/unsafe%20code-0%25%20(Safe%20Rust)-brightgreen.svg)](audit_log.md)
 [![Privacy](https://img.shields.io/badge/telemetry-0%25%20(100%25%20Offline)-blueviolet.svg)](audit_log.md)
 
