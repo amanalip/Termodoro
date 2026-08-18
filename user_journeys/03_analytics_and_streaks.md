@@ -6,7 +6,7 @@ Track your focus metrics, analyze 7-day productivity distribution charts, preser
 
 ## Table of Contents
 
-1. [Journey Narrative & Persona](#1-journey-narrative--persona)
+1. [Journey Overview & Persona Context](#1-journey-overview--persona-context)
 2. [Step-by-Step Interactive Walkthrough](#2-step-by-step-interactive-walkthrough)
    - [Step 1: Navigating to the Analytics Workstation](#step-1-navigating-to-the-analytics-workstation)
    - [Step 2: Inspecting Quantitative Metric Cards](#step-2-inspecting-quantitative-metric-cards)
@@ -14,39 +14,44 @@ Track your focus metrics, analyze 7-day productivity distribution charts, preser
    - [Step 4: Building & Preserving Consecutive Day Streaks](#step-4-building--preserving-consecutive-day-streaks)
    - [Step 5: Reviewing the Chronological Session Activity Log](#step-5-reviewing-the-chronological-session-activity-log)
 3. [Visual Layout & Interface Deep Dive](#3-visual-layout--interface-deep-dive)
-4. [Streak Retention & Algorithm Guarantees](#4-streak-retention--algorithm-guarantees)
+4. [Under the Hood: Streak Algorithms & Mathematical Guarantees](#4-under-the-hood-streak-algorithms--mathematical-guarantees)
 5. [Complete Keybinding Reference](#5-complete-keybinding-reference)
 
 ---
 
-## 1. Journey Narrative & Persona
+## 1. Journey Overview & Persona Context
 
-> **Meet Daniel, an Open Source Maintainer & Writer.**  
-> Daniel wants to build a consistent daily coding habit without burnout. Rather than relying on cloud services that monetize personal productivity data, Daniel reviews Termodoro's local analytics at the end of each working day to celebrate his focus milestones and maintain a continuous habit streak.
+Sustainable focus requires feedback and habit momentum. Long-term productivity is built on continuous daily discipline rather than sporadic bursts of overwork.
+
+This user journey demonstrates how a practitioner tracks their daily output, monitors weekly distribution cadence, and maintains habit streaks with Termodoro's local analytics engine:
+
+```
+[Complete Focus Sessions] ──> [Log Duration & Task ID] ──> [Update Consecutive Daily Streaks] ──> [Inspect 7-Day Histogram]
+```
 
 ---
 
 ## 2. Step-by-Step Interactive Walkthrough
 
 ### Step 1: Navigating to the Analytics Workstation
-From any tab in Termodoro, press `3` to jump directly into **Tab 3: Stats View**.
+From any tab in Termodoro, press `3` (or press `Tab`) to jump directly into **Tab 3: Stats View**.
 
 ---
 
 ### Step 2: Inspecting Quantitative Metric Cards
-The top metrics banner gives you an instantaneous summary of your output:
+The top metrics banner gives you an instantaneous summary of your focus output:
 
-1. ⏱️ **Total Focus Time**: Cumulative focused work time formatted as hours and minutes (e.g., `42h 30m` or `125m`).
-2. 🍅 **Total Pomodoros**: Exact count of fully completed 25-minute focus intervals.
-3. 🔥 **Current Streak**: Number of consecutive calendar days where at least one focus session was completed.
-4. 🏆 **Longest Streak**: Your all-time personal best continuous daily streak record.
+1. ⏱️ **Total Focus Time**: Cumulative focused work time formatted as hours and minutes (e.g., `42h 30m` or `125m` via `StatsHistory::total_focus_minutes()`).
+2. 🍅 **Total Pomodoros**: Exact count of fully completed 25-minute focus intervals via `StatsHistory::total_work_sessions()`.
+3. 🔥 **Current Streak**: Number of consecutive calendar days where at least one focus session was completed (`StatsHistory::current_streak_days()`).
+4. 🏆 **Longest Streak**: Your all-time personal best continuous daily streak record (`StatsHistory::longest_streak_days()`).
 
 ---
 
 ### Step 3: Analyzing the 7-Day Activity Distribution Histogram
 The middle panel renders a vertical ASCII bar chart visualizing your focus output over the last 7 calendar days:
 - **X-Axis**: Local calendar dates with day of the week labels (`Mon 11`, `Tue 12`, `Wed 13`, `Thu 14`, etc.).
-- **Y-Axis**: Proportional vertical bars representing total focus minutes or completed Pomodoros on that day.
+- **Y-Axis**: Proportional vertical bars (`█`) representing total focus minutes or completed Pomodoros on that day via `StatsHistory::last_days_distribution(7)`.
 - Allows you to easily spot mid-week productivity peaks and balance your workload across days.
 
 ---
@@ -80,23 +85,24 @@ Below is the live operational layout of Tab 3:
 
 ---
 
-## 4. Streak Retention & Algorithm Guarantees
+## 4. Under the Hood: Streak Algorithms & Mathematical Guarantees
 
-Termodoro’s streak calculation engine (`src/stats.rs`) is mathematically certified across edge cases:
-- **Timezone Continuity**: Uses `chrono::Local` calendar dates to prevent timezone drift.
-- **Month & Year Boundaries**: Seamlessly bridges streaks across month transitions (e.g., Feb 28 $\rightarrow$ Mar 1) and New Year’s Eve (Dec 31 $\rightarrow$ Jan 1).
-- **366-Day Leap Year Resilience**: Formally verified in automated tests for full leap-year date continuity.
-- **Zero Break Contamination**: Break intervals (Short and Long Breaks) are strictly excluded from focus metrics, ensuring 100% genuine habit data.
+In [`src/stats.rs`](file:///home/amanap/Documents/GitHub/Termodoro/src/stats.rs), the analytics engine guarantees mathematical correctness across calendar boundaries:
+- **`distinct_work_dates()`**: Normalizes all completed session timestamps into local dates (`chrono::Local.date_naive()`), deduplicating multiple sessions on the same calendar day.
+- **Consecutive Day Continuity**: Backward iteration using `NaiveDate::pred_opt()` bridges month transitions (Feb 28 $\rightarrow$ Mar 1) and year transitions (Dec 31 $\rightarrow$ Jan 1).
+- **366-Day Leap Year Resilience**: Tested against full 366-day leap year histories.
+- **Zero Break Contamination**: Sessions with `phase == PomodoroPhase::ShortBreak` or `LongBreak` are filtered out so rest periods never artificially inflate productivity numbers.
 
 ---
 
 ## 5. Complete Keybinding Reference
 
-| Keybinding | Action | Context / Behavior |
+| Keybinding | Action | Codebase Handler & Behavior |
 | :---: | :--- | :--- |
-| `1` | **Switch to Timer** | Jump back to countdown timer view |
-| `2` | **Switch to Tasks** | Jump to task management view |
-| `3` | **Switch to Stats** | Refresh and view analytics |
-| `4` | **Switch to Settings** | Open configuration and theme selector |
-| `?` | **Help Overlay** | View global keybinding reference dialog |
-| `q` / `Esc` | **Quit** | Save state and exit application |
+| `1` | **Switch to Timer** | [`src/app.rs:288`](file:///home/amanap/Documents/GitHub/Termodoro/src/app.rs#L288) (`active_tab = ActiveTab::Timer`) |
+| `2` | **Switch to Tasks** | [`src/app.rs:295`](file:///home/amanap/Documents/GitHub/Termodoro/src/app.rs#L295) (`active_tab = ActiveTab::Tasks`) |
+| `3` | **Switch to Stats** | [`src/app.rs:302`](file:///home/amanap/Documents/GitHub/Termodoro/src/app.rs#L302) (`active_tab = ActiveTab::Stats`) |
+| `4` | **Switch to Settings** | [`src/app.rs:308`](file:///home/amanap/Documents/GitHub/Termodoro/src/app.rs#L308) (`active_tab = ActiveTab::Settings`) |
+| `Tab` / `Shift+Tab` | **Cycle Tabs** | [`src/app.rs:268-286`](file:///home/amanap/Documents/GitHub/Termodoro/src/app.rs#L268-L286) (`next_tab()` / `previous_tab()`) |
+| `?` | **Help Overlay** | [`src/app.rs:261`](file:///home/amanap/Documents/GitHub/Termodoro/src/app.rs#L261) (`show_help = true`) |
+| `q` / `Esc` | **Quit** | [`src/app.rs:254`](file:///home/amanap/Documents/GitHub/Termodoro/src/app.rs#L254) (`should_quit = true`) |
