@@ -558,7 +558,7 @@ These shortcuts function across every screen in Termodoro:
 | `3` | Switch to Stats | Jump directly to Tab 3 (Analytics View) |
 | `4` | Switch to Settings | Jump directly to Tab 4 (Settings View) |
 | `?` | Help Modal | Open or close the interactive keybinding reference dialog |
-| `q` or `Esc` | Quit / Dismiss | Close any open modal overlay, or exit the application |
+| `q` | Quit | Save state atomically and exit the application |
 
 ---
 
@@ -653,8 +653,8 @@ Quickly create new tasks, assign titles, and define estimated Pomodoro intervals
 ##### Controls in Add Task Modal
 - `Tab` / `Shift+Tab` / `↓` / `↑`: Switch focus between **Task Title** and **Pomodoro Estimate** fields.
 - `←` / `→` (or `-` / `+`): In the estimate field, decrement or increment estimated Pomodoro count ($1 \le N \le 20$).
-- `Enter`: Save and create the new task immediately.
-- `Esc` or `q`: Cancel and close modal without saving.
+- `Enter`: Save and create the new task immediately (when title is non-empty).
+- `Esc`: Cancel and close modal without saving.
 
 #### 2. Help & Keybindings Dialog
 Press `?` at any point from any screen to open the interactive keyboard cheat sheet:

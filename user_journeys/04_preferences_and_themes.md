@@ -137,4 +137,4 @@ In [`src/app.rs`](../src/app.rs), configuration changes propagate immediately:
 | `1` - `4` | **Switch Tab** | [`src/app.rs:288-311`](../src/app.rs#L288-L311) (`active_tab = ActiveTab::...`) |
 | `Tab` / `Shift+Tab` | **Cycle Tabs** | [`src/app.rs:268-286`](../src/app.rs#L268-L286) (`next_tab()` / `previous_tab()`) |
 | `?` | **Help Overlay** | [`src/app.rs:261`](../src/app.rs#L261) (`show_help = true`) |
-| `q` / `Esc` | **Quit** | [`src/app.rs:254`](../src/app.rs#L254) (`should_quit = true`) |
+| `q` | **Quit** | [`src/app.rs:254`](../src/app.rs#L254) (`should_quit = true`) |

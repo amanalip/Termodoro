@@ -103,7 +103,7 @@ All user journeys in this directory adhere to the strict design invariants of Te
 | `1` - `4` | Switch Tab directly | Jump to Timer (`1`), Tasks (`2`), Stats (`3`), or Settings (`4`) |
 | `Tab` / `Shift+Tab` | Cycle Tabs | Move to next or previous tab sequentially |
 | `?` | Global | Open / close Keyboard Shortcuts Help modal dialog |
-| `q` / `Esc` | Global | Save state atomically and exit application |
+| `q` | Global | Save state atomically and exit application |
 | `Space` | Tab 1 / Tab 2 / Tab 4 | Start/Pause timer (Tab 1), Toggle task done (Tab 2), Toggle setting (Tab 4) |
 | `r` / `s` | Tab 1 (Timer) | Reset countdown timer (`r`) or Skip to next phase (`s`) |
 | `a` | Tab 1 & Tab 2 | Open New Task modal overlay from anywhere |
