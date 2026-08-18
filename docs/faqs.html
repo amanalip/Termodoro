@@ -219,6 +219,53 @@ cargo install --path .</code></pre>
 
             <details class="faq-item">
               <summary>
+                <span>How do I install and configure Termodoro on macOS (Apple Silicon &amp; Intel)?</span>
+                <svg class="faq-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 18px; height: 18px; min-width: 18px; max-width: 18px; flex-shrink: 0;"><polyline points="6 9 12 15 18 9"></polyline></svg>
+              </summary>
+              <div class="faq-content">
+                <p>Termodoro runs natively on macOS across both Apple Silicon (M1, M2, M3, M4) and Intel architectures:</p>
+                <ol>
+                  <li>Install Apple Command Line Tools if you haven't already:
+                    <pre><code>xcode-select --install</code></pre>
+                  </li>
+                  <li>Install Rust and Cargo via the official installer:
+                    <pre><code>curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+source "$HOME/.cargo/env"</code></pre>
+                  </li>
+                  <li>Compile and install Termodoro globally:
+                    <pre><code>cargo install --git https://github.com/amanalip/Termodoro.git</code></pre>
+                  </li>
+                  <li>Ensure <code>~/.cargo/bin</code> is in your <code>~/.zshrc</code>:
+                    <pre><code>echo 'export PATH="$HOME/.cargo/bin:$PATH"' >> ~/.zshrc
+source ~/.zshrc</code></pre>
+                  </li>
+                  <li>Type <code>termodoro</code> to launch in your favorite macOS terminal (iTerm2, Ghostty, Alacritty, WezTerm, or Terminal.app). Audio chimes use macOS CoreAudio natively without extra drivers.</li>
+                </ol>
+              </div>
+            </details>
+
+            <details class="faq-item">
+              <summary>
+                <span>How do I install and configure Termodoro on Windows 10 &amp; 11?</span>
+                <svg class="faq-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 18px; height: 18px; min-width: 18px; max-width: 18px; flex-shrink: 0;"><polyline points="6 9 12 15 18 9"></polyline></svg>
+              </summary>
+              <div class="faq-content">
+                <p>Termodoro is fully supported on Windows 10 and 11:</p>
+                <ol>
+                  <li>Download and run <strong>rustup-init.exe</strong> from <a href="https://rustup.rs" target="_blank" rel="noopener">rustup.rs</a>. Select option <code>1</code> (default) to install Rust and the Microsoft Visual C++ Build Tools.</li>
+                  <li>Open <strong>PowerShell</strong> or <strong>Windows Terminal</strong> and install Termodoro:
+                    <pre><code>cargo install --git https://github.com/amanalip/Termodoro.git</code></pre>
+                  </li>
+                  <li>If <code>termodoro</code> is not found, ensure Cargo's binary path is added to your user PATH:
+                    <pre><code>[Environment]::SetEnvironmentVariable("Path", $env:Path + ";$env:USERPROFILE\.cargo\bin", "User")</code></pre>
+                  </li>
+                  <li>We recommend running Termodoro inside <a href="https://github.com/microsoft/terminal" target="_blank" rel="noopener">Windows Terminal</a> with a Nerd Font (e.g. Cascadia Code NF or JetBrains Mono) for full 24-bit TrueColor and crisp Unicode block-digit rendering.</li>
+                </ol>
+              </div>
+            </details>
+
+            <details class="faq-item">
+              <summary>
                 <span>How do I update Termodoro to the latest release?</span>
                 <svg class="faq-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 18px; height: 18px; min-width: 18px; max-width: 18px; flex-shrink: 0;"><polyline points="6 9 12 15 18 9"></polyline></svg>
               </summary>

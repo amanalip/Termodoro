@@ -51,8 +51,8 @@ docs/
 - Web Audio test buttons that synthesize the 3 procedural transition cues.
 
 ### 3. faqs.html (Knowledge Base)
-- 32 categorized questions and answers covering:
-  1. Installation and Environment Setup (5 questions)
+- 34 categorized questions and answers covering:
+  1. Installation and Environment Setup (7 questions)
   2. Terminal Multiplexers and Shell Integration (4 questions)
   3. Timer and Pomodoro Mechanics (4 questions)
   4. Task Management and Target Tracking (4 questions)
