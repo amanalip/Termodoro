@@ -87,9 +87,16 @@ jobs:
         # Execute cargo test harness with full backtraces
         run: cargo test --verbose -- --nocapture --show-output
 
-      # Step 9: Automatically clean target build cache to maintain runner disk hygiene
+      # Step 9: Verify Global Cargo Install Workflow
+      - name: Verify Global Cargo Install Workflow
+        run: cargo install --path .
+
+      # Step 10: Verify Screenshot Generator Execution
+      - name: Verify Screenshot Generator Execution
+        run: cargo run --bin generate_screenshots
+
+      # Step 11: Automatically clean target build cache to maintain runner disk hygiene
       - name: Clean build cache
-        # Reclaim build cache storage
         run: cargo clean
 
 
