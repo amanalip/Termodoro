@@ -135,217 +135,211 @@
 
               <!-- TAB 1: TIMER SCREEN -->
               <div class="screen-view active" data-screen="1" id="screen-timer">
-                <div class="timer-screen-container">
-                  
-                  <div class="phase-indicator">
-                    <span class="phase-pulse" id="sim-phase-pulse"></span>
-                    <span id="sim-phase-title">WORK PAUSED</span>
+                <div class="ratatui-timer-layout">
+                  <!-- 1. Phase Header -->
+                  <div class="ratatui-phase-header">
+                    <span class="ratatui-phase-title" id="sim-phase-title">🍅 Focus Work</span>
+                    <span class="ratatui-status-badge" id="sim-status-badge">[● RUNNING]</span>
+                    <span class="ratatui-cycle-tracker" id="sim-cycle-tracker">Cycle 1/4 [<span id="sim-cycle-dots">◉ ○ ○ ○</span>]</span>
                   </div>
 
-                  <!-- 5x3 Block Digits Clock -->
-                  <div class="clock-display" aria-live="polite">
-                    <pre class="digit-block" id="digit-1">███&#10;  █&#10;███&#10;█  &#10;███</pre>
-                    <pre class="digit-block" id="digit-2">███&#10;█  &#10;███&#10;  █&#10;███</pre>
-                    <pre class="colon-block" id="digit-colon"> &#10;█&#10; &#10;█&#10; </pre>
-                    <pre class="digit-block" id="digit-3">███&#10;█ █&#10;█ █&#10;█ █&#10;███</pre>
-                    <pre class="digit-block" id="digit-4">███&#10;█ █&#10;█ █&#10;█ █&#10;███</pre>
+                  <!-- 2. Big Block Digits -->
+                  <div class="ratatui-clock-display" id="sim-clock-display">
+                    <pre class="tui-digit" id="digit-1">███&#10;█ █&#10;█ █&#10;█ █&#10;███</pre>
+                    <pre class="tui-digit" id="digit-2">███&#10;  █&#10;███&#10;  █&#10;███</pre>
+                    <pre class="tui-digit-colon" id="digit-colon">&#10; █ &#10;&#10; █ &#10;</pre>
+                    <pre class="tui-digit" id="digit-3">███&#10;█ █&#10;█ █&#10;█ █&#10;███</pre>
+                    <pre class="tui-digit" id="digit-4">███&#10;█ █&#10;█ █&#10;█ █&#10;███</pre>
                   </div>
 
-                  <!-- Gauge & Cycle Dots -->
-                  <div class="timer-gauge-box">
-                    <div class="gauge-track">
-                      <div class="gauge-fill" id="sim-gauge-fill" style="width: 0%;"></div>
-                    </div>
-                    <div class="cycle-dots-row">
-                      <span>Cycle Progress:</span>
-                      <div class="dots-wrapper" id="sim-cycle-dots">
-                        <span class="cycle-dot">○</span>
-                        <span class="cycle-dot">○</span>
-                        <span class="cycle-dot">○</span>
-                        <span class="cycle-dot">○</span>
+                  <!-- 3. Ratatui Gauge Block -->
+                  <div class="ratatui-box ratatui-gauge-box">
+                    <div class="ratatui-box-title">── Progress </div>
+                    <div class="ratatui-gauge-inner">
+                      <div class="ratatui-gauge-bar-track">
+                        <div class="ratatui-gauge-bar-fill" id="sim-gauge-fill" style="width: 50%;"></div>
                       </div>
-                      <span>4-Pomodoro Block</span>
+                      <span class="ratatui-gauge-text" id="sim-gauge-percent">50%</span>
                     </div>
                   </div>
 
-                  <!-- Active Target Task Card -->
-                  <div class="target-task-card">
-                    <div class="target-task-label">
-                      <span>🎯 Active Goal:</span>
-                      <span class="target-task-title" id="sim-target-task-title">Implement GitHub Pages Website</span>
+                  <!-- 4. Ratatui Target Box -->
+                  <div class="ratatui-box ratatui-target-box">
+                    <div class="ratatui-box-title">── 🎯 Current Target </div>
+                    <div class="ratatui-target-inner">
+                      <span class="tui-muted">Active Focus: </span>
+                      <strong class="tui-fg" id="sim-target-task-title">Implement GitHub Pages Website</strong>
+                      <span class="tui-secondary" id="sim-target-task-poms"> (🍅 2/4)</span>
                     </div>
-                    <span class="target-task-badge">Press [2] to change</span>
                   </div>
 
+                  <!-- 5. Quick Controls & Daily Summary -->
+                  <div class="ratatui-timer-footer-summary">
+                    <div class="tui-summary-line">
+                      <span class="tui-muted">Today's Sessions: </span>
+                      <strong class="tui-fg" id="sim-timer-today-poms">4 pomodoros (100 mins)</strong>
+                      <span class="tui-dim"> │ </span>
+                      <span class="tui-muted">Streak: </span>
+                      <strong class="tui-warning">🔥 7 days</strong>
+                    </div>
+                    <div class="tui-controls-line">
+                      <span class="tui-key">[Space]</span> <span class="tui-action" id="sim-space-label">Pause</span>
+                      <span class="tui-key">[r]</span> <span class="tui-action">Reset</span>
+                      <span class="tui-key">[s]</span> <span class="tui-action">Skip Phase</span>
+                      <span class="tui-key">[a]</span> <span class="tui-action">Quick Add Task</span>
+                    </div>
+                  </div>
                 </div>
               </div>
 
               <!-- TAB 2: TASKS SCREEN -->
               <div class="screen-view" data-screen="2" id="screen-tasks">
-                <div class="tasks-screen-container">
-                  <div class="tasks-toolbar">
-                    <div class="tasks-filter-tabs">
-                      <button type="button" class="task-filter-btn active" data-filter="all">[1] All (3)</button>
-                      <button type="button" class="task-filter-btn" data-filter="active">[2] Active (2)</button>
-                      <button type="button" class="task-filter-btn" data-filter="completed">[3] Completed (1)</button>
-                    </div>
-                    <div style="display: flex; gap: 0.4rem;">
-                      <button type="button" class="sim-key-pill" data-action="set-target" title="Set selected task as active target">
-                        <kbd>t</kbd> Set Target
-                      </button>
-                      <button type="button" class="sim-key-pill" data-action="delete" title="Delete selected task">
-                        <kbd>d</kbd> Delete
-                      </button>
-                      <button type="button" class="sim-key-pill" data-action="add">
-                        <kbd>a</kbd> Add Task
-                      </button>
+                <div class="ratatui-tasks-layout">
+                  <!-- 1. Filter Bar Box -->
+                  <div class="ratatui-box ratatui-filter-box">
+                    <div class="ratatui-box-title">── Filter </div>
+                    <div class="ratatui-filter-inner">
+                      <span class="tui-fg">Filter: </span>
+                      <button type="button" class="tui-filter-tab active" data-filter="all" id="tui-filter-all">[1] All (3)</button>
+                      <button type="button" class="tui-filter-tab" data-filter="active" id="tui-filter-active">[2] Active (2)</button>
+                      <button type="button" class="tui-filter-tab" data-filter="completed" id="tui-filter-completed">[3] Completed (1)</button>
                     </div>
                   </div>
 
-                  <table class="tasks-table">
-                    <thead>
-                      <tr>
-                        <th style="width: 10%;">Status</th>
-                        <th style="width: 50%;">Task Title</th>
-                        <th style="width: 20%;">Est. Pomodoros</th>
-                        <th style="width: 20%;">Active Target</th>
-                      </tr>
-                    </thead>
-                    <tbody id="sim-tasks-tbody">
-                      <!-- Rendered dynamically by app.js -->
-                    </tbody>
-                  </table>
+                  <!-- 2. Tasks Table Box -->
+                  <div class="ratatui-box ratatui-table-box">
+                    <div class="ratatui-box-title">── 📋 Tasks Backlog </div>
+                    <table class="ratatui-table" id="sim-tasks-tui-table">
+                      <thead>
+                        <tr>
+                          <th style="width: 4%;"></th>
+                          <th style="width: 8%;">Status</th>
+                          <th style="width: 48%;">Task Title</th>
+                          <th style="width: 22%;">Est. Pomodoros</th>
+                          <th style="width: 18%;">Active Target</th>
+                        </tr>
+                      </thead>
+                      <tbody id="sim-tasks-tbody">
+                        <!-- Rendered by app.js -->
+                      </tbody>
+                    </table>
+                  </div>
+
+                  <!-- 3. Actions Helper Box -->
+                  <div class="ratatui-box ratatui-helper-box">
+                    <div class="ratatui-helper-inner">
+                      <span class="tui-key">[a]</span> <span class="tui-action">Add Task</span>
+                      <span class="tui-key">[Space/Enter]</span> <span class="tui-action">Toggle Status</span>
+                      <span class="tui-key">[t]</span> <span class="tui-action">Set Active Target</span>
+                      <span class="tui-key">[d/x]</span> <span class="tui-action">Delete</span>
+                      <span class="tui-key">[↑/↓/j/k]</span> <span class="tui-action">Navigate</span>
+                    </div>
+                  </div>
                 </div>
               </div>
 
               <!-- TAB 3: STATS SCREEN -->
               <div class="screen-view" data-screen="3" id="screen-stats">
-                <div class="stats-grid">
-                  <div class="stat-card">
-                    <span class="stat-label">📅 Today's Focus</span>
-                    <span class="stat-value" id="stats-today-poms">4 🍅</span>
-                    <span class="stat-sub">100 minutes focused</span>
+                <div class="ratatui-stats-layout">
+                  <!-- 1. Top 3 Metric Summary Boxes -->
+                  <div class="ratatui-stats-cards-row">
+                    <div class="ratatui-box ratatui-stat-card">
+                      <div class="ratatui-box-title">── 📅 Today's Focus </div>
+                      <div class="ratatui-stat-val tui-work" id="stats-card-today-poms">4 🍅</div>
+                      <div class="ratatui-stat-sub tui-muted">100 minutes focused</div>
+                    </div>
+                    <div class="ratatui-box ratatui-stat-card">
+                      <div class="ratatui-box-title">── ⚡ Current Streak </div>
+                      <div class="ratatui-stat-val tui-warning">🔥 7 Days</div>
+                      <div class="ratatui-stat-sub tui-muted">Personal Best: 14 Days</div>
+                    </div>
+                    <div class="ratatui-box ratatui-stat-card">
+                      <div class="ratatui-box-title">── 🏆 All-Time Focus </div>
+                      <div class="ratatui-stat-val tui-secondary">42 Sessions</div>
+                      <div class="ratatui-stat-sub tui-muted">17.5 Total Focus Hours</div>
+                    </div>
                   </div>
-                  <div class="stat-card">
-                    <span class="stat-label">🔥 Daily Streak</span>
-                    <span class="stat-value">7 Days</span>
-                    <span class="stat-sub">Longest: 14 days</span>
-                  </div>
-                  <div class="stat-card">
-                    <span class="stat-label">⭐ All-Time Total</span>
-                    <span class="stat-value">42 🍅</span>
-                    <span class="stat-sub">1,050 total minutes</span>
-                  </div>
-                </div>
 
-                <div class="chart-box" style="margin-bottom: 1.25rem;">
-                  <div class="chart-title">📊 Last 7 Days Activity (Pomodoros Completed)</div>
-                  <div class="bar-chart-visual">
-                    <div class="bar-col"><div class="bar-pillar" style="height: 35px;"></div><span class="bar-day">Mon (3)</span></div>
-                    <div class="bar-col"><div class="bar-pillar" style="height: 55px;"></div><span class="bar-day">Tue (5)</span></div>
-                    <div class="bar-col"><div class="bar-pillar" style="height: 75px;"></div><span class="bar-day">Wed (7)</span></div>
-                    <div class="bar-col"><div class="bar-pillar" style="height: 45px;"></div><span class="bar-day">Thu (4)</span></div>
-                    <div class="bar-col"><div class="bar-pillar" style="height: 90px;"></div><span class="bar-day">Fri (8)</span></div>
-                    <div class="bar-col"><div class="bar-pillar" style="height: 100px;"></div><span class="bar-day">Sat (9)</span></div>
-                    <div class="bar-col"><div class="bar-pillar" style="height: 65px;"></div><span class="bar-day">Sun (6)</span></div>
+                  <!-- 2. 7-Day BarChart Box -->
+                  <div class="ratatui-box ratatui-chart-box">
+                    <div class="ratatui-box-title">── 📊 7-Day Focus Distribution </div>
+                    <div class="ratatui-barchart-container">
+                      <div class="tui-chart-bars">
+                        <div class="tui-bar-col"><div class="tui-bar-fill" style="height: 35%;"></div><span class="tui-bar-label">Mon (3)</span></div>
+                        <div class="tui-bar-col"><div class="tui-bar-fill" style="height: 55%;"></div><span class="tui-bar-label">Tue (5)</span></div>
+                        <div class="tui-bar-col"><div class="tui-bar-fill" style="height: 75%;"></div><span class="tui-bar-label">Wed (7)</span></div>
+                        <div class="tui-bar-col"><div class="tui-bar-fill" style="height: 45%;"></div><span class="tui-bar-label">Thu (4)</span></div>
+                        <div class="tui-bar-col"><div class="tui-bar-fill" style="height: 90%;"></div><span class="tui-bar-label">Fri (8)</span></div>
+                        <div class="tui-bar-col"><div class="tui-bar-fill" style="height: 100%;"></div><span class="tui-bar-label">Sat (9)</span></div>
+                        <div class="tui-bar-col"><div class="tui-bar-fill" style="height: 65%;"></div><span class="tui-bar-label">Sun (6)</span></div>
+                      </div>
+                    </div>
                   </div>
-                </div>
 
-                <div class="chart-box">
-                  <div class="chart-title">📜 Recent Completed Sessions</div>
-                  <table class="tasks-table">
-                    <thead>
-                      <tr>
-                        <th>Time</th>
-                        <th>Type</th>
-                        <th>Duration</th>
-                        <th>Target Task</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr><td>10:45 AM</td><td><span style="color: var(--color-work);">🍅 Focus</span></td><td>25 mins</td><td>Implement GitHub Pages Website</td></tr>
-                      <tr><td>10:15 AM</td><td><span style="color: var(--color-short-break);">☕ Break</span></td><td>5 mins</td><td>Rest &amp; hydrate</td></tr>
-                      <tr><td>09:45 AM</td><td><span style="color: var(--color-work);">🍅 Focus</span></td><td>25 mins</td><td>Write Ratatui block digits renderer</td></tr>
-                    </tbody>
-                  </table>
+                  <!-- 3. Recent Sessions Table Box -->
+                  <div class="ratatui-box ratatui-recent-box">
+                    <div class="ratatui-box-title">── 📜 Recent Completed Sessions </div>
+                    <table class="ratatui-table">
+                      <thead>
+                        <tr>
+                          <th style="width: 20%;">Time</th>
+                          <th style="width: 20%;">Type</th>
+                          <th style="width: 20%;">Duration</th>
+                          <th style="width: 40%;">Target Task</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>10:45 AM</td>
+                          <td><span class="tui-work">🍅 Focus</span></td>
+                          <td>25 mins</td>
+                          <td>Implement GitHub Pages Website</td>
+                        </tr>
+                        <tr>
+                          <td>10:15 AM</td>
+                          <td><span class="tui-short-break">☕ Break</span></td>
+                          <td>5 mins</td>
+                          <td>Rest &amp; hydrate</td>
+                        </tr>
+                        <tr>
+                          <td>09:45 AM</td>
+                          <td><span class="tui-work">🍅 Focus</span></td>
+                          <td>25 mins</td>
+                          <td>Write Ratatui block digits renderer</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
 
-              <!-- TAB 4: SETTINGS SCREEN -->
+              <!-- TAB 4: SETTINGS SCREEN (100% Ratatui Table Replica) -->
               <div class="screen-view" data-screen="4" id="screen-settings">
-                <div class="settings-grid">
-                  <div class="setting-group">
-                    <div class="setting-group-title">Timer Durations &amp; Intervals</div>
-                    <div class="setting-row">
-                      <span>Focus Duration:</span>
-                      <strong>25 mins</strong>
-                    </div>
-                    <div class="setting-row">
-                      <span>Short Break:</span>
-                      <strong>5 mins</strong>
-                    </div>
-                    <div class="setting-row">
-                      <span>Long Break:</span>
-                      <strong>15 mins</strong>
-                    </div>
-                    <div class="setting-row">
-                      <span>Long Break Interval:</span>
-                      <strong>4 sessions</strong>
-                    </div>
+                <div class="ratatui-settings-layout">
+                  <!-- 1. Settings Table Box -->
+                  <div class="ratatui-box ratatui-table-box">
+                    <div class="ratatui-box-title">── ⚙️ Preferences &amp; Settings </div>
+                    <table class="ratatui-table" id="sim-settings-tui-table">
+                      <thead>
+                        <tr>
+                          <th style="width: 3%;"></th>
+                          <th style="width: 27%;">Setting</th>
+                          <th style="width: 20%;">Current Value</th>
+                          <th style="width: 50%;">Description</th>
+                        </tr>
+                      </thead>
+                      <tbody id="sim-settings-tbody">
+                        <!-- Rendered dynamically by app.js matching src/ui/settings_view.rs -->
+                      </tbody>
+                    </table>
                   </div>
 
-                  <div class="setting-group">
-                    <div class="setting-group-title">Automation &amp; Alerts</div>
-                    <div class="setting-row">
-                      <span>Auto-start Breaks:</span>
-                      <strong style="color: var(--text-dim);">Disabled</strong>
-                    </div>
-                    <div class="setting-row">
-                      <span>Auto-start Work:</span>
-                      <strong style="color: var(--text-dim);">Disabled</strong>
-                    </div>
-                    <div class="setting-row">
-                      <span>Desktop Notifications:</span>
-                      <strong style="color: var(--color-success);">Enabled</strong>
-                    </div>
-                    <div class="setting-row">
-                      <span>Sound / Bell Alert:</span>
-                      <strong style="color: var(--color-success);">Enabled</strong>
-                    </div>
-                  </div>
-
-                  <div class="setting-group" style="grid-column: 1 / -1;">
-                    <div class="setting-group-title">Acoustic Audio &amp; Theme Engine</div>
-                    <div style="display: flex; flex-wrap: wrap; gap: 1.5rem; justify-content: space-between; align-items: center;">
-                      <div style="display: flex; gap: 0.75rem; align-items: center;">
-                        <span>Audio Chimes:</span>
-                        <button type="button" class="btn btn-secondary" id="test-zen-btn" style="padding: 0.3rem 0.65rem; font-size: 0.8rem;">🔔 528 Hz Zen Bowl</button>
-                        <button type="button" class="btn btn-secondary" id="test-break-btn" style="padding: 0.3rem 0.65rem; font-size: 0.8rem;">🎵 D5 &rarr; A5 Chime</button>
-                        <button type="button" class="btn btn-secondary" id="test-bell-btn" style="padding: 0.3rem 0.65rem; font-size: 0.8rem;">⚡ 800 Hz Bell</button>
-                      </div>
-                      <div style="display: flex; gap: 0.75rem; align-items: center;">
-                        <span>Active Theme:</span>
-                        <select class="setting-select" id="sim-theme-select">
-                          <option value="catppuccin_mocha">Catppuccin Mocha</option>
-                          <option value="catppuccin_macchiato">Catppuccin Macchiato</option>
-                          <option value="catppuccin_frappe">Catppuccin Frappé</option>
-                          <option value="catppuccin_latte">Catppuccin Latte (Light)</option>
-                          <option value="nord">Nord</option>
-                          <option value="gruvbox_dark">Gruvbox Dark</option>
-                          <option value="tokyo_night">Tokyo Night</option>
-                          <option value="dracula">Dracula</option>
-                          <option value="rose_pine">Rose Pine</option>
-                          <option value="one_dark">One Dark</option>
-                          <option value="kanagawa">Kanagawa</option>
-                          <option value="everforest_dark">Everforest Dark</option>
-                          <option value="everforest_light">Everforest Light</option>
-                          <option value="solarized_dark">Solarized Dark</option>
-                          <option value="solarized_light">Solarized Light</option>
-                          <option value="synthwave84">Synthwave '84</option>
-                          <option value="monokai_pro">Monokai Pro</option>
-                          <option value="oled_phosphor">OLED Phosphor</option>
-                        </select>
-                      </div>
+                  <!-- 2. Settings Helper Box -->
+                  <div class="ratatui-box ratatui-helper-box">
+                    <div class="ratatui-helper-inner">
+                      <span class="tui-key">[↑/↓/j/k]</span> <span class="tui-action">Select Setting</span>
+                      <span class="tui-key">[←/→/h/l] or [+/-]</span> <span class="tui-action">Adjust Value / Change Theme</span>
+                      <span class="tui-key">[Space/Enter]</span> <span class="tui-action">Toggle</span>
                     </div>
                   </div>
                 </div>
@@ -480,6 +474,11 @@
             <p class="feature-body">
               Procedural RIFF WAV sound generation for Zen Tibetan singing bowls (528 Hz harmonics) and crisp alerts, paired with native desktop notifications.
             </p>
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 1rem;">
+              <button type="button" class="btn btn-secondary" id="test-zen-btn" style="padding: 0.35rem 0.65rem; font-size: 0.78rem;">🔔 528 Hz Bowl</button>
+              <button type="button" class="btn btn-secondary" id="test-break-btn" style="padding: 0.35rem 0.65rem; font-size: 0.78rem;">🎵 D5 &rarr; A5 Chime</button>
+              <button type="button" class="btn btn-secondary" id="test-bell-btn" style="padding: 0.35rem 0.65rem; font-size: 0.78rem;">⚡ 800 Hz Bell</button>
+            </div>
           </div>
 
           <div class="feature-card">

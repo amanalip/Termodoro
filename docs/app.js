@@ -319,12 +319,17 @@ function playBellBeep() {
 const state = {
   currentTab: 1, // 1: Timer, 2: Tasks, 3: Stats, 4: Settings
   phase: 'work', // 'work', 'shortBreak', 'longBreak'
-  workDuration: 25 * 60,
-  shortBreakDuration: 5 * 60,
-  longBreakDuration: 15 * 60,
-  cyclesBeforeLongBreak: 4,
+  workDurationMins: 25,
+  shortBreakMins: 5,
+  longBreakMins: 15,
+  longBreakInterval: 4,
+  autoStartBreaks: false,
+  autoStartWork: false,
+  desktopNotifications: true,
+  soundEnabled: true,
   timeRemaining: 25 * 60,
   isRunning: false,
+  currentCycle: 1,
   completedCycles: 0,
   targetTask: 'Implement GitHub Pages Website',
   tasks: [
@@ -334,6 +339,7 @@ const state = {
   ],
   selectedTaskIndex: 0,
   activeFilter: 'all', // 'all', 'active', 'completed'
+  settingsIndex: 0, // 0 to 8
   helpModalOpen: false,
   taskModalOpen: false
 };
@@ -345,6 +351,7 @@ function initSimulator() {
   renderTimerScreen();
   renderTasksScreen();
   renderStatsScreen();
+  renderSettingsScreen();
   setupEventListeners();
 }
 
@@ -367,58 +374,98 @@ function updateClockDisplay() {
   if (d3) d3.textContent = renderBlockDigit(secStr[0]);
   if (d4) d4.textContent = renderBlockDigit(secStr[1]);
 
-  // Update gauge fill
-  const total = state.phase === 'work' ? state.workDuration :
-                state.phase === 'shortBreak' ? state.shortBreakDuration : state.longBreakDuration;
+  const total = state.phase === 'work' ? state.workDurationMins * 60 :
+                state.phase === 'shortBreak' ? state.shortBreakMins * 60 : state.longBreakMins * 60;
   const progressPercent = Math.max(0, Math.min(100, ((total - state.timeRemaining) / total) * 100));
   
+  // Update gauge fill
   const gaugeFill = document.getElementById('sim-gauge-fill');
+  const gaugePercentText = document.getElementById('sim-gauge-percent');
+  const t = THEMES[currentThemeKey] || THEMES.catppuccin_mocha;
+
   if (gaugeFill) {
     gaugeFill.style.width = `${progressPercent}%`;
-    const t = THEMES[currentThemeKey] || THEMES.catppuccin_mocha;
     gaugeFill.style.backgroundColor = state.phase === 'work' ? t.work :
                                       state.phase === 'shortBreak' ? t.shortBreak : t.longBreak;
   }
+  if (gaugePercentText) {
+    gaugePercentText.textContent = `${Math.round(progressPercent)}%`;
+    gaugePercentText.style.color = t.primary;
+  }
 
-  // Update dots
+  // Update dots and cycle tracker
   const dotsWrapper = document.getElementById('sim-cycle-dots');
+  const cycleTracker = document.getElementById('sim-cycle-tracker');
   if (dotsWrapper) {
     let dotsHtml = '';
-    const currentCycleInBlock = state.completedCycles % state.cyclesBeforeLongBreak;
-    for (let i = 0; i < state.cyclesBeforeLongBreak; i++) {
-      const isFilled = i < currentCycleInBlock;
-      dotsHtml += `<span class="cycle-dot ${isFilled ? 'filled' : ''}">${isFilled ? '●' : '○'}</span> `;
+    for (let i = 1; i <= state.longBreakInterval; i++) {
+      if (i < state.currentCycle) {
+        dotsHtml += '● ';
+      } else if (i === state.currentCycle && state.phase === 'work') {
+        dotsHtml += '◉ ';
+      } else {
+        dotsHtml += '○ ';
+      }
     }
-    dotsWrapper.innerHTML = dotsHtml;
+    dotsWrapper.innerHTML = dotsHtml.trim();
+  }
+  if (cycleTracker) {
+    cycleTracker.innerHTML = `Cycle ${state.currentCycle}/${state.longBreakInterval} [<span id="sim-cycle-dots">${dotsWrapper ? dotsWrapper.innerHTML : ''}</span>]`;
   }
 
   // Update phase indicator
-  const phaseLabel = document.getElementById('sim-phase-title');
-  const phasePulse = document.getElementById('sim-phase-pulse');
-  const t = THEMES[currentThemeKey] || THEMES.catppuccin_mocha;
+  const phaseTitle = document.getElementById('sim-phase-title');
+  const statusBadge = document.getElementById('sim-status-badge');
+  const spaceLabel = document.getElementById('sim-space-label');
 
-  if (phaseLabel && phasePulse) {
+  if (phaseTitle) {
     if (state.phase === 'work') {
-      phaseLabel.textContent = state.isRunning ? 'FOCUS WORK' : 'WORK PAUSED';
-      phaseLabel.style.color = t.work;
-      phasePulse.style.backgroundColor = t.work;
-      phasePulse.style.boxShadow = `0 0 10px ${t.work}`;
+      phaseTitle.textContent = '🍅 Focus Work';
+      phaseTitle.style.color = t.work;
     } else if (state.phase === 'shortBreak') {
-      phaseLabel.textContent = 'SHORT BREAK';
-      phaseLabel.style.color = t.shortBreak;
-      phasePulse.style.backgroundColor = t.shortBreak;
-      phasePulse.style.boxShadow = `0 0 10px ${t.shortBreak}`;
+      phaseTitle.textContent = '☕ Short Break';
+      phaseTitle.style.color = t.shortBreak;
     } else {
-      phaseLabel.textContent = 'LONG BREAK';
-      phaseLabel.style.color = t.longBreak;
-      phasePulse.style.backgroundColor = t.longBreak;
-      phasePulse.style.boxShadow = `0 0 10px ${t.longBreak}`;
+      phaseTitle.textContent = '🌴 Long Break';
+      phaseTitle.style.color = t.longBreak;
     }
   }
 
-  // Update target task title
+  if (statusBadge) {
+    if (state.isRunning) {
+      statusBadge.textContent = '[● RUNNING]';
+      statusBadge.style.color = t.success;
+    } else {
+      statusBadge.textContent = '[❚❚ PAUSED]';
+      statusBadge.style.color = t.warning;
+    }
+  }
+
+  if (spaceLabel) {
+    spaceLabel.textContent = state.isRunning ? 'Pause' : 'Start';
+  }
+
+  // Update target task title and count
+  const targetTask = state.tasks.find(x => x.is_active);
   const taskTitleEl = document.getElementById('sim-target-task-title');
-  if (taskTitleEl) taskTitleEl.textContent = state.targetTask || 'No Active Goal';
+  const taskPomsEl = document.getElementById('sim-target-task-poms');
+
+  if (taskTitleEl && taskPomsEl) {
+    if (targetTask) {
+      taskTitleEl.textContent = targetTask.title;
+      taskPomsEl.textContent = ` (🍅 ${targetTask.completed_poms}/${targetTask.est_poms})`;
+    } else {
+      taskTitleEl.textContent = 'No active task selected. Press [2] for Tasks, or [a] to add one.';
+      taskPomsEl.textContent = '';
+    }
+  }
+
+  // Digits color matching phase
+  const digits = document.querySelectorAll('.tui-digit');
+  digits.forEach(d => {
+    d.style.color = state.phase === 'work' ? t.work :
+                    state.phase === 'shortBreak' ? t.shortBreak : t.longBreak;
+  });
 }
 
 function toggleTimer() {
@@ -448,25 +495,26 @@ function tickTimer() {
       playZenBowlChime();
       showToast('Focus session complete! 🎉');
       
-      // Update active target task completed pomodoros
       const activeTask = state.tasks.find(t => t.is_active);
       if (activeTask) {
         activeTask.completed_poms++;
         renderTasksScreen();
       }
 
-      if (state.completedCycles % state.cyclesBeforeLongBreak === 0) {
+      if (state.currentCycle >= state.longBreakInterval) {
         state.phase = 'longBreak';
-        state.timeRemaining = state.longBreakDuration;
+        state.timeRemaining = state.longBreakMins * 60;
+        state.currentCycle = 1;
       } else {
         state.phase = 'shortBreak';
-        state.timeRemaining = state.shortBreakDuration;
+        state.timeRemaining = state.shortBreakMins * 60;
+        state.currentCycle++;
       }
     } else {
       playBreakChime();
       showToast('Break finished! Back to focus ⚡');
       state.phase = 'work';
-      state.timeRemaining = state.workDuration;
+      state.timeRemaining = state.workDurationMins * 60;
     }
     updateClockDisplay();
   }
@@ -476,8 +524,8 @@ function resetTimer() {
   state.isRunning = false;
   clearInterval(timerInterval);
   timerInterval = null;
-  state.timeRemaining = state.phase === 'work' ? state.workDuration :
-                        state.phase === 'shortBreak' ? state.shortBreakDuration : state.longBreakDuration;
+  state.timeRemaining = state.phase === 'work' ? state.workDurationMins * 60 :
+                        state.phase === 'shortBreak' ? state.shortBreakMins * 60 : state.longBreakMins * 60;
   updateClockDisplay();
   showToast('Timer reset.');
 }
@@ -485,16 +533,18 @@ function resetTimer() {
 function skipPhase() {
   if (state.phase === 'work') {
     state.completedCycles++;
-    if (state.completedCycles % state.cyclesBeforeLongBreak === 0) {
+    if (state.currentCycle >= state.longBreakInterval) {
       state.phase = 'longBreak';
-      state.timeRemaining = state.longBreakDuration;
+      state.timeRemaining = state.longBreakMins * 60;
+      state.currentCycle = 1;
     } else {
       state.phase = 'shortBreak';
-      state.timeRemaining = state.shortBreakDuration;
+      state.timeRemaining = state.shortBreakMins * 60;
+      state.currentCycle++;
     }
   } else {
     state.phase = 'work';
-    state.timeRemaining = state.workDuration;
+    state.timeRemaining = state.workDurationMins * 60;
   }
   updateClockDisplay();
   showToast(`Skipped to ${state.phase === 'work' ? 'Focus Work' : state.phase === 'shortBreak' ? 'Short Break' : 'Long Break'}`);
@@ -508,6 +558,11 @@ function switchTab(tabIndex) {
   document.querySelectorAll('.screen-view').forEach(screen => {
     screen.classList.toggle('active', parseInt(screen.dataset.screen) === tabIndex);
   });
+  if (tabIndex === 4) {
+    renderSettingsScreen();
+  } else if (tabIndex === 2) {
+    renderTasksScreen();
+  }
 }
 
 function renderTabs() {
@@ -539,15 +594,23 @@ function renderTasksScreen() {
   const doneCount = state.tasks.filter(t => t.completed).length;
   const activeCount = totalCount - doneCount;
 
-  // Update filter button badges
-  const filterBtns = document.querySelectorAll('.task-filter-btn');
-  filterBtns.forEach(btn => {
-    const f = btn.dataset.filter;
-    btn.classList.toggle('active', f === state.activeFilter);
-    if (f === 'all') btn.textContent = `[1] All (${totalCount})`;
-    else if (f === 'active') btn.textContent = `[2] Active (${activeCount})`;
-    else if (f === 'completed') btn.textContent = `[3] Completed (${doneCount})`;
-  });
+  // Update filter tabs
+  const fAll = document.getElementById('tui-filter-all');
+  const fAct = document.getElementById('tui-filter-active');
+  const fComp = document.getElementById('tui-filter-completed');
+
+  if (fAll) {
+    fAll.textContent = `[1] All (${totalCount})`;
+    fAll.classList.toggle('active', state.activeFilter === 'all');
+  }
+  if (fAct) {
+    fAct.textContent = `[2] Active (${activeCount})`;
+    fAct.classList.toggle('active', state.activeFilter === 'active');
+  }
+  if (fComp) {
+    fComp.textContent = `[3] Completed (${doneCount})`;
+    fComp.classList.toggle('active', state.activeFilter === 'completed');
+  }
 
   if (state.selectedTaskIndex >= filtered.length) {
     state.selectedTaskIndex = Math.max(0, filtered.length - 1);
@@ -555,46 +618,208 @@ function renderTasksScreen() {
 
   tbody.innerHTML = filtered.map((t, idx) => {
     const isSelected = idx === state.selectedTaskIndex;
-    const checkGlyph = t.completed ? '<span style="color: var(--color-success); font-weight: bold;">✔</span>' : '<span style="color: var(--text-dim);">○</span>';
-    const targetBadge = t.is_active ? '<span style="color: var(--color-work); font-weight: bold;">🎯 ACTIVE</span>' : '<span style="color: var(--text-dim);">-</span>';
+    const pointer = isSelected ? '<span class="tui-primary">▶</span>' : ' ';
+    const checkGlyph = t.completed ? '<span class="tui-success">✔</span>' : '<span class="tui-dim">○</span>';
+    const targetBadge = t.is_active ? '<span class="tui-work">🎯 ACTIVE</span>' : '<span class="tui-dim">-</span>';
     
-    // Generate pomodoro blocks
     let blocks = '';
     for (let b = 0; b < Math.min(t.est_poms, 10); b++) {
       blocks += b < t.completed_poms ? '■' : '□';
     }
 
     return `
-      <tr class="task-row ${isSelected ? 'selected-row' : ''} ${t.completed ? 'completed' : ''}" data-index="${idx}" style="${isSelected ? 'background: var(--color-highlight);' : ''}">
-        <td style="text-align: center;">${checkGlyph}</td>
-        <td style="${t.completed ? 'text-decoration: line-through; opacity: 0.7;' : ''}">${t.title}</td>
-        <td><code style="color: var(--color-warning);">${blocks}</code> ${t.completed_poms}/${t.est_poms} 🍅</td>
-        <td>${targetBadge}</td>
+      <tr class="tui-clickable-row ${isSelected ? 'tui-selected-row' : ''} ${t.completed ? 'completed' : ''}" data-index="${idx}">
+        <td style="text-align: center; width: 4%;">${pointer}</td>
+        <td style="text-align: center; width: 8%;">${checkGlyph}</td>
+        <td style="width: 48%; ${t.completed ? 'text-decoration: line-through; opacity: 0.7;' : ''}">${t.title}</td>
+        <td style="width: 22%;"><code class="tui-warning">${blocks}</code> ${t.completed_poms}/${t.est_poms} 🍅</td>
+        <td style="width: 18%;">${targetBadge}</td>
       </tr>
     `;
   }).join('');
 
-  tbody.querySelectorAll('.task-row').forEach(row => {
+  tbody.querySelectorAll('tr').forEach(row => {
     row.addEventListener('click', () => {
       const idx = parseInt(row.dataset.index);
       state.selectedTaskIndex = idx;
-      const filteredTasks = getFilteredTasks();
-      const task = filteredTasks[idx];
-      if (task) {
-        task.completed = !task.completed;
-        renderTasksScreen();
-        showToast(`Task marked ${task.completed ? 'completed' : 'active'}`);
-      }
+      renderTasksScreen();
     });
   });
 }
 
 function renderStatsScreen() {
-  const pillars = document.querySelectorAll('.bar-pillar');
+  const pillars = document.querySelectorAll('.tui-bar-fill');
   const heights = [35, 55, 75, 45, 90, 100, 65];
   pillars.forEach((p, idx) => {
-    p.style.height = `${heights[idx] || 50}px`;
+    p.style.height = `${heights[idx] || 50}%`;
   });
+}
+
+// 100% Authentic Ratatui Settings Renderer matching src/ui/settings_view.rs
+function getSettingItems() {
+  return [
+    {
+      id: 0,
+      name: "Focus Duration",
+      value: `${state.workDurationMins} mins`,
+      desc: "Length of a standard work pomodoro (1 - 120 mins)",
+      type: "number"
+    },
+    {
+      id: 1,
+      name: "Short Break",
+      value: `${state.shortBreakMins} mins`,
+      desc: "Duration of short breaks between sessions (1 - 60 mins)",
+      type: "number"
+    },
+    {
+      id: 2,
+      name: "Long Break",
+      value: `${state.longBreakMins} mins`,
+      desc: "Duration of long break after completing a full cycle (1 - 90 mins)",
+      type: "number"
+    },
+    {
+      id: 3,
+      name: "Long Break Interval",
+      value: `${state.longBreakInterval} sessions`,
+      desc: "Number of focus sessions before a long break (1 - 24)",
+      type: "number"
+    },
+    {
+      id: 4,
+      name: "Auto-start Breaks",
+      value: state.autoStartBreaks ? "Enabled" : "Disabled",
+      desc: "Automatically start countdown when entering a break",
+      type: "bool"
+    },
+    {
+      id: 5,
+      name: "Auto-start Work",
+      value: state.autoStartWork ? "Enabled" : "Disabled",
+      desc: "Automatically start countdown after break finishes",
+      type: "bool"
+    },
+    {
+      id: 6,
+      name: "Desktop Notifications",
+      value: state.desktopNotifications ? "Enabled" : "Disabled",
+      desc: "Send native OS desktop notification on phase completion",
+      type: "bool"
+    },
+    {
+      id: 7,
+      name: "Sound / Bell Alert",
+      value: state.soundEnabled ? "Enabled" : "Disabled",
+      desc: "Ring audio / terminal bell when a session finishes",
+      type: "bool"
+    },
+    {
+      id: 8,
+      name: "Color Theme",
+      value: THEMES[currentThemeKey].name,
+      desc: "Select your favorite TUI visual color scheme",
+      type: "theme"
+    }
+  ];
+}
+
+function renderSettingsScreen() {
+  const tbody = document.getElementById('sim-settings-tbody');
+  if (!tbody) return;
+
+  const items = getSettingItems();
+
+  tbody.innerHTML = items.map((item, idx) => {
+    const isSelected = idx === state.settingsIndex;
+    const pointer = isSelected ? '<span class="tui-primary">▶</span>' : ' ';
+    const valClass = isSelected ? 'tui-val-col tui-primary' : 'tui-val-col';
+
+    return `
+      <tr class="tui-clickable-row ${isSelected ? 'tui-selected-row' : ''}" data-index="${idx}">
+        <td style="width: 3%; text-align: center;">${pointer}</td>
+        <td style="width: 27%; font-weight: ${isSelected ? '700' : '500'};">${item.name}</td>
+        <td class="${valClass}" style="width: 20%;">${item.value}</td>
+        <td class="tui-muted" style="width: 50%;">${item.desc}</td>
+      </tr>
+    `;
+  }).join('');
+
+  tbody.querySelectorAll('tr').forEach(row => {
+    row.addEventListener('click', () => {
+      state.settingsIndex = parseInt(row.dataset.index);
+      renderSettingsScreen();
+    });
+  });
+}
+
+function adjustSetting(delta) {
+  switch (state.settingsIndex) {
+    case 0: // Focus Duration (1 - 120 mins)
+      state.workDurationMins = Math.max(1, Math.min(120, state.workDurationMins + delta));
+      if (!state.isRunning && state.phase === 'work') {
+        state.timeRemaining = state.workDurationMins * 60;
+        updateClockDisplay();
+      }
+      showToast(`Focus Duration: ${state.workDurationMins} mins`);
+      break;
+    case 1: // Short Break (1 - 60 mins)
+      state.shortBreakMins = Math.max(1, Math.min(60, state.shortBreakMins + delta));
+      if (!state.isRunning && state.phase === 'shortBreak') {
+        state.timeRemaining = state.shortBreakMins * 60;
+        updateClockDisplay();
+      }
+      showToast(`Short Break: ${state.shortBreakMins} mins`);
+      break;
+    case 2: // Long Break (1 - 90 mins)
+      state.longBreakMins = Math.max(1, Math.min(90, state.longBreakMins + delta));
+      if (!state.isRunning && state.phase === 'longBreak') {
+        state.timeRemaining = state.longBreakMins * 60;
+        updateClockDisplay();
+      }
+      showToast(`Long Break: ${state.longBreakMins} mins`);
+      break;
+    case 3: // Long Break Interval (1 - 24 sessions)
+      state.longBreakInterval = Math.max(1, Math.min(24, state.longBreakInterval + delta));
+      updateClockDisplay();
+      showToast(`Long Break Interval: ${state.longBreakInterval} sessions`);
+      break;
+    case 4: // Auto-start Breaks
+      state.autoStartBreaks = !state.autoStartBreaks;
+      showToast(`Auto-start Breaks: ${state.autoStartBreaks ? 'Enabled' : 'Disabled'}`);
+      break;
+    case 5: // Auto-start Work
+      state.autoStartWork = !state.autoStartWork;
+      showToast(`Auto-start Work: ${state.autoStartWork ? 'Enabled' : 'Disabled'}`);
+      break;
+    case 6: // Desktop Notifications
+      state.desktopNotifications = !state.desktopNotifications;
+      showToast(`Desktop Notifications: ${state.desktopNotifications ? 'Enabled' : 'Disabled'}`);
+      break;
+    case 7: // Sound / Bell Alert
+      state.soundEnabled = !state.soundEnabled;
+      soundEnabled = state.soundEnabled;
+      if (soundEnabled) playBellBeep();
+      showToast(`Sound / Bell Alert: ${state.soundEnabled ? 'Enabled' : 'Disabled'}`);
+      break;
+    case 8: // Color Theme (Cycle 18 themes)
+      const themeKeys = Object.keys(THEMES);
+      const curIdx = themeKeys.indexOf(currentThemeKey);
+      const nextIdx = (curIdx + delta + themeKeys.length) % themeKeys.length;
+      const nextKey = themeKeys[nextIdx];
+      applyTheme(nextKey);
+      showToast(`Theme: ${THEMES[nextKey].name}`);
+      break;
+  }
+  renderSettingsScreen();
+}
+
+function toggleSetting() {
+  if (state.settingsIndex >= 4 && state.settingsIndex <= 7) {
+    adjustSetting(1);
+  } else if (state.settingsIndex === 8) {
+    adjustSetting(1);
+  }
 }
 
 function showToast(msg) {
@@ -654,7 +879,7 @@ function setupEventListeners() {
 
     // Global Keybindings
     if (e.key === 'q') {
-      showToast('Termodoro: Use terminal controls or close browser tab.');
+      showToast('Termodoro: Running in browser simulator.');
       return;
     }
     if (e.key === '?' || e.key === 'F1') {
@@ -751,23 +976,22 @@ function setupEventListeners() {
         switchTab(parseInt(e.key));
       }
     } else if (state.currentTab === 4) {
-      // TAB 4: SETTINGS
+      // TAB 4: SETTINGS (matching src/app.rs handle_settings_key)
       if (['1', '2', '3', '4'].includes(e.key)) {
         switchTab(parseInt(e.key));
+      } else if (e.key === 'j' || e.key === 'ArrowDown') {
+        state.settingsIndex = (state.settingsIndex + 1) % 9;
+        renderSettingsScreen();
+      } else if (e.key === 'k' || e.key === 'ArrowUp') {
+        state.settingsIndex = (state.settingsIndex - 1 + 9) % 9;
+        renderSettingsScreen();
       } else if (e.key === 'l' || e.key === 'ArrowRight' || e.key === '+' || e.key === '=') {
-        // Cycle theme forward
-        const themeKeys = Object.keys(THEMES);
-        const curIdx = themeKeys.indexOf(currentThemeKey);
-        const nextKey = themeKeys[(curIdx + 1) % themeKeys.length];
-        applyTheme(nextKey);
-        showToast(`Theme: ${THEMES[nextKey].name}`);
+        adjustSetting(1);
       } else if (e.key === 'h' || e.key === 'ArrowLeft' || e.key === '-' || e.key === '_') {
-        // Cycle theme backward
-        const themeKeys = Object.keys(THEMES);
-        const curIdx = themeKeys.indexOf(currentThemeKey);
-        const prevKey = themeKeys[(curIdx - 1 + themeKeys.length) % themeKeys.length];
-        applyTheme(prevKey);
-        showToast(`Theme: ${THEMES[prevKey].name}`);
+        adjustSetting(-1);
+      } else if (e.key === ' ' || e.key === 'Enter') {
+        e.preventDefault();
+        toggleSetting();
       }
     }
   });
@@ -777,9 +1001,11 @@ function setupEventListeners() {
   if (soundBtn) {
     soundBtn.addEventListener('click', () => {
       soundEnabled = !soundEnabled;
+      state.soundEnabled = soundEnabled;
       soundBtn.innerHTML = soundEnabled ? '🔊 Sound: ON' : '🔇 Sound: OFF';
       if (soundEnabled) playBellBeep();
       showToast(`Sound ${soundEnabled ? 'Enabled' : 'Muted'}`);
+      renderSettingsScreen();
     });
   }
 
@@ -792,40 +1018,16 @@ function setupEventListeners() {
       else if (action === 'skip') skipPhase();
       else if (action === 'help') toggleHelpModal(true);
       else if (action === 'add') toggleTaskModal(true);
-      else if (action === 'set-target') {
-        const filtered = getFilteredTasks();
-        const task = filtered[state.selectedTaskIndex];
-        if (task) {
-          state.tasks.forEach(t => t.is_active = (t.id === task.id));
-          state.targetTask = task.title;
-          updateClockDisplay();
-          renderTasksScreen();
-          showToast(`Target set to: ${task.title}`);
-        }
-      } else if (action === 'delete') {
-        const filtered = getFilteredTasks();
-        const task = filtered[state.selectedTaskIndex];
-        if (task) {
-          state.tasks = state.tasks.filter(t => t.id !== task.id);
-          if (task.is_active) {
-            state.targetTask = '';
-            updateClockDisplay();
-          }
-          renderTasksScreen();
-          showToast('Task deleted.');
-        }
-      }
     });
   });
 
   // Task Filters
-  document.querySelectorAll('.task-filter-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      state.activeFilter = btn.dataset.filter;
-      state.selectedTaskIndex = 0;
-      renderTasksScreen();
-    });
-  });
+  const fAll = document.getElementById('tui-filter-all');
+  if (fAll) fAll.addEventListener('click', () => { state.activeFilter = 'all'; state.selectedTaskIndex = 0; renderTasksScreen(); });
+  const fAct = document.getElementById('tui-filter-active');
+  if (fAct) fAct.addEventListener('click', () => { state.activeFilter = 'active'; state.selectedTaskIndex = 0; renderTasksScreen(); });
+  const fComp = document.getElementById('tui-filter-completed');
+  if (fComp) fComp.addEventListener('click', () => { state.activeFilter = 'completed'; state.selectedTaskIndex = 0; renderTasksScreen(); });
 
   // Theme card click in gallery
   document.querySelectorAll('.theme-card').forEach(card => {
@@ -833,26 +1035,19 @@ function setupEventListeners() {
       const themeKey = card.dataset.theme;
       applyTheme(themeKey);
       showToast(`Switched theme to ${THEMES[themeKey].name}`);
+      renderSettingsScreen();
     });
   });
 
-  // Theme select in Settings tab
-  const simThemeSelect = document.getElementById('sim-theme-select');
-  if (simThemeSelect) {
-    simThemeSelect.addEventListener('change', (e) => {
-      applyTheme(e.target.value);
-    });
-  }
-
   // Audio test buttons
   const testZenBtn = document.getElementById('test-zen-btn');
-  if (testZenBtn) testZenBtn.addEventListener('click', () => playZenBowlChime());
+  if (testZenBtn) testZenBtn.addEventListener('click', () => { playZenBowlChime(); showToast('Playing 528 Hz Zen Bowl'); });
   
   const testBreakBtn = document.getElementById('test-break-btn');
-  if (testBreakBtn) testBreakBtn.addEventListener('click', () => playBreakChime());
+  if (testBreakBtn) testBreakBtn.addEventListener('click', () => { playBreakChime(); showToast('Playing D5 → A5 Chime'); });
 
   const testBellBtn = document.getElementById('test-bell-btn');
-  if (testBellBtn) testBellBtn.addEventListener('click', () => playBellBeep());
+  if (testBellBtn) testBellBtn.addEventListener('click', () => { playBellBeep(); showToast('Playing 800 Hz Alert Bell'); });
 
   // Task creation form
   const createTaskForm = document.getElementById('modal-task-form');

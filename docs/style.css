@@ -439,8 +439,8 @@ button {
 
 /* Terminal Body & Screens */
 .terminal-body {
-  padding: 1.75rem 2rem;
-  min-height: 420px;
+  padding: 1.25rem 1.5rem;
+  min-height: 480px;
   background: var(--bg-surface);
   font-family: var(--font-mono);
   position: relative;
@@ -452,396 +452,360 @@ button {
 
 .screen-view.active {
   display: block;
-  animation: fadeIn 0.2s ease;
+  animation: fadeIn 0.15s ease;
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(3px); }
+  from { opacity: 0; transform: translateY(2px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* Tab 1: Timer Screen */
-.timer-screen-container {
+/* Authentic Ratatui Box & Border Framework */
+.ratatui-box {
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  position: relative;
+  padding: 0.75rem 1rem;
+  background: var(--bg-surface);
+  margin-bottom: 0.75rem;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
+}
+
+.ratatui-box-title {
+  position: absolute;
+  top: -0.65rem;
+  left: 0.85rem;
+  background: var(--bg-surface);
+  padding: 0 0.4rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  font-family: var(--font-mono);
+  letter-spacing: 0.02em;
+}
+
+/* Ratatui Table Component */
+.ratatui-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-mono);
+  font-size: 0.83rem;
+  line-height: 1.45;
+}
+
+.ratatui-table th {
+  color: var(--color-primary);
+  font-weight: 700;
+  padding: 0.4rem 0.6rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.ratatui-table td {
+  padding: 0.45rem 0.6rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  color: var(--text-main);
+}
+
+.ratatui-table tr.tui-selected-row {
+  background: var(--highlight-bg) !important;
+  border-radius: 4px;
+}
+
+.ratatui-table tr.tui-selected-row td {
+  color: var(--text-main);
+  font-weight: 600;
+}
+
+.ratatui-table tr.tui-selected-row td.tui-val-col {
+  color: var(--color-primary);
+  font-weight: 700;
+}
+
+.ratatui-table tr.tui-clickable-row {
+  cursor: pointer;
+}
+
+.ratatui-table tr.tui-clickable-row:hover {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+/* TUI Text Utility Tokens */
+.tui-fg { color: var(--text-main); }
+.tui-muted { color: var(--text-muted); }
+.tui-dim { color: var(--text-dim); }
+.tui-work { color: var(--color-work); font-weight: 700; }
+.tui-short-break { color: var(--color-short-break); font-weight: 700; }
+.tui-long-break { color: var(--color-long-break); font-weight: 700; }
+.tui-primary { color: var(--color-primary); font-weight: 700; }
+.tui-secondary { color: var(--color-secondary); font-weight: 700; }
+.tui-warning { color: var(--color-warning); font-weight: 700; }
+.tui-success { color: var(--color-success); font-weight: 700; }
+
+.tui-key {
+  color: var(--color-primary);
+  font-weight: 700;
+  margin-right: 0.15rem;
+}
+
+.tui-action {
+  color: var(--text-main);
+  margin-right: 0.85rem;
+}
+
+/* Tab 1: Timer Screen Layout */
+.ratatui-timer-layout {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1.5rem;
-  padding: 1rem 0;
+  gap: 1rem;
+  width: 100%;
 }
 
-.phase-indicator {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.6rem;
-  font-size: 1rem;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: var(--color-work);
-}
-
-.phase-pulse {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--color-work);
-  box-shadow: 0 0 10px var(--color-work);
-}
-
-/* ASCII Block Clock Raster */
-.clock-display {
+.ratatui-phase-header {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.75rem;
-  user-select: none;
-}
-
-.digit-block {
-  font-family: var(--font-mono);
-  font-size: 2.1rem;
-  line-height: 1.05;
-  letter-spacing: 0.05em;
-  font-weight: 900;
-  color: var(--text-main);
-}
-
-.colon-block {
-  font-family: var(--font-mono);
-  font-size: 2.1rem;
-  line-height: 1.05;
-  font-weight: 900;
-  color: var(--text-dim);
-}
-
-/* Progress bar & Cycle dots */
-.timer-gauge-box {
+  gap: 1.25rem;
+  font-size: 0.95rem;
+  font-weight: 700;
   width: 100%;
-  max-width: 540px;
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
 }
 
-.gauge-track {
-  width: 100%;
-  height: 10px;
-  background: var(--bg-card);
-  border-radius: 9999px;
-  overflow: hidden;
-  border: 1px solid var(--border-color);
+.ratatui-phase-title {
+  color: var(--color-work);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
-.gauge-fill {
-  height: 100%;
-  width: 40%;
-  background: var(--color-work);
-  border-radius: 9999px;
-  transition: width 0.5s ease, background 0.3s ease;
+.ratatui-status-badge {
+  color: var(--color-success);
+  font-weight: 700;
 }
 
-.cycle-dots-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 0.85rem;
+.ratatui-cycle-tracker {
   color: var(--text-muted);
 }
 
-.dots-wrapper {
+/* ASCII Block Digits Clock */
+.ratatui-clock-display {
   display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  user-select: none;
+  margin: 0.5rem 0;
+}
+
+.tui-digit {
+  font-family: var(--font-mono);
+  font-size: 1.95rem;
+  line-height: 1.02;
+  letter-spacing: 0.04em;
+  font-weight: 900;
+  color: var(--color-work);
+  margin: 0;
+}
+
+.tui-digit-colon {
+  font-family: var(--font-mono);
+  font-size: 1.95rem;
+  line-height: 1.02;
+  font-weight: 900;
+  color: var(--text-dim);
+  margin: 0;
+}
+
+/* Gauge Block */
+.ratatui-gauge-box {
+  width: 100%;
+  max-width: 620px;
+}
+
+.ratatui-gauge-inner {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.ratatui-gauge-bar-track {
+  flex: 1;
+  height: 16px;
+  background: var(--highlight-bg);
+  border-radius: 3px;
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+  position: relative;
+}
+
+.ratatui-gauge-bar-fill {
+  height: 100%;
+  width: 50%;
+  background: var(--color-work);
+  transition: width 0.4s ease, background 0.3s ease;
+}
+
+.ratatui-gauge-text {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  min-width: 42px;
+  text-align: right;
+}
+
+/* Target Box */
+.ratatui-target-box {
+  width: 100%;
+  max-width: 620px;
+}
+
+.ratatui-target-inner {
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
   gap: 0.4rem;
 }
 
-.cycle-dot {
-  color: var(--text-dim);
-}
-
-.cycle-dot.filled {
-  color: var(--color-primary);
-}
-
-/* Active Target Task Card */
-.target-task-card {
+/* Timer Footer Summary */
+.ratatui-timer-footer-summary {
   width: 100%;
-  max-width: 540px;
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  padding: 0.85rem 1.2rem;
+  max-width: 620px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  font-size: 0.82rem;
+  padding: 0.5rem 0.25rem;
+}
+
+.tui-summary-line, .tui-controls-line {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-}
-
-.target-task-label {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  font-size: 0.85rem;
-  color: var(--text-muted);
-}
-
-.target-task-title {
-  font-weight: 600;
-  color: var(--text-main);
-}
-
-.target-task-badge {
-  background: var(--bg-surface);
-  border: 1px solid var(--border-color);
-  padding: 0.2rem 0.5rem;
-  border-radius: 4px;
-  font-size: 0.75rem;
-  color: var(--color-primary);
-}
-
-/* Terminal Controls Footer */
-.terminal-footer {
-  background: var(--bg-base);
-  border-top: 1px solid var(--border-color);
-  padding: 0.75rem 1.5rem;
-  display: flex;
   flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  font-family: var(--font-mono);
-  font-size: 0.8rem;
-  color: var(--text-muted);
 }
 
-.sim-key-pill {
-  display: inline-flex;
+/* Tab 2: Tasks Screen Layout */
+.ratatui-tasks-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  width: 100%;
+}
+
+.ratatui-filter-inner {
+  display: flex;
   align-items: center;
-  gap: 0.35rem;
-  background: var(--bg-card);
-  padding: 0.2rem 0.45rem;
-  border-radius: 4px;
-  border: 1px solid var(--border-color);
-  color: var(--text-main);
+  gap: 0.75rem;
+  font-size: 0.83rem;
+}
+
+.tui-filter-tab {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.83rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 3px;
   cursor: pointer;
   transition: all var(--transition-fast);
 }
 
-.sim-key-pill:hover {
-  border-color: var(--color-primary);
-  background: var(--highlight-bg);
-}
-
-.sim-key-pill kbd {
-  font-weight: 700;
-  color: var(--color-primary);
-}
-
-/* Tab 2: Tasks Screen */
-.tasks-screen-container {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.tasks-toolbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 1px solid var(--border-color);
-  padding-bottom: 0.75rem;
-}
-
-.tasks-filter-tabs {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.task-filter-btn {
-  padding: 0.25rem 0.6rem;
-  border-radius: 4px;
-  font-size: 0.8rem;
-  color: var(--text-muted);
-}
-
-.task-filter-btn.active {
-  background: var(--highlight-bg);
-  color: var(--color-primary);
-}
-
-.tasks-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.tasks-table th {
-  text-align: left;
-  padding: 0.5rem 0.75rem;
-  font-size: 0.75rem;
-  color: var(--text-dim);
-  text-transform: uppercase;
-  border-bottom: 1px solid var(--border-color);
-}
-
-.tasks-table td {
-  padding: 0.75rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-  font-size: 0.85rem;
-}
-
-.task-row {
-  cursor: pointer;
-  transition: background var(--transition-fast);
-}
-
-.task-row:hover, .task-row.selected {
-  background: var(--highlight-bg);
-}
-
-.task-checkbox {
-  color: var(--color-success);
-  margin-right: 0.5rem;
-}
-
-.task-row.completed td {
-  color: var(--text-dim);
-  text-decoration: line-through;
-}
-
-.task-tag {
-  display: inline-block;
-  padding: 0.15rem 0.4rem;
-  border-radius: 3px;
-  font-size: 0.7rem;
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
-}
-
-.tag-high { color: var(--color-work); border-color: rgba(243, 139, 168, 0.3); }
-.tag-med { color: var(--color-warning); border-color: rgba(249, 226, 175, 0.3); }
-.tag-low { color: var(--color-short-break); border-color: rgba(166, 227, 161, 0.3); }
-
-/* Tab 3: Stats Screen */
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-}
-
-.stat-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  padding: 1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.stat-label {
-  font-size: 0.75rem;
-  color: var(--text-muted);
-  text-transform: uppercase;
-}
-
-.stat-value {
-  font-size: 1.5rem;
-  font-weight: 700;
+.tui-filter-tab:hover {
   color: var(--text-main);
 }
 
-.stat-sub {
-  font-size: 0.75rem;
+.tui-filter-tab.active {
   color: var(--color-primary);
+  font-weight: 700;
+  background: var(--highlight-bg);
 }
 
-.chart-box {
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  padding: 1.25rem;
+.ratatui-helper-box {
+  padding: 0.5rem 0.85rem;
+  margin-top: 0.25rem;
 }
 
-.chart-title {
-  font-size: 0.85rem;
-  font-weight: 600;
-  margin-bottom: 1rem;
-  color: var(--text-muted);
+.ratatui-helper-inner {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  font-size: 0.8rem;
 }
 
-.bar-chart-visual {
+/* Tab 3: Stats Screen Layout */
+.ratatui-stats-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  width: 100%;
+}
+
+.ratatui-stats-cards-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.85rem;
+}
+
+.ratatui-stat-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.75rem 0.85rem;
+}
+
+.ratatui-stat-val {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.ratatui-stat-sub {
+  font-size: 0.78rem;
+}
+
+/* 7-Day Bar Chart */
+.ratatui-barchart-container {
+  padding: 0.5rem 0 0.25rem;
+}
+
+.tui-chart-bars {
   display: flex;
   align-items: flex-end;
   justify-content: space-around;
-  height: 120px;
-  padding-top: 1rem;
+  height: 90px;
   border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.35rem;
 }
 
-.bar-col {
+.tui-bar-col {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.4rem;
   height: 100%;
   justify-content: flex-end;
 }
 
-.bar-pillar {
-  width: 28px;
+.tui-bar-fill {
+  width: 26px;
   background: var(--color-primary);
-  border-radius: 4px 4px 0 0;
-  transition: height 0.5s ease;
-  min-height: 6px;
+  border-radius: 2px 2px 0 0;
+  min-height: 4px;
+  transition: height 0.4s ease;
 }
 
-.bar-day {
+.tui-bar-label {
   font-size: 0.75rem;
   color: var(--text-dim);
 }
 
-/* Tab 4: Settings Screen */
-.settings-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 1.25rem;
-}
-
-.setting-group {
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  padding: 1.2rem;
+/* Tab 4: Settings Screen Layout */
+.ratatui-settings-layout {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
-}
-
-.setting-group-title {
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: var(--color-primary);
-  margin-bottom: 0.25rem;
-}
-
-.setting-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 0.85rem;
-}
-
-.setting-select {
-  background: var(--bg-surface);
-  color: var(--text-main);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-sm);
-  padding: 0.35rem 0.6rem;
-  font-family: var(--font-mono);
-  font-size: 0.8rem;
-  outline: none;
-}
-
-.setting-select:focus {
-  border-color: var(--color-primary);
+  gap: 0.85rem;
+  width: 100%;
 }
 
 /* Modal overlays in terminal */
