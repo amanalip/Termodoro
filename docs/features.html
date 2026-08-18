@@ -195,52 +195,56 @@
     </section>
 
     <!-- ========================================================================
-         Feature 5: In-Memory Procedural Sound Synthesis
+         Feature 5: In-Memory Procedural Phase Transition Alerts
          ======================================================================== -->
     <section class="section" id="audio-feature">
       <div class="container">
         
         <div class="section-header">
           <div class="section-tag">Acoustic Audio Engine</div>
-          <h2 class="section-title">Pure Procedural Audio Synthesis</h2>
+          <h2 class="section-title">Procedural Phase Transition Sound Cues</h2>
           <p class="section-desc">
-            Termodoro generates mathematical 16-bit PCM RIFF WAV audio directly in memory. Zero MP3 files, zero external audio assets, and zero network requests.
+            Termodoro does not use bulky MP3 files or external sound assets. Instead, it mathematically synthesizes 16-bit PCM RIFF WAV audio in memory, playing distinct acoustic cues for each timer transition.
           </p>
         </div>
 
         <div class="audio-cards-grid">
           <div class="audio-card">
-            <div class="audio-icon">🔔</div>
-            <h3 class="audio-title">528 Hz Tibetan Zen Bowl</h3>
+            <div class="audio-icon">🍅</div>
+            <h3 class="audio-title">Focus Complete: 528 Hz Zen Bowl</h3>
             <p class="audio-desc">
-              Triggered upon completing a focus Pomodoro. Synthesizes a pure 528 Hz miracle transformation tone accompanied by rich 1056 Hz and 1584 Hz overtone harmonics with exponential decay.
+              Plays automatically when a focus Pomodoro session finishes. Synthesizes a resonant 528 Hz tone with 1056 Hz and 1584 Hz harmonic overtones and smooth exponential decay.
             </p>
             <button type="button" class="btn btn-secondary" id="test-zen-btn" style="margin-top: 1rem;">
-              🔊 Play 528 Hz Bowl
+              🔊 Preview Focus Tone
             </button>
           </div>
 
           <div class="audio-card">
-            <div class="audio-icon">🎵</div>
-            <h3 class="audio-title">D5 &rarr; A5 Break Chime</h3>
+            <div class="audio-icon">☕</div>
+            <h3 class="audio-title">Short Break Complete: D5 &rarr; A5 Chime</h3>
             <p class="audio-desc">
-              Triggered when a short or long break finishes. Synthesizes an energetic upward melodic interval from D5 (587.33 Hz) to A5 (880 Hz) to gently bring you back into the zone.
+              Plays automatically when a short break interval concludes. Synthesizes an upward melodic step from D5 (587.33 Hz) to A5 (880 Hz) to gently bring you back to work.
             </p>
             <button type="button" class="btn btn-secondary" id="test-break-btn" style="margin-top: 1rem;">
-              🔊 Play D5 &rarr; A5 Chime
+              🔊 Preview Short Break Chime
             </button>
           </div>
 
           <div class="audio-card">
-            <div class="audio-icon">⚡</div>
-            <h3 class="audio-title">800 Hz Terminal Alert</h3>
+            <div class="audio-icon">🌴</div>
+            <h3 class="audio-title">Long Break Complete: C-E-G Triad</h3>
             <p class="audio-desc">
-              A clean, high-frequency 800 Hz pulse alert for instant terminal notifications and audio test signals, paired with desktop notifications.
+              Plays automatically after completing a full cycle's long break. Synthesizes a bright C5 (523.25 Hz) &rarr; E5 (659.25 Hz) &rarr; G5 (783.99 Hz) major triad arpeggio.
             </p>
-            <button type="button" class="btn btn-secondary" id="test-bell-btn" style="margin-top: 1rem;">
-              🔊 Play 800 Hz Bell
+            <button type="button" class="btn btn-secondary" id="test-long-break-btn" style="margin-top: 1rem;">
+              🔊 Preview Long Break Triad
             </button>
           </div>
+        </div>
+
+        <div style="margin-top: 1.5rem; text-align: center; font-size: 0.85rem; color: var(--text-dim);">
+          ℹ️ Sound alerts can be toggled on or off at any time via <code>Settings &rarr; Sound / Bell Alert</code> or muted globally.
         </div>
 
       </div>

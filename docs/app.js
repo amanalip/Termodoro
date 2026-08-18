@@ -303,23 +303,32 @@ function playBreakChime() {
   osc2.stop(now + 1.4);
 }
 
-// ASCII Terminal Bell (800 Hz beep)
-function playBellBeep() {
+// Long Break Completion Triad (C5 523.25 Hz -> E5 659.25 Hz -> G5 783.99 Hz)
+function playLongBreakChime() {
   if (!soundEnabled) return;
   const ctx = getAudioContext();
   if (!ctx) return;
 
   const now = ctx.currentTime;
-  const osc = ctx.createOscillator();
-  const gain = ctx.createGain();
-  osc.type = 'sine';
-  osc.frequency.setValueAtTime(800, now);
-  gain.gain.setValueAtTime(0.25, now);
-  gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.15);
-  osc.connect(gain);
-  gain.connect(ctx.destination);
-  osc.start(now);
-  osc.stop(now + 0.15);
+  const notes = [
+    { freq: 523.25, time: 0.0, dur: 0.20 },
+    { freq: 659.25, time: 0.20, dur: 0.20 },
+    { freq: 783.99, time: 0.40, dur: 1.60 }
+  ];
+
+  notes.forEach(note => {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(note.freq, now + note.time);
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.setValueAtTime(0.3, now + note.time);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + note.time + note.dur);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(now + note.time);
+    osc.stop(now + note.time + note.dur);
+  });
 }
 
 // ============================================================================
@@ -394,8 +403,8 @@ function setupCommonListeners() {
   const testBreakBtn = document.getElementById('test-break-btn');
   if (testBreakBtn) testBreakBtn.addEventListener('click', () => { playBreakChime(); showToast('Playing D5 → A5 Chime'); });
 
-  const testBellBtn = document.getElementById('test-bell-btn');
-  if (testBellBtn) testBellBtn.addEventListener('click', () => { playBellBeep(); showToast('Playing 800 Hz Alert Bell'); });
+  const testLongBreakBtn = document.getElementById('test-long-break-btn');
+  if (testLongBreakBtn) testLongBreakBtn.addEventListener('click', () => { playLongBreakChime(); showToast('Playing Long Break Triad'); });
 
   // Installation tab navigation
   document.querySelectorAll('.install-tab-btn').forEach(tab => {
