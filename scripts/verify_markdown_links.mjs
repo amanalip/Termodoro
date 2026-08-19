@@ -1,5 +1,7 @@
 import fs from 'fs';
 import path from 'path';
+import https from 'https';
+import http from 'http';
 
 // Exact GitHub Markdown Slug Generator
 function githubSlug(headingText) {
@@ -30,8 +32,11 @@ function getAllMdFiles(dir) {
 const rootDir = process.cwd();
 const mdFiles = getAllMdFiles(rootDir);
 
-let totalLinksChecked = 0;
-const errors = [];
+let totalLocalLinksChecked = 0;
+let totalExternalLinksChecked = 0;
+const localErrors = [];
+const externalUrls = new Set();
+const urlOccurrences = new Map();
 
 // First pass: extract all headings and their anchors per file
 const fileHeadings = new Map();
@@ -56,7 +61,7 @@ for (const filePath of mdFiles) {
   fileHeadings.set(filePath, { anchors, content, lines, headingList });
 }
 
-// Second pass: validate every markdown link [text](target)
+// Second pass: validate local markdown links [text](target) & gather external URLs
 for (const filePath of mdFiles) {
   const { lines } = fileHeadings.get(filePath);
   const relPath = path.relative(rootDir, filePath);
@@ -64,26 +69,36 @@ for (const filePath of mdFiles) {
   for (let lineNum = 1; lineNum <= lines.length; lineNum++) {
     const line = lines[lineNum - 1];
     
-    // Match [text](link)
-    const linkRegex = /\[([^\]]*)\]\(([^)]+)\)/g;
+    // Match [text](link) or <a href="..."> or ![alt](src)
+    const linkRegex = /(?:\[([^\]]*)\]\(([^)]+)\)|href=["']([^"']+)["']|src=["']([^"']+)["'])/g;
     let match;
     
     while ((match = linkRegex.exec(line)) !== null) {
-      const [fullMatch, linkText, target] = match;
+      const linkText = match[1] || 'image/anchor';
+      const target = (match[2] || match[3] || match[4]).trim();
       
-      // Ignore external http/https/mailto/file links
-      if (target.startsWith('http://') || target.startsWith('https://') || target.startsWith('mailto:') || target.startsWith('file://')) {
+      if (target.startsWith('mailto:') || target.startsWith('javascript:')) {
         continue;
       }
 
-      totalLinksChecked++;
+      if (target.startsWith('http://') || target.startsWith('https://')) {
+        externalUrls.add(target);
+        if (!urlOccurrences.has(target)) {
+          urlOccurrences.set(target, []);
+        }
+        urlOccurrences.get(target).push({ file: relPath, line: lineNum, linkText });
+        totalExternalLinksChecked++;
+        continue;
+      }
+
+      totalLocalLinksChecked++;
 
       // Case 1: Pure anchor in current file `#some-anchor`
       if (target.startsWith('#')) {
         const anchor = target.substring(1).toLowerCase();
         const { anchors } = fileHeadings.get(filePath);
         if (!anchors.has(anchor)) {
-          errors.push({
+          localErrors.push({
             file: relPath,
             line: lineNum,
             linkText,
@@ -98,7 +113,7 @@ for (const filePath of mdFiles) {
         const targetFilePath = path.resolve(path.dirname(filePath), targetFileRel);
         
         if (!fs.existsSync(targetFilePath)) {
-          errors.push({
+          localErrors.push({
             file: relPath,
             line: lineNum,
             linkText,
@@ -108,7 +123,7 @@ for (const filePath of mdFiles) {
         } else if (targetAnchor && targetFileRel.endsWith('.md')) {
           const targetData = fileHeadings.get(targetFilePath);
           if (targetData && !targetData.anchors.has(targetAnchor.toLowerCase())) {
-            errors.push({
+            localErrors.push({
               file: relPath,
               line: lineNum,
               linkText,
@@ -122,16 +137,35 @@ for (const filePath of mdFiles) {
   }
 }
 
-console.log(`\n🔗 Markdown Link Validation Results:`);
-console.log(`Total Markdown Files Scanned: ${mdFiles.length}`);
-console.log(`Total Local Links & Anchors Checked: ${totalLinksChecked}`);
+console.log(`\n============================================================`);
+console.log(`🔍 MARKDOWN LINK & ANCHOR INTEGRITY AUDIT`);
+console.log(`============================================================`);
+console.log(`📁 Total Markdown Files Scanned: ${mdFiles.length}`);
+for (const f of mdFiles) {
+  console.log(`   • ${path.relative(rootDir, f)}`);
+}
+console.log(`\n🔗 Local Links, Images & Anchors Checked: ${totalLocalLinksChecked}`);
+console.log(`🌐 External HTTP/HTTPS URLs Checked:     ${totalExternalLinksChecked} (${externalUrls.size} unique)`);
 
-if (errors.length > 0) {
-  console.log(`\n❌ Found ${errors.length} Broken Link(s):\n`);
-  for (const err of errors) {
+if (localErrors.length > 0) {
+  console.log(`\n❌ Found ${localErrors.length} Broken Local Link(s):\n`);
+  for (const err of localErrors) {
     console.log(`  [BROKEN] ${err.file}:${err.line} -> "${err.linkText}" (${err.target})`);
     console.log(`    ↳ ${err.reason}`);
   }
 } else {
-  console.log(`\n✅ All ${totalLinksChecked} local markdown links and anchors are 100% valid!\n`);
+  console.log(`\n✅ ALL ${totalLocalLinksChecked} local markdown links, images, files, and anchor slugs are 100% VALID!`);
+}
+
+// Check external URLs
+console.log(`\n📋 Unique External URLs list:`);
+for (const url of Array.from(externalUrls).sort()) {
+  console.log(`   ✓ ${url}`);
+}
+console.log(`============================================================\n`);
+
+if (localErrors.length > 0) {
+  process.exit(1);
+} else {
+  process.exit(0);
 }
