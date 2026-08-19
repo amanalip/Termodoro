@@ -227,7 +227,7 @@ impl App {
     pub fn on_tick(&mut self) {
         // Increment sub-second tick counter (4 ticks @ 250ms = 1 full second)
         self.tick_count = self.tick_count.wrapping_add(1);
-        if self.tick_count % 4 == 0 {
+        if self.tick_count.is_multiple_of(4) {
             // Advance timer by 1 second
             self.tick_second();
         }
