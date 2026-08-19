@@ -197,7 +197,7 @@ async function runTestSuite() {
       const codeCardTitle = await page.locator('#install-panel-linux .code-card-title').textContent();
       const copyBtnInHeader = await page.locator('#install-panel-linux .code-card-header .copy-btn').isVisible();
       assert(codeCardHeader, '.code-card-header bar exists');
-      assert(codeCardTitle.includes('Linux Terminal'), 'Code card displays title in header bar');
+      assert(codeCardTitle.includes('Linux'), 'Code card displays title in header bar');
       assert(copyBtnInHeader, 'Copy button is anchored inside .code-card-header and not floating');
 
       // 2. Click copy button
