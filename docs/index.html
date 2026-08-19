@@ -654,8 +654,12 @@ zellij run --floating --width 75% --height 75% -- termodoro</code></pre>
                 <pre><code id="code-binary"><span class="code-comment"># 1. Compile optimized standalone release artifact (~5.1 MB)</span>
 cargo build --release
 
-<span class="code-comment"># 2. Copy binary to your local user PATH directory (~/.local/bin)</span>
+<span class="code-comment"># 2. Copy binary to your local user PATH directory:</span>
+<span class="code-comment"># Linux &amp; macOS:</span>
 mkdir -p ~/.local/bin &amp;&amp; cp target/release/termodoro ~/.local/bin/ &amp;&amp; chmod +x ~/.local/bin/termodoro
+
+<span class="code-comment"># Windows (PowerShell):</span>
+Copy-Item target\release\termodoro.exe $env:USERPROFILE\.cargo\bin\
 
 <span class="code-comment"># 3. Launch Termodoro from anywhere</span>
 termodoro</code></pre>
