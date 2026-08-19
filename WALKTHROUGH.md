@@ -178,10 +178,13 @@ make test
 # Option 2: Run Playwright cross-device E2E test suite (Desktop + Tablet + Mobile)
 make test-e2e
 
-# Option 3: Using the automated script directly
+# Option 3: Run full 81-check source sanity and fact-checking audit
+make check-facts
+
+# Option 4: Using the automated script directly
 ./scripts/test_and_clean.sh
 
-# Option 4: Standard cargo test
+# Option 5: Standard cargo test
 cargo test
 ```
 
@@ -200,6 +203,7 @@ cargo test
 | **Digital Typography** | `src/ui/digits.rs` | 5x3 block font rasterization for all digits, colon, boundary values, and fallbacks |
 | **Terminal UI Rendering** | `src/ui/mod.rs` | Pixel buffer content assertions across all tabs, extreme geometries ($20 \times 10$ to $300 \times 100$), and 24-cycle dot indicators |
 | **Web Portal & Showcase** | [`scripts/e2e-website-test.mjs`](scripts/e2e-website-test.mjs) | Playwright automated E2E testing across 6 viewport profiles (1920x1080 to 320x568), mobile drawer, theme engine, copy buttons |
+| **Sanity & Fact-Check Suite** | [`scripts/sanity_and_fact_check.mjs`](scripts/sanity_and_fact_check.mjs) | 81 programmatic assertions validating source invariants, audio frequencies, theme tokens, and HTML assets |
 
 ## 5. Fact-Check, Sanity Audit & Operational Verification
 
@@ -218,6 +222,7 @@ To verify that the documented operational workflows match runtime reality, the s
 | **Live Settings Update** | Adjusting durations instantly updates timer | [`src/app.rs`](src/app.rs#L310-L360) | `test_settings_tab_vim_keys_and_live_timer_updates` | **VERIFIED** |
 | **Terminal Clean Exit** | `q` or `Esc` restores raw mode cleanly | [`src/main.rs`](src/main.rs#L25-L65) | `test_app_restart_and_state_recovery_e2e` | **VERIFIED** |
 | **Web Responsive Layout** | 100% mobile-friendly with zero overflow | [`docs/style.css`](docs/style.css) | Playwright E2E (41/41 passing tests) | **VERIFIED** |
+| **Source Truth Verification** | 81/81 assertions verified vs Rust source | [`scripts/sanity_and_fact_check.mjs`](scripts/sanity_and_fact_check.mjs) | `make check-facts` (81/81 passing checks) | **VERIFIED** |
 
 ---
 

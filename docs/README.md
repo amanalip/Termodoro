@@ -131,15 +131,16 @@ Open `http://localhost:8000` in your web browser.
 
 ---
 
-## Automated Cross-Device Playwright E2E Testing
+## Automated Cross-Device Playwright E2E & Sanity Testing
 
-The documentation portal includes an automated **Playwright End-to-End Testing Suite** to continuously verify responsiveness, component interactivity, zero-overflow geometry, and theme engine functionality across desktop, tablet, and mobile devices:
+The documentation portal includes an automated **Playwright End-to-End Testing Suite** and a **Sanity & Fact-Checking Engine** to continuously verify responsiveness, component interactivity, zero-overflow geometry, theme engine functionality, and exact correspondence with the Rust source code:
 
 ```bash
-# Run the automated Playwright E2E test suite
+# Run the automated Playwright E2E test suite (41/41 passing tests)
 make test-e2e
-# or directly:
-node scripts/e2e-website-test.mjs
+
+# Run the 81-assertion source sanity and fact-checking audit
+make check-facts
 ```
 
 ### Viewport Matrix & Automated Verifications (41/41 Tests Passing)
@@ -160,6 +161,7 @@ node scripts/e2e-website-test.mjs
 4. **18-Theme Palette Engine**: Validates theme switching via navbar dropdown `<select>` and gallery card clicks, testing dynamic CSS custom properties and pure pitch black `#000000` tokens for OLED Phosphor.
 5. **Interactive Screenshot Showcase**: Tests tab switching across all 6 views and numerical keyboard navigation (`1`–`6`).
 6. **Keybindings & FAQ Search**: Verifies real-time table row filtering and FAQ accordion query matching.
+7. **Source Fact-Check Engine (`make check-facts`)**: Programmatically verifies all 18 theme enum variants, audio frequencies, configuration bounds, and installation cards against `src/`.
 
 ---
 
@@ -177,4 +179,4 @@ Changes pushed to the `main` branch trigger `.github/workflows/static.yml`. The 
 - Keep the codebase vanilla. Do not add JavaScript frameworks, bundlers, or third-party tracking scripts.
 - If you add or modify a theme in `src/theme.rs`, update both `THEMES` in `docs/app.js` and the corresponding `html[data-theme="..."]` rules in `docs/style.css`.
 - When making substantial CSS or JS changes, increment the version query parameter (for example, `style.css?v=...`) across `index.html`, `features.html`, and `faqs.html` to avoid stale browser cache issues.
-- Always execute `make test-e2e` to verify zero horizontal overflow and mobile responsiveness before committing changes to `docs/`.
+- Always execute `make test-e2e` and `make check-facts` to verify zero horizontal overflow, mobile responsiveness, and source truth before committing changes to `docs/`.

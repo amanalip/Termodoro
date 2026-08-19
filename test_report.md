@@ -279,3 +279,23 @@ Test coverage now spans all **9 core modules** with **192 unit, integration, and
    - Verified instant table row filtering upon query inputs.
 7. **Suite 7: FAQ Hub Search & Category Filtering** (2/2 checks)  
    - Verified category pill filtering and keyword search matching on `faqs.html`.
+
+---
+
+## 6. Automated Source Code Sanity & Fact-Checking Audit Suite
+
+**Test Script:** [`scripts/sanity_and_fact_check.mjs`](scripts/sanity_and_fact_check.mjs)  
+**Execution Command:** `make check-facts` or `node scripts/sanity_and_fact_check.mjs`  
+**Pass Rate:** **81 / 81 Checks Passed (100% Invariants Verified)**  
+
+### Audit Category Breakdown
+
+| Category | Assertions | Source Truth Invariants Audited | Status |
+| :--- | :---: | :--- | :---: |
+| **Rust Source Invariants** | 31 | All 18 `ThemeChoice` variants, 528Hz/1056Hz/1584Hz Work chime harmonics, 587.33Hz/880.0Hz Short Break tones, 523.25Hz/659.25Hz/783.99Hz Long Break triad, 25/5/15m config bounds | **PASS** (31/31) |
+| **HTML Assets & Shell Structure** | 18 | Viewport meta, UTF-8 charset, favicon, mobile drawer & backdrop across `index.html`, `features.html`, and `faqs.html` | **PASS** (18/18) |
+| **Screenshot Asset Integrity** | 6 | All 6 high-contrast KDE Konsole PNG assets exist on disk with valid file sizes (50 KB–105 KB) | **PASS** (6/6) |
+| **18-Theme CSS & JS Parity** | 18 | 1:1 synchronization between `src/theme.rs`, `docs/style.css` (`data-theme`), `docs/app.js`, and HTML selectors | **PASS** (18/18) |
+| **Web Audio Synthesizer Math** | 3 | Exact mathematical frequency formulas match Rust `src/audio.rs` | **PASS** (3/3) |
+| **Install Code Card Anchoring** | 5 | All 5 OS install panels use structured `.code-card` headers with anchored copy buttons | **PASS** (5/5) |
+| **Total Fact-Check Assertions** | **81** | **All Invariants Match Production Codebase & Runtime Truth** | **100% PASS** |

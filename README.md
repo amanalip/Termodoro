@@ -300,21 +300,24 @@ Termodoro uses purely synthesized in-memory PCM audio without requiring heavy ex
 
 ---
 
-### Step 3: Cloning and Installing Termodoro
-
-First, download the source code repository from GitHub:
-```bash
-git clone https://github.com/amanalip/Termodoro.git
-cd Termodoro
-```
+### Step 3: Installing Termodoro
 
 Choose the installation option that fits your preference:
 
-#### Option A: Global Installation via Cargo (Recommended)
-This compiles an optimized, standalone binary (~5.1 MB) and installs it into `~/.cargo/bin/termodoro`:
+#### Option A: One-Line Global Install via Cargo (Fastest)
+Install Termodoro directly from GitHub into `~/.cargo/bin/termodoro`:
 ```bash
+cargo install --git https://github.com/amanalip/Termodoro.git
+```
+
+#### Option B: Global Installation from Local Clone (Recommended for Custom Tweaks)
+First, download the source code repository and install into `~/.cargo/bin/termodoro`:
+```bash
+git clone https://github.com/amanalip/Termodoro.git
+cd Termodoro
 cargo install --path .
 ```
+
 Once installed, you can launch Termodoro from **any terminal folder** on your system:
 ```bash
 termodoro
@@ -332,7 +335,7 @@ termodoro
 
 > **Disk Space Tip**: After running `cargo install --path .`, you can safely run `cargo clean` inside this repository folder. The installed `termodoro` binary in `~/.cargo/bin/` will continue to launch instantly (0.01s) without needing any recompilation, keeping your local project folder at a lean **~3.9 MB** without generating temporary compiler cache files!
 
-#### Option B: Running Directly from Source (Testing / Development)
+#### Option C: Running Directly from Source (Testing / Development)
 If you are developing or want to test source code edits without installing globally:
 ```bash
 # Debug mode (creates local target/ build cache)
@@ -342,7 +345,7 @@ cargo run
 cargo run --release
 ```
 
-#### Option C: Manual Release Binary Installation
+#### Option D: Manual Release Binary Installation
 If you prefer placing compiled standalone binaries directly in standard Unix directories (such as `~/.local/bin` or `/usr/local/bin`):
 ```bash
 # 1. Compile the release artifact
@@ -899,6 +902,7 @@ node scripts/e2e-website-test.mjs
 | `make test` | Run 192-test Rust suite and automatically clean `target/` cache |
 | `make test-clean` | Run tests and auto-clean (reclaims ~1.8GB disk space) |
 | `make test-e2e` | Run full Playwright cross-device E2E test suite (41/41 tests across 6 viewports) |
+| `make check-facts` | Run full 81-assertion sanity & fact-checking audit against Rust codebase |
 | `make check` | Execute `fmt`, `clippy`, full 192-test suite, and clean up |
 | `make build` | Compile optimized release binary in `target/release/termodoro` |
 | `make run` | Launch Termodoro in release mode |
@@ -918,6 +922,7 @@ To provide full confidence to developers, contributors, and users, all claims, m
 | :--- | :--- | :--- | :--- | :---: |
 | **Test Suite Pass Rate** | 192 / 192 Passed (100%) | `src/` (All 9 test modules) | `cargo test` execution (1.16s total runtime) | **VERIFIED** |
 | **Playwright E2E Pass Rate** | 41 / 41 Passed (100%) | [`scripts/e2e-website-test.mjs`](scripts/e2e-website-test.mjs) | Playwright Chromium across 6 responsive viewports | **VERIFIED** |
+| **Sanity & Fact-Check Audit** | 81 / 81 Verified (100%) | [`scripts/sanity_and_fact_check.mjs`](scripts/sanity_and_fact_check.mjs) | Automated AST, HTML, CSS & audio frequency audit (`make check-facts`) | **VERIFIED** |
 | **Privacy & Zero Telemetry** | 100% Offline & Private (0 Network Calls) | `src/storage.rs` & `Cargo.lock` | Unit tests `test_privacy_zero_telemetry_guarantees` & CI check | **VERIFIED** |
 | **Rust Safety Guarantee** | 100% Safe Rust (`0` unsafe blocks) | Full codebase grep (`grep -rn "unsafe" src/`) | Static code analysis via compiler frontend | **VERIFIED** |
 | **Static Analysis Compliance** | 0 Warnings, 0 Errors | Entire workspace | `cargo clippy -- -D warnings` | **VERIFIED** |

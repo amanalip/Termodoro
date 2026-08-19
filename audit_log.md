@@ -338,6 +338,22 @@ This document maintains a transparent, permanent, and structured audit log of re
 
 ---
 
+### AUD-018: Installation Architecture Unification, Distro Prerequisites & 81-Check Automated Source Audit
+- **Date:** August 18, 2026
+- **Category:** Installation Architecture, Documentation Veracity & Fact-Checking Engine
+- **Commit:** [`8aa9253`](https://github.com/amanalip/Termodoro/commit/8aa9253)
+- **Severity:** Documentation Clarity, Code Formatting & Automated Source Verification
+- **Description:** 
+  The installation section on the documentation website underwent comprehensive architectural refactoring to eliminate disjointed split boxes, format pure un-commented commands, and introduce an automated 81-check source sanity suite.
+- **Technical Remediation & Verification:**
+  1. **Unified Single Terminal Card Structure**: Replaced split second hint containers with a single terminal card containing macOS/Linux window control dots (`dot-red`, `dot-yellow`, `dot-green`) and anchored copy buttons.
+  2. **Un-Commented Executable Code Snippets**: Formatted commands across Ubuntu/Debian, Arch Linux, Fedora/RHEL, macOS, and Windows with un-commented, copy-ready commands.
+  3. **Segmented Desktop Tab Layout**: Optimized `.install-nav` into a sleek single-line segmented control on desktop screens, transitioning into an adaptive 2-column touch grid on mobile viewports.
+  4. **Automated Sanity & Fact-Checking Engine**: Developed [`scripts/sanity_and_fact_check.mjs`](scripts/sanity_and_fact_check.mjs) (`make check-facts`) executing 81 programmatic assertions cross-referencing all 18 theme enum variants, exact audio chime frequencies (528Hz, 587.33Hz, 880.0Hz, 523.25Hz, 659.25Hz, 783.99Hz), default configuration bounds, HTML structural elements, and screenshot assets on disk.
+- **Resolution Status:** **VERIFIED & CERTIFIED (81/81 Sanity Checks + 41/41 Playwright Tests + 192 Rust Tests Passing)**
+
+---
+
 ## 3. Fact-Check, Sanity Audit & Certification Matrix
 
 | Audit Target | Documented Metric | Verified Fact | Verification Evidence |
@@ -346,6 +362,7 @@ This document maintains a transparent, permanent, and structured audit log of re
 | **Dependencies** | 9 direct crates | Clean resolution | Verified in `Cargo.lock` |
 | **Automated Tests** | 192 Unit & Integration | 192 Passed, 0 Failed | `cargo test` (1.16s runtime) |
 | **Playwright Web E2E** | 41 Cross-Device Tests | 41 Passed, 0 Failed | `make test-e2e` across 6 viewports |
+| **Source Sanity Audit** | 81 Fact-Checked Invariants | 81 Passed, 0 Failed | `make check-facts` (`scripts/sanity_and_fact_check.mjs`) |
 | **Privacy & Telemetry** | 0 Network Calls / Trackers | 100% Local-First | Unit tests & CI lockfile audit |
 | **Unsafe Blocks** | 0 Unsafe blocks | 100% Safe Rust | AST scan (`! grep -rn "unsafe" src/`) |
 | **Linter Warnings** | 0 Warnings | Clean Clippy output | `cargo clippy -- -D warnings` |

@@ -383,6 +383,9 @@ make test
 
 # Run 41 Playwright Web E2E tests
 make test-e2e
+
+# Run 81-check source sanity and fact-checking audit
+make check-facts
 ```
 
 ---
@@ -404,6 +407,7 @@ To ensure strict engineering correctness and technical veracity, the implementat
 | **Theme Contrast** | WCAG 2.1 AA Compliant Contrast ($R \ge 4.5:1$) across all 18 themes | [`src/theme.rs`](src/theme.rs#L8-L280) | `test_all_eighteen_themes_cycle_and_persistence_e2e` | **VERIFIED** |
 | **UI Geometry Safety** | Minimum bounds checking ($W \ge 80, H \ge 24$) with fallback | [`src/ui/mod.rs`](src/ui/mod.rs#L40-L100) | `test_render_extreme_small_terminals` | **VERIFIED** |
 | **Web Responsive Layout** | Zero horizontal overflow & mobile navigation | [`docs/style.css`](docs/style.css) | `scripts/e2e-website-test.mjs` (41/41 PASS) | **VERIFIED** |
+| **Source Sanity Proof** | 81 programmatic assertions against source invariants | [`scripts/sanity_and_fact_check.mjs`](scripts/sanity_and_fact_check.mjs) | `make check-facts` (81/81 PASS) | **VERIFIED** |
 
 ---
 
