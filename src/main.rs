@@ -13,7 +13,12 @@ use crossterm::{
 // Import Ratatui Terminal backend
 use ratatui::{backend::CrosstermBackend, Terminal};
 // Import standard error and I/O utilities
-use std::{error::Error, io::stdout, panic, time::Duration};
+use std::{
+    error::Error,
+    io::stdout,
+    panic,
+    time::{Duration, Instant},
+};
 
 // Sets up a panic hook to guarantee terminal state is restored if the program encounters a panic
 fn setup_panic_hook() {
@@ -82,16 +87,23 @@ fn run_app(
     terminal: &mut Terminal<CrosstermBackend<std::io::Stdout>>,
     app: &mut App,
 ) -> Result<(), Box<dyn Error>> {
-    // Define tick rate interval (250 milliseconds for smooth countdown updates)
+    // Define tick rate interval (250 milliseconds for responsive UI and status updates)
     let tick_rate = Duration::from_millis(250);
+    // Track timestamp of last tick execution
+    let mut last_tick = Instant::now();
 
     // Continuous event loop
     loop {
         // Render current application UI frame
         terminal.draw(|f| ui::render(f, app))?;
 
-        // Check for incoming terminal events with timeout matching tick rate
-        if event::poll(tick_rate)? {
+        // Calculate dynamic timeout until next tick boundary
+        let timeout = tick_rate
+            .checked_sub(last_tick.elapsed())
+            .unwrap_or_else(|| Duration::from_secs(0));
+
+        // Check for incoming terminal events with dynamic timeout
+        if event::poll(timeout)? {
             // Read terminal event
             if let Event::Key(key) = event::read()? {
                 // Ensure key press event (filters out release events on certain platforms)
@@ -102,8 +114,11 @@ fn run_app(
             }
         }
 
-        // Invoke periodic application tick logic
-        app.on_tick();
+        // Only invoke periodic application tick logic when the tick interval has elapsed
+        if last_tick.elapsed() >= tick_rate {
+            app.on_tick();
+            last_tick = Instant::now();
+        }
 
         // Check if user requested to quit
         if app.should_quit {

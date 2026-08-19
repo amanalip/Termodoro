@@ -61,6 +61,8 @@ pub struct App {
     pub status_message: Option<String>,
     // Tick counter for expiring status message
     pub status_message_ticks: usize,
+    // Sub-second tick counter for pacing 1-second timer decrements (4 ticks @ 250ms = 1s)
+    pub tick_count: u32,
 }
 
 impl Default for App {
@@ -117,6 +119,8 @@ impl App {
             status_message: None,
             // 0 ticks elapsed for message
             status_message_ticks: 0,
+            // 0 sub-second ticks elapsed
+            tick_count: 0,
         }
     }
 
@@ -169,9 +173,9 @@ impl App {
         }
     }
 
-    // Periodic tick method invoked on every timer interval (~250ms)
-    pub fn on_tick(&mut self) {
-        // Tick countdown timer
+    // Advances the Pomodoro countdown timer by 1 second and handles phase completion lifecycles
+    pub fn tick_second(&mut self) {
+        // Tick countdown timer by 1 full second
         if let Some(event) = self.timer.tick(&self.config) {
             // Handle timer completion event
             match event {
@@ -216,6 +220,16 @@ impl App {
                     self.save_state();
                 }
             }
+        }
+    }
+
+    // Periodic tick method invoked on every event loop tick interval (~250ms)
+    pub fn on_tick(&mut self) {
+        // Increment sub-second tick counter (4 ticks @ 250ms = 1 full second)
+        self.tick_count = self.tick_count.wrapping_add(1);
+        if self.tick_count % 4 == 0 {
+            // Advance timer by 1 second
+            self.tick_second();
         }
 
         // Decrement status message counter if active
@@ -1003,14 +1017,14 @@ mod tests {
         assert_eq!(app.timer.status, crate::timer::TimerStatus::Stopped);
         assert_eq!(app.timer.time_remaining_secs, 5 * 60);
 
-        // Add task and test on_tick completion
+        // Add task and test tick_second completion
         app.tasks.add("Focus Task".to_string(), 2);
         app.timer.phase = PomodoroPhase::Work;
         app.timer.status = crate::timer::TimerStatus::Running;
         app.timer.time_remaining_secs = 1;
 
-        // Tick to complete phase
-        app.on_tick();
+        // Tick 1 second to complete phase
+        app.tick_second();
         assert_eq!(app.tasks.tasks[0].pomodoros_spent, 1);
         assert_eq!(app.stats.sessions.len(), 1);
         assert_eq!(app.stats.sessions[0].phase, PomodoroPhase::Work);
@@ -1034,14 +1048,14 @@ mod tests {
         assert_eq!(app.timer.phase, PomodoroPhase::Work);
         app.timer.status = crate::timer::TimerStatus::Running;
         app.timer.time_remaining_secs = 1;
-        app.on_tick(); // Completes Work 1 -> ShortBreak 1 (cycle 2)
+        app.tick_second(); // Completes Work 1 -> ShortBreak 1 (cycle 2)
         assert_eq!(app.timer.phase, PomodoroPhase::ShortBreak);
         assert_eq!(app.timer.current_cycle, 2);
         assert_eq!(app.tasks.tasks[0].pomodoros_spent, 1);
 
         // Complete ShortBreak 1
         app.timer.time_remaining_secs = 1;
-        app.on_tick(); // Completes ShortBreak 1 -> Work 2
+        app.tick_second(); // Completes ShortBreak 1 -> Work 2
         assert_eq!(app.timer.phase, PomodoroPhase::Work);
 
         // Switch target to Task B
@@ -1051,30 +1065,30 @@ mod tests {
 
         // Cycle 2: Work (Task B active)
         app.timer.time_remaining_secs = 1;
-        app.on_tick(); // Completes Work 2 -> ShortBreak 2 (cycle 3)
+        app.tick_second(); // Completes Work 2 -> ShortBreak 2 (cycle 3)
         assert_eq!(app.timer.phase, PomodoroPhase::ShortBreak);
         assert_eq!(app.timer.current_cycle, 3);
         assert_eq!(app.tasks.tasks[1].pomodoros_spent, 1);
 
         // Complete ShortBreak 2
         app.timer.time_remaining_secs = 1;
-        app.on_tick(); // Completes ShortBreak 2 -> Work 3
+        app.tick_second(); // Completes ShortBreak 2 -> Work 3
         assert_eq!(app.timer.phase, PomodoroPhase::Work);
 
         // Cycle 3: Work
         app.timer.time_remaining_secs = 1;
-        app.on_tick(); // Completes Work 3 -> ShortBreak 3 (cycle 4)
+        app.tick_second(); // Completes Work 3 -> ShortBreak 3 (cycle 4)
         assert_eq!(app.timer.phase, PomodoroPhase::ShortBreak);
         assert_eq!(app.timer.current_cycle, 4);
 
         // Complete ShortBreak 3
         app.timer.time_remaining_secs = 1;
-        app.on_tick(); // Completes ShortBreak 3 -> Work 4
+        app.tick_second(); // Completes ShortBreak 3 -> Work 4
         assert_eq!(app.timer.phase, PomodoroPhase::Work);
 
         // Cycle 4: Work (at cycle 4)
         app.timer.time_remaining_secs = 1;
-        app.on_tick(); // Completes Work 4 -> LongBreak! Cycle resets to 1
+        app.tick_second(); // Completes Work 4 -> LongBreak! Cycle resets to 1
         assert_eq!(app.timer.phase, PomodoroPhase::LongBreak);
         assert_eq!(app.timer.current_cycle, 1);
         assert_eq!(app.timer.completed_pomodoros, 4);
@@ -1395,7 +1409,7 @@ mod tests {
             // Tick work to 0
             app.timer.time_remaining_secs = 1;
             app.timer.status = crate::timer::TimerStatus::Running;
-            app.on_tick();
+            app.tick_second();
 
             if cycle < 24 {
                 assert_eq!(app.timer.phase, PomodoroPhase::ShortBreak);
@@ -1403,7 +1417,7 @@ mod tests {
                 // Tick short break to 0
                 app.timer.time_remaining_secs = 1;
                 app.timer.status = crate::timer::TimerStatus::Running;
-                app.on_tick();
+                app.tick_second();
                 assert_eq!(app.timer.phase, PomodoroPhase::Work);
             } else {
                 // 24th cycle completes into LongBreak and resets cycle to 1
@@ -1714,7 +1728,7 @@ mod tests {
         app.timer.phase = PomodoroPhase::Work;
         app.timer.status = crate::timer::TimerStatus::Running;
         app.timer.time_remaining_secs = 1;
-        app.on_tick();
+        app.tick_second();
         assert_eq!(app.stats.sessions.len(), 1);
         assert_eq!(app.stats.sessions[0].task_id, None);
 
@@ -1732,7 +1746,7 @@ mod tests {
         app.timer.phase = PomodoroPhase::Work;
         app.timer.status = crate::timer::TimerStatus::Running;
         app.timer.time_remaining_secs = 1;
-        app.on_tick();
+        app.tick_second();
 
         assert_eq!(app.timer.phase, PomodoroPhase::ShortBreak);
         assert_eq!(app.timer.status, crate::timer::TimerStatus::Stopped);
@@ -1743,7 +1757,7 @@ mod tests {
 
         // Break finishes -> Work should be STOPPED (awaiting user start)
         app.timer.time_remaining_secs = 1;
-        app.on_tick();
+        app.tick_second();
 
         assert_eq!(app.timer.phase, PomodoroPhase::Work);
         assert_eq!(app.timer.status, crate::timer::TimerStatus::Stopped);
@@ -1763,7 +1777,7 @@ mod tests {
         app.timer.current_cycle = 1;
         app.timer.status = crate::timer::TimerStatus::Running;
         app.timer.time_remaining_secs = 1;
-        app.on_tick();
+        app.tick_second();
 
         assert_eq!(app.timer.phase, PomodoroPhase::LongBreak);
         assert_eq!(app.timer.current_cycle, 1);
@@ -2061,6 +2075,65 @@ mod tests {
             .as_ref()
             .unwrap()
             .contains("Task deleted"));
+
+        let _ = std::fs::remove_dir_all(temp_dir);
+    }
+
+    #[test]
+    fn test_subsecond_tick_accumulation_and_second_decrement() {
+        let (mut app, temp_dir) = create_test_app();
+        app.timer.phase = PomodoroPhase::Work;
+        app.timer.status = crate::timer::TimerStatus::Running;
+        app.timer.time_remaining_secs = 10;
+        assert_eq!(app.tick_count, 0);
+
+        // First 3 ticks (250ms, 500ms, 750ms) -> timer should remain at 10s
+        app.on_tick();
+        assert_eq!(app.tick_count, 1);
+        assert_eq!(app.timer.time_remaining_secs, 10);
+
+        app.on_tick();
+        assert_eq!(app.tick_count, 2);
+        assert_eq!(app.timer.time_remaining_secs, 10);
+
+        app.on_tick();
+        assert_eq!(app.tick_count, 3);
+        assert_eq!(app.timer.time_remaining_secs, 10);
+
+        // 4th tick (1000ms = 1s) -> timer decrements to 9s
+        app.on_tick();
+        assert_eq!(app.tick_count, 4);
+        assert_eq!(app.timer.time_remaining_secs, 9);
+
+        // 4 more ticks -> timer decrements to 8s
+        for _ in 0..4 {
+            app.on_tick();
+        }
+        assert_eq!(app.tick_count, 8);
+        assert_eq!(app.timer.time_remaining_secs, 8);
+
+        let _ = std::fs::remove_dir_all(temp_dir);
+    }
+
+    #[test]
+    fn test_keypresses_do_not_decrement_timer() {
+        let (mut app, temp_dir) = create_test_app();
+        app.timer.phase = PomodoroPhase::Work;
+        app.timer.status = crate::timer::TimerStatus::Running;
+        app.timer.time_remaining_secs = 25 * 60;
+        let initial_remaining = app.timer.time_remaining_secs;
+        let initial_tick_count = app.tick_count;
+
+        // Simulate 50 rapid keypresses across different tabs
+        for _ in 0..50 {
+            app.on_key_event(make_key(KeyCode::Char('2'))); // Switch to Tasks tab
+            app.on_key_event(make_key(KeyCode::Char('3'))); // Switch to Stats tab
+            app.on_key_event(make_key(KeyCode::Char('1'))); // Switch to Timer tab
+        }
+
+        // Timer remaining seconds and tick_count must remain completely unaffected by keypresses
+        assert_eq!(app.timer.time_remaining_secs, initial_remaining);
+        assert_eq!(app.tick_count, initial_tick_count);
 
         let _ = std::fs::remove_dir_all(temp_dir);
     }
