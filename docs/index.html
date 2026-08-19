@@ -501,12 +501,14 @@
 
         <div class="install-hub">
           
-          <div class="install-nav">
-            <button type="button" class="install-tab-btn active" data-install="linux">Linux (Cargo)</button>
-            <button type="button" class="install-tab-btn" data-install="macos">macOS (Apple &amp; Intel)</button>
-            <button type="button" class="install-tab-btn" data-install="windows">Windows (PowerShell)</button>
-            <button type="button" class="install-tab-btn" data-install="multiplexer">tmux &amp; Zellij</button>
-            <button type="button" class="install-tab-btn" data-install="binary">Manual Binary</button>
+          <div class="install-nav-wrapper">
+            <div class="install-nav">
+              <button type="button" class="install-tab-btn active" data-install="linux">Linux (Cargo)</button>
+              <button type="button" class="install-tab-btn" data-install="macos">macOS (Apple &amp; Intel)</button>
+              <button type="button" class="install-tab-btn" data-install="windows">Windows (PowerShell)</button>
+              <button type="button" class="install-tab-btn" data-install="multiplexer">tmux &amp; Zellij</button>
+              <button type="button" class="install-tab-btn" data-install="binary">Manual Binary</button>
+            </div>
           </div>
 
           <!-- Panel 1: Linux -->
@@ -514,6 +516,11 @@
             <div class="code-card">
               <div class="code-card-header">
                 <div class="code-card-title">
+                  <span class="window-dots">
+                    <span class="dot dot-red"></span>
+                    <span class="dot dot-yellow"></span>
+                    <span class="dot dot-green"></span>
+                  </span>
                   <span>Linux (Cargo / Source)</span>
                 </div>
                 <button type="button" class="copy-btn" data-target="code-linux">📋 Copy</button>
@@ -533,6 +540,11 @@
             <div class="code-card">
               <div class="code-card-header">
                 <div class="code-card-title">
+                  <span class="window-dots">
+                    <span class="dot dot-red"></span>
+                    <span class="dot dot-yellow"></span>
+                    <span class="dot dot-green"></span>
+                  </span>
                   <span>macOS (Apple Silicon &amp; Intel)</span>
                 </div>
                 <button type="button" class="copy-btn" data-target="code-macos">📋 Copy</button>
@@ -552,6 +564,11 @@
             <div class="code-card">
               <div class="code-card-header">
                 <div class="code-card-title">
+                  <span class="window-dots">
+                    <span class="dot dot-red"></span>
+                    <span class="dot dot-yellow"></span>
+                    <span class="dot dot-green"></span>
+                  </span>
                   <span>Windows (PowerShell)</span>
                 </div>
                 <button type="button" class="copy-btn" data-target="code-windows">📋 Copy</button>
@@ -571,6 +588,11 @@
             <div class="code-card">
               <div class="code-card-header">
                 <div class="code-card-title">
+                  <span class="window-dots">
+                    <span class="dot dot-red"></span>
+                    <span class="dot dot-yellow"></span>
+                    <span class="dot dot-green"></span>
+                  </span>
                   <span>tmux &amp; Zellij Integration</span>
                 </div>
                 <button type="button" class="copy-btn" data-target="code-multiplexer">📋 Copy</button>
@@ -590,6 +612,11 @@
             <div class="code-card">
               <div class="code-card-header">
                 <div class="code-card-title">
+                  <span class="window-dots">
+                    <span class="dot dot-red"></span>
+                    <span class="dot dot-yellow"></span>
+                    <span class="dot dot-green"></span>
+                  </span>
                   <span>Standalone Release Binary</span>
                 </div>
                 <button type="button" class="copy-btn" data-target="code-binary">📋 Copy</button>
