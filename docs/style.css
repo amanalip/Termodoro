@@ -1697,7 +1697,7 @@ button {
 
 .install-nav {
   display: inline-flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   background: var(--bg-card);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
@@ -1705,6 +1705,8 @@ button {
   gap: 0.35rem;
   justify-content: center;
   box-shadow: var(--shadow-sm);
+  max-width: 100%;
+  overflow-x: auto;
 }
 
 .install-tab-btn {
@@ -1734,6 +1736,11 @@ button {
   box-shadow: var(--shadow-sm);
 }
 
+.code-comment {
+  color: var(--text-muted);
+  opacity: 0.8;
+}
+
 .window-dots {
   display: inline-flex;
   align-items: center;
@@ -1751,30 +1758,6 @@ button {
 .window-dots .dot-red { background: #ff5f56; }
 .window-dots .dot-yellow { background: #ffbd2e; }
 .window-dots .dot-green { background: #27c93f; }
-
-.install-hint {
-  margin-top: 0.85rem;
-  padding: 0.85rem 1.15rem;
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  font-size: 0.84rem;
-  color: var(--text-muted);
-  line-height: 1.6;
-}
-
-.install-hint code {
-  background: var(--bg-surface);
-  color: var(--color-primary);
-  padding: 0.15rem 0.45rem;
-  border-radius: var(--radius-sm);
-  font-family: var(--font-mono);
-  font-size: 0.82rem;
-}
-
-.install-hint strong {
-  color: var(--text-main);
-}
 
 .code-card {
   background: var(--bg-surface);
