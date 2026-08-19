@@ -529,14 +529,18 @@
                 <pre><code id="code-linux"><span class="code-comment"># 1. Install ALSA audio headers &amp; build tools (one-time setup)</span>
 <span class="code-comment"># Ubuntu / Debian:</span>
 sudo apt update &amp;&amp; sudo apt install -y build-essential git libasound2-dev pkg-config
-<span class="code-comment"># Arch Linux:      sudo pacman -S --needed base-devel git alsa-lib pkgconf</span>
-<span class="code-comment"># Fedora / RHEL:   sudo dnf install -y git alsa-lib-devel pkgconf-pkg-config</span>
+
+<span class="code-comment"># Arch Linux:</span>
+sudo pacman -S --needed base-devel git alsa-lib pkgconf
+
+<span class="code-comment"># Fedora / RHEL:</span>
+sudo dnf install -y git alsa-lib-devel pkgconf-pkg-config
 
 <span class="code-comment"># 2. Install Termodoro globally via Cargo</span>
 cargo install --git https://github.com/amanalip/Termodoro.git
 
 <span class="code-comment"># (Optional) Or compile locally from source:</span>
-<span class="code-comment"># git clone https://github.com/amanalip/Termodoro.git &amp;&amp; cd Termodoro &amp;&amp; cargo install --path .</span>
+git clone https://github.com/amanalip/Termodoro.git &amp;&amp; cd Termodoro &amp;&amp; cargo install --path .
 
 <span class="code-comment"># 3. Launch Termodoro</span>
 termodoro</code></pre>
