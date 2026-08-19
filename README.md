@@ -4,7 +4,7 @@
 
 <img src="assets/logo.svg" width="96" height="96" alt="Termodoro Totoro Logo" />
 
-This was a experiment with Google Antigravity. The repo is now archived. 
+This was a experiment with Google Antigravity. The repo is now archived. Github Pages website removed.
 
 [![CI](https://github.com/amanalip/Termodoro/actions/workflows/rust.yml/badge.svg)](https://github.com/amanalip/Termodoro/actions)
 [![Website](https://img.shields.io/badge/website-live%20showcase-blue.svg)](https://amanalip.github.io/Termodoro/)
