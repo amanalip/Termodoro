@@ -240,7 +240,7 @@ Test coverage now spans all **9 core modules** with **192 unit, integration, and
 188. `ui::tests::test_task_modal_focus_switch_and_cancel_invariants`
 189. `ui::tests::test_render_twenty_four_cycle_dots_timer_view`
 190. `ui::tests::test_render_varied_terminal_geometries_stress`
-191. `ui::tests::test_ui_render_with_status_message_banner_content`
+191. `ui::tests::test_render_task_modal_both_focus_states`
 192. `ui::tests::test_ui_render_with_status_message_banner_content`
 
 ---

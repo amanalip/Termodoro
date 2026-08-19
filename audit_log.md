@@ -24,6 +24,8 @@ This document maintains a transparent, permanent, and structured audit log of re
    - [AUD-014: GitHub Pages Project Website, Web Simulator & static.yml CI Configuration](#aud-014-github-pages-project-website-web-simulator--staticyml-ci-configuration)
    - [AUD-015: 18-Theme Native CSS Engine, Navbar Selector & Headless Browser Certification](#aud-015-18-theme-native-css-engine-navbar-selector--headless-browser-certification)
    - [AUD-016: Vector SVG Screenshots, Untruncated Task Backlog & Clean Window Title Headers](#aud-016-vector-svg-screenshots-untruncated-task-backlog--clean-window-title-headers)
+   - [AUD-017: Mobile Responsive Navigation, Card-Anchored Copy Buttons & 41-Test Playwright Cross-Viewport E2E Suite](#aud-017-mobile-responsive-navigation-card-anchored-copy-buttons--41-test-playwright-cross-viewport-e2e-suite)
+   - [AUD-018: Installation Architecture Unification, Distro Prerequisites & 81-Check Automated Source Audit](#aud-018-installation-architecture-unification-distro-prerequisites--81-check-automated-source-audit)
 3. [Fact-Check, Sanity Audit & Certification Matrix](#3-fact-check-sanity-audit--certification-matrix)
 4. [Future Audit Protocol](#4-future-audit-protocol)
 
@@ -49,6 +51,8 @@ This document maintains a transparent, permanent, and structured audit log of re
 | [**AUD-014**](#aud-014-github-pages-project-website-web-simulator--staticyml-ci-configuration) | 2026-08-18 | GitHub Pages, Web Simulator & CI | `c8cc114` | **CERTIFIED** |
 | [**AUD-015**](#aud-015-18-theme-native-css-engine-navbar-selector--headless-browser-certification) | 2026-08-18 | Web Architecture & Theme Engine | `c8cc114` | **CERTIFIED** |
 | [**AUD-016**](#aud-016-vector-svg-screenshots-untruncated-task-backlog--clean-window-title-headers) | 2026-08-18 | Documentation Screenshots & Vector SVG Unification | `5fe415f` | **VERIFIED** |
+| [**AUD-017**](#aud-017-mobile-responsive-navigation-card-anchored-copy-buttons--41-test-playwright-cross-viewport-e2e-suite) | 2026-08-18 | Mobile UX & Playwright E2E Automation | `f0fd3f3` | **VERIFIED** |
+| [**AUD-018**](#aud-018-installation-architecture-unification-distro-prerequisites--81-check-automated-source-audit) | 2026-08-18 | Installation Architecture & Fact-Check Engine | `8aa9253` | **CERTIFIED** |
 
 ---
 

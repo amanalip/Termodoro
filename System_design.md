@@ -281,7 +281,7 @@ Where:
 
 ### Audio Chime Harmonic Algorithms
 1. **Focus Completion (Zen Tibetan Bowl)**: 528 Hz fundamental with subtle harmonic overtone (1056 Hz) and gentle 2.5-second exponential decay.
-2. **Short Break Completion (Two-Tone Alert)**: Dual chime at 659.25 Hz ($E_5$) followed by 880.00 Hz ($A_5$).
+2. **Short Break Completion (Two-Tone Alert)**: Dual chime at 587.33 Hz ($D_5$) followed by 880.00 Hz ($A_5$).
 3. **Long Break Completion (Major Triad Chord)**: Harmonious major chord comprising $C_5$ (523.25 Hz), $E_5$ (659.25 Hz), and $G_5$ (783.99 Hz).
 
 ### Hardware Click Prevention & Envelope Decay
