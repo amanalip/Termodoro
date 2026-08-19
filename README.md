@@ -130,7 +130,7 @@ Termodoro/
 ├── IMPLEMENTATION.md           # In-depth engineering specification and algorithms
 ├── WALKTHROUGH.md              # Operational workflows, code tour, and test benchmarks
 ├── test_report.md              # Comprehensive 192-test QA audit & test suite report
-├── audit_log.md                # Permanent audit log & verification history (AUD-001 to AUD-016)
+├── audit_log.md                # Permanent audit log & verification history (AUD-001 to AUD-018)
 ├── new_features_tracker.md     # Feature tracking roadmap and specifications
 ├── scripts/                    # Automation helper scripts (test_and_clean.sh)
 ├── docs/                       # GitHub Pages live web showcase, simulator & documentation
@@ -461,7 +461,7 @@ To verify your installation:
 | Symptom / Error Message | Root Cause | Exact Solution |
 | :--- | :--- | :--- |
 | `error: linker 'cc' not found` | C compiler linker is missing on your system | **Ubuntu/Debian**: `sudo apt install -y build-essential`<br>**Arch**: `sudo pacman -S base-devel`<br>**macOS**: `xcode-select --install` |
-| `pkg-config / alsa-lib not found` | Audio development headers are missing | **Ubuntu/Debian**: `sudo apt install -y libasound2-dev pkg-config`<br>**Fedora**: `sudo dnf install -y alsa-lib-devel pkgconf-pkg-config` |
+| `pkg-config / alsa-lib not found` | Audio development headers are missing | **Ubuntu/Debian**: `sudo apt install -y libasound2-dev pkg-config`<br>**Arch**: `sudo pacman -S alsa-lib pkgconf`<br>**Fedora**: `sudo dnf install -y alsa-lib-devel pkgconf-pkg-config` |
 | `command not found: termodoro` | `~/.cargo/bin` is not in your current `$PATH` | Run `export PATH="$HOME/.cargo/bin:$PATH"` and add it to your `~/.bashrc` or `~/.zshrc`. |
 | Colors appear washed out / dull | Terminal running in standard 16-color mode | Add `export COLORTERM=truecolor` to your shell profile. |
 | Text overlapping or clock squished | Terminal window size is too small | Maximize your terminal or resize window to at least **80x24 characters**. |
@@ -501,7 +501,7 @@ Termodoro leaves no persistent background services, system daemons, or registry 
   cargo uninstall termodoro
   ```
 
-- **Method B: If installed manually (`Option C`)**:
+- **Method B: If installed manually (`Option D`)**:
   - **Linux / macOS**:
     ```bash
     rm -f ~/.local/bin/termodoro /usr/local/bin/termodoro
@@ -641,23 +641,23 @@ The Settings view allows you to customize durations, toggles, and visual appeara
 
 | Palette Name | Type | Background | Primary Accent | Focus Phase Tone |
 | :--- | :---: | :---: | :---: | :---: |
-| **Catppuccin Mocha** *(Default)* | Dark | `#1e1e2e` | `#cba6f7` (Mauve) | `#f38ba8` (Red) |
-| **Catppuccin Macchiato** | Dark | `#24273a` | `#c6a0f6` (Mauve) | `#ed8796` (Red) |
-| **Catppuccin Frappé** | Dark | `#303446` | `#ca9ee6` (Mauve) | `#e78284` (Red) |
-| **Catppuccin Latte** | Light | `#eff1f5` | `#8839ef` (Mauve) | `#d20f39` (Red) |
-| **Tokyo Night** | Dark | `#1a1b26` | `#7aa2f7` (Blue) | `#f7768e` (Coral Red) |
+| **Catppuccin Mocha** *(Default)* | Dark | `#1e1e2e` | `#89b4fa` (Blue) | `#f38ba8` (Red) |
+| **Catppuccin Macchiato** | Dark | `#24273a` | `#8aadf4` (Blue) | `#ed8796` (Red) |
+| **Catppuccin Frappé** | Dark | `#303446` | `#8caaee` (Blue) | `#e78284` (Red) |
+| **Catppuccin Latte** | Light | `#eff1f5` | `#1e66f5` (Blue) | `#d20f39` (Red) |
 | **Nord** | Dark | `#2e3440` | `#88c0d0` (Frost Cyan) | `#bf616a` (Nordic Red) |
 | **Gruvbox Dark** | Dark | `#282828` | `#fabd2f` (Yellow) | `#fb4934` (Warm Red) |
+| **Tokyo Night** | Dark | `#1a1b26` | `#7aa2f7` (Blue) | `#f7768e` (Coral Red) |
 | **Dracula** | Dark | `#282a36` | `#bd93f9` (Purple) | `#ff5555` (Dracula Red) |
 | **Solarized Dark** | Dark | `#002b36` | `#268bd2` (Blue) | `#dc322f` (Solar Red) |
 | **Solarized Light** | Light | `#fdf6e3` | `#268bd2` (Blue) | `#dc322f` (Solar Red) |
-| **Rose Pine** | Dark | `#191724` | `#ebbcba` (Rose) | `#eb6f92` (Love) |
+| **Rose Pine** | Dark | `#191724` | `#9ccfd8` (Foam) | `#eb6f92` (Love) |
 | **One Dark** | Dark | `#282c34` | `#61afef` (Blue) | `#e06c75` (Red) |
-| **Kanagawa** | Dark | `#1f1f28` | `#7e9cd8` (Wave Blue) | `#c34043` (Autumn Red) |
-| **Everforest Dark** | Dark | `#2d353b` | `#a7c080` (Green) | `#e67e80` (Red) |
-| **Everforest Light** | Light | `#fdf6e3` | `#8da101` (Olive) | `#f85552` (Red) |
-| **Synthwave '84** | Dark | `#262335` | `#ff7edb` (Neon Pink) | `#fe4450` (Hot Red) |
-| **Monokai Pro** | Dark | `#2d2a2e` | `#ffd866` (Sun Yellow) | `#ff6188` (Rose Red) |
+| **Kanagawa** | Dark | `#1f1f28` | `#7e9cd8` (Wave Blue) | `#e46876` (Autumn Red) |
+| **Everforest Dark** | Dark | `#2d353b` | `#7fbbb3` (Aqua) | `#e67e80` (Red) |
+| **Everforest Light** | Light | `#fdf6e3` | `#3a9486` (Aqua) | `#f85552` (Red) |
+| **Synthwave '84** | Dark | `#262335` | `#36f9f6` (Neon Cyan) | `#fe4450` (Hot Red) |
+| **Monokai Pro** | Dark | `#2d2a2e` | `#78dce8` (Cyan) | `#ff6188` (Rose Red) |
 | **OLED Phosphor** | Dark | `#000000` | `#00ff66` (CRT Phosphor) | `#ff3333` (Warning Red) |
 
 ---
@@ -903,7 +903,8 @@ node scripts/e2e-website-test.mjs
 | `make test` | Run 192-test Rust suite and automatically clean `target/` cache |
 | `make test-clean` | Run tests and auto-clean (reclaims ~1.8GB disk space) |
 | `make test-e2e` | Run full Playwright cross-device E2E test suite (41/41 tests across 6 viewports) |
-| `make check-facts` | Run full 81-assertion sanity & fact-checking audit against Rust codebase |
+| `make check-facts` | Run full 81-assertion sanity, fact-checking & Markdown link audit |
+| `make check-links` | Verify 100% of all Markdown internal links, cross-file references & anchor slugs |
 | `make check` | Execute `fmt`, `clippy`, full 192-test suite, and clean up |
 | `make build` | Compile optimized release binary in `target/release/termodoro` |
 | `make run` | Launch Termodoro in release mode |
