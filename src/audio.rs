@@ -424,8 +424,10 @@ mod tests {
         assert_eq!(sample_bytes.len() % 2, 0);
 
         let mut max_abs: i16 = 0;
-        for chunk in sample_bytes.chunks_exact(2) {
-            let sample = i16::from_le_bytes([chunk[0], chunk[1]]);
+        // as_chunks yields aligned &[u8; 2] slices (clippy-preferred over
+        // chunks_exact(2) on newer toolchains)
+        for chunk in sample_bytes.as_chunks::<2>().0 {
+            let sample = i16::from_le_bytes(*chunk);
             let abs = sample.saturating_abs();
             if abs > max_abs {
                 max_abs = abs;
@@ -444,8 +446,8 @@ mod tests {
         ] {
             let sample_bytes = &wav[44..];
             let mut max_abs: i16 = 0;
-            for chunk in sample_bytes.chunks_exact(2) {
-                let sample = i16::from_le_bytes([chunk[0], chunk[1]]);
+            for chunk in sample_bytes.as_chunks::<2>().0 {
+                let sample = i16::from_le_bytes(*chunk);
                 let abs = sample.saturating_abs();
                 if abs > max_abs {
                     max_abs = abs;
