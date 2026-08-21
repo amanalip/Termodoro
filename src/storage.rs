@@ -251,8 +251,11 @@ impl Storage {
             let mut tmp = File::create(&tmp_path)?;
             // Write JSON bytes to the staging file
             tmp.write_all(json.as_bytes())?;
-            // Flush userspace buffers AND force the OS to commit to stable
-            // storage so a power cut right after rename cannot lose the data
+            // Flush userspace buffers AND force the OS to commit the staging
+            // file's contents to storage, so a crash or power cut cannot leave
+            // a partial/truncated write behind. Note: this does not sync the
+            // parent directory, so full crash durability of the rename itself
+            // depends on the filesystem and is not guaranteed here.
             tmp.sync_all()?;
         }
 

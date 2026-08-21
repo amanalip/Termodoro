@@ -47,7 +47,7 @@ Test coverage now spans all **9 core modules plus the rigorous integration E2E s
 | **Task Operations** | UUID V4 Collision Proof, Unicode Cell-Width, Selection Clamping & Stale-Cursor Healing | 32 / 32 PASS |
 | **Habit Streaks** | Leap Year Continuity, Month/Year Bridges, Midnight Rollover, DST-Weekend Attribution | 34 / 34 PASS |
 | **Air-Gapped Privacy** | Atomic .tmp File Swap, Concurrent-Save Isolation, Hostile-Input Quarantine, Zero Network/Telemetry Schema Keys | 28 / 28 PASS |
-| **Theme Luminance** | WCAG 2.1 AA Contrast Ratio ($R \ge 4.5:1$) across all 18 Themes | 18 / 18 PASS |
+| **Theme Luminance** | WCAG 2.1 AA Contrast Ratio ($R \ge 4.5:1$) across all 18 Themes | 18 / 18 themes PASS |
 | **TUI Geometries** | Viewport Rendering from $20\times 10$ to $350\times 120$ Ultra-Wide; Centered-Rect Containment | 36 / 36 PASS |
 | **Application E2E** | 1,000-Step Chaos Fuzzing, Modal Overlays, Toast Expirations, Save-Failure Banner | 52 / 52 PASS |
 | **Configuration** | Serde Roundtrips, Flag Permutations, Clamping Compatibility | 8 / 8 PASS |
