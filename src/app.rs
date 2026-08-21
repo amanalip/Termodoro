@@ -184,6 +184,13 @@ impl App {
 
     // Advances the Pomodoro countdown timer by 1 second and handles phase completion lifecycles
     pub fn tick_second(&mut self) {
+        // Snapshot the RUNNING phase and its scheduled duration BEFORE tick():
+        // advance_phase overwrites total_duration_secs with the NEXT phase's
+        // length, and the Settings tab allows editing durations mid-flight, so
+        // reading self.config at completion time would log fabricated minutes
+        // instead of what the session actually ran.
+        let scheduled_total_secs = self.timer.total_duration_secs;
+
         // Tick countdown timer by 1 full second
         if let Some(event) = self.timer.tick(&self.config) {
             // Handle timer completion event
@@ -193,12 +200,10 @@ impl App {
                     finished_phase,
                     next_phase,
                 } => {
-                    // Calculate duration in minutes for finished phase
-                    let dur_mins = match finished_phase {
-                        PomodoroPhase::Work => self.config.work_duration_mins,
-                        PomodoroPhase::ShortBreak => self.config.short_break_mins,
-                        PomodoroPhase::LongBreak => self.config.long_break_mins,
-                    };
+                    // Actual minutes spent: on a natural completion the phase
+                    // ran from its full scheduled duration down to zero, so
+                    // the pre-tick total IS the elapsed time.
+                    let dur_mins = scheduled_total_secs / 60;
 
                     // Extract active task information if session was Work
                     let (task_id, task_title) = if finished_phase == PomodoroPhase::Work {
@@ -420,13 +425,17 @@ impl App {
             KeyCode::Enter => {
                 // Check if title is not blank
                 if !self.task_input_title.trim().is_empty() {
+                    // Store the same trimmed title the list will display so
+                    // the confirmation toast echoes what the user actually
+                    // sees, not raw pre-trim buffer contents
+                    let trimmed_title = self.task_input_title.trim().to_string();
                     // Add task to task manager
                     self.tasks
-                        .add(self.task_input_title.clone(), self.task_input_estimated);
+                        .add(trimmed_title.clone(), self.task_input_estimated);
                     // Close task modal
                     self.show_task_modal = false;
                     // Show confirmation notification
-                    self.set_status_message(format!("Task added: {}", self.task_input_title));
+                    self.set_status_message(format!("Task added: {}", trimmed_title));
                     // Persist state to disk
                     self.save_state();
                 }
@@ -534,12 +543,20 @@ impl App {
             }
             // 't' assigns selected task as active timer target
             KeyCode::Char('t') => {
-                // Set selected as active
-                self.tasks.set_selected_active();
-                // Set status notification
-                if let Some(task) = self.tasks.active_task() {
-                    // Status banner
-                    self.set_status_message(format!("Target set to: {}", task.title));
+                // set_selected_active refuses completed tasks so finished
+                // work can never become the focus target
+                if self.tasks.set_selected_active() {
+                    // Set status notification
+                    if let Some(task) = self.tasks.active_task() {
+                        // Status banner
+                        self.set_status_message(format!("Target set to: {}", task.title));
+                    }
+                } else if self.tasks.tasks.is_empty() {
+                    // Nothing in the list at all
+                    self.set_status_message("No task to target.".to_string());
+                } else {
+                    // Selection exists but is completed (or filtered out)
+                    self.set_status_message("Cannot target a completed task.".to_string());
                 }
                 // Persist state
                 self.save_state();
@@ -2154,6 +2171,126 @@ mod tests {
         // Timer remaining seconds and tick_count must remain completely unaffected by keypresses
         assert_eq!(app.timer.time_remaining_secs, initial_remaining);
         assert_eq!(app.tick_count, initial_tick_count);
+
+        let _ = std::fs::remove_dir_all(temp_dir);
+    }
+
+    // A session that runs to natural completion must be logged with the
+    // duration it ACTUALLY ran for. The Settings tab allows editing durations
+    // while the timer is running, so reading the current config at completion
+    // time logs fabricated minutes whenever the user touched that row
+    // mid-flight.
+    #[test]
+    fn test_completed_session_records_actual_duration_not_mutated_config() {
+        let (mut app, temp_dir) = create_test_app();
+        let _audio_mute_guard = crate::audio::audio_mute_guard_for_tests(true);
+        app.config.desktop_notifications = false;
+
+        // Start a 25-minute focus session
+        app.timer.phase = PomodoroPhase::Work;
+        app.timer.status = crate::timer::TimerStatus::Running;
+        app.timer.total_duration_secs = 25 * 60;
+        app.timer.time_remaining_secs = 25 * 60;
+
+        // Mid-flight the user raises Focus Duration to 90 minutes; a running
+        // countdown is deliberately left untouched by adjust_setting
+        app.config.work_duration_mins = 90;
+
+        // Run the session to natural completion (loop anchored to the phase:
+        // on completion the timer refills the countdown for the next phase)
+        while app.timer.status == crate::timer::TimerStatus::Running
+            && app.timer.phase == PomodoroPhase::Work
+        {
+            app.tick_second();
+        }
+
+        assert_eq!(app.stats.sessions.len(), 1);
+        assert_eq!(
+            app.stats.sessions[0].duration_mins, 25,
+            "session must record the 25 minutes actually spent, not the mutated 90"
+        );
+
+        let _ = std::fs::remove_dir_all(temp_dir);
+    }
+
+    // The inverse direction: shrinking the setting mid-session must not
+    // under-report the minutes the user really focused.
+    #[test]
+    fn test_completed_session_records_actual_duration_when_config_shrunk() {
+        let (mut app, temp_dir) = create_test_app();
+        let _audio_mute_guard = crate::audio::audio_mute_guard_for_tests(true);
+        app.config.desktop_notifications = false;
+
+        app.timer.phase = PomodoroPhase::Work;
+        app.timer.status = crate::timer::TimerStatus::Running;
+        app.timer.total_duration_secs = 30 * 60;
+        app.timer.time_remaining_secs = 30 * 60;
+
+        app.config.work_duration_mins = 5;
+
+        while app.timer.status == crate::timer::TimerStatus::Running
+            && app.timer.phase == PomodoroPhase::Work
+        {
+            app.tick_second();
+        }
+
+        assert_eq!(app.stats.sessions.len(), 1);
+        assert_eq!(
+            app.stats.sessions[0].duration_mins, 30,
+            "session must record the 30 minutes actually spent"
+        );
+
+        let _ = std::fs::remove_dir_all(temp_dir);
+    }
+
+    // Break sessions follow the same rule: the recorded minutes come from the
+    // phase that ran, not from whatever the config says at completion time.
+    #[test]
+    fn test_break_session_records_break_phase_duration() {
+        let (mut app, temp_dir) = create_test_app();
+        let _audio_mute_guard = crate::audio::audio_mute_guard_for_tests(true);
+        app.config.desktop_notifications = false;
+
+        app.timer.phase = PomodoroPhase::ShortBreak;
+        app.timer.status = crate::timer::TimerStatus::Running;
+        app.timer.total_duration_secs = 5 * 60;
+        app.timer.time_remaining_secs = 5 * 60;
+
+        // User lengthens breaks mid-break
+        app.config.short_break_mins = 45;
+
+        while app.timer.status == crate::timer::TimerStatus::Running
+            && app.timer.phase == PomodoroPhase::ShortBreak
+        {
+            app.tick_second();
+        }
+
+        assert_eq!(app.stats.sessions.len(), 1);
+        assert_eq!(app.stats.sessions[0].phase, PomodoroPhase::ShortBreak);
+        assert_eq!(app.stats.sessions[0].duration_mins, 5);
+
+        let _ = std::fs::remove_dir_all(temp_dir);
+    }
+
+    // The confirmation toast must show the same cleaned-up title that was
+    // stored, not the raw pre-trim buffer contents.
+    #[test]
+    fn test_modal_enter_shows_trimmed_title_in_status_message() {
+        let (mut app, temp_dir) = create_test_app();
+        app.open_task_modal();
+
+        for c in "  Padded Task  ".chars() {
+            app.on_key_event(make_key(KeyCode::Char(c)));
+        }
+        app.on_key_event(make_key(KeyCode::Enter));
+
+        assert!(!app.show_task_modal);
+        assert_eq!(app.tasks.tasks[0].title, "Padded Task");
+        assert_eq!(
+            app.status_message.as_deref(),
+            Some("Task added: Padded Task"),
+            "toast must echo the trimmed title users see in the list"
+        );
 
         let _ = std::fs::remove_dir_all(temp_dir);
     }

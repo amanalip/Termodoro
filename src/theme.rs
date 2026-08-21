@@ -112,8 +112,19 @@ impl std::str::FromStr for ThemeChoice {
     // config files still load. Unknown names yield Err, which the Deserialize
     // impl below converts into the default theme.
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let normalize =
-            |v: &str| -> String { v.trim().to_ascii_lowercase().replace([' ', '-', '_'], "") };
+        // Normalization folds everything a hand-edited config might plausibly
+        // contain: casing, space/hyphen/underscore separators, apostrophes
+        // ("Synthwave '84"), and accented characters ("Catppuccin Frappé" —
+        // both NFC é and NFD e + combining acute). Without this, copying the
+        // exact display name shown in the UI footer into data.json silently
+        // fell back to the default theme.
+        let normalize = |v: &str| -> String {
+            v.trim()
+                .to_ascii_lowercase()
+                .replace([' ', '-', '_', '\'', '\u{2018}', '\u{2019}'], "")
+                .replace('é', "e")
+                .replace('\u{0301}', "")
+        };
         let wanted = normalize(s);
         for choice in ThemeChoice::all() {
             let variant = normalize(format!("{:?}", choice).as_str());
@@ -747,5 +758,85 @@ mod tests {
         let cloned = original;
         assert_eq!(original, cloned);
         assert_eq!(format!("{:?}", original), "TokyoNight");
+    }
+
+    // The Settings UI and footer display `name()` strings. A user who copies
+    // that exact string into data.json must get the same theme back, not a
+    // silent fallback to the default palette.
+    #[test]
+    fn test_from_str_parses_every_display_name() {
+        for choice in ThemeChoice::all() {
+            let parsed: ThemeChoice = choice
+                .name()
+                .parse()
+                .unwrap_or_else(|_| panic!("display name {:?} must parse", choice.name()));
+            assert_eq!(
+                parsed,
+                *choice,
+                "display name {:?} parsed to the wrong variant",
+                choice.name()
+            );
+        }
+    }
+
+    // Serialization writes the Debug variant name; it must always round-trip.
+    #[test]
+    fn test_from_str_parses_every_variant_name() {
+        for choice in ThemeChoice::all() {
+            let variant = format!("{:?}", choice);
+            let parsed: ThemeChoice = variant
+                .parse()
+                .unwrap_or_else(|_| panic!("variant name {:?} must parse", variant));
+            assert_eq!(parsed, *choice);
+        }
+    }
+
+    // Names shown in the UI contain an accented character (Catppuccin Frappé)
+    // and an apostrophe (Synthwave '84). Both spellings must resolve instead
+    // of silently degrading to the default theme.
+    #[test]
+    fn test_from_str_handles_accented_and_apostrophe_names() {
+        let frappe: ThemeChoice = "Catppuccin Frappé".parse().expect("accented é must fold");
+        assert_eq!(frappe, ThemeChoice::CatppuccinFrappe);
+
+        let synthwave: ThemeChoice = "Synthwave '84".parse().expect("apostrophe must be ignored");
+        assert_eq!(synthwave, ThemeChoice::Synthwave84);
+
+        // Curly-quote variant some editors substitute when hand-editing JSON
+        let curly: ThemeChoice = "Synthwave \u{2019}84"
+            .parse()
+            .expect("curly quote tolerated");
+        assert_eq!(curly, ThemeChoice::Synthwave84);
+    }
+
+    // Hand-edited configs are frequently sloppy: random casing, stray
+    // separators, padding whitespace. All of it must still resolve.
+    #[test]
+    fn test_from_str_loose_formatting_tolerated() {
+        let cases = [
+            ("  nord  ", ThemeChoice::Nord),
+            ("DRACULA", ThemeChoice::Dracula),
+            ("tokyo-night", ThemeChoice::TokyoNight),
+            ("tokyo_night", ThemeChoice::TokyoNight),
+            ("catppuccin latte", ThemeChoice::CatppuccinLatte),
+            ("one-dark", ThemeChoice::OneDark),
+            ("oled phosphor", ThemeChoice::OledPhosphor),
+            ("gruvboxdark", ThemeChoice::GruvboxDark),
+        ];
+        for (input, expected) in cases {
+            let parsed: ThemeChoice = input
+                .parse()
+                .unwrap_or_else(|_| panic!("{:?} should parse", input));
+            assert_eq!(parsed, expected, "{:?} resolved to the wrong theme", input);
+        }
+    }
+
+    // Genuinely unknown names must keep falling back to the default rather
+    // than panicking or inventing a variant.
+    #[test]
+    fn test_deserialize_unknown_theme_falls_back_to_default() {
+        let json = r#""NotARealTheme""#;
+        let parsed: ThemeChoice = serde_json::from_str(json).expect("unknown names never error");
+        assert_eq!(parsed, ThemeChoice::default());
     }
 }

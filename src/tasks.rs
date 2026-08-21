@@ -196,21 +196,45 @@ impl TaskManager {
                         .map(|t| t.id.clone());
                 }
             }
+            // A toggle can SHRINK the currently filtered view: completing a
+            // task under Active, or untoggling one under Completed, removes
+            // that row from the visible list. The cursor must follow the new
+            // length exactly like remove_selected does — clamping only for
+            // the fully-emptied case previously left the selection pointing
+            // past the end whenever the row below the cursor disappeared.
+            let new_visible_len = self.filtered_indices().len();
+            if new_visible_len == 0 {
+                // An emptied view must not keep pointing at a phantom row
+                self.selected_index = 0;
+            } else if self.selected_index >= new_visible_len {
+                // Selection rode off the end of the shrunken view
+                self.selected_index = new_visible_len - 1;
+            }
         }
     }
 
-    // Sets the currently selected task as the active focus target for the timer
-    pub fn set_selected_active(&mut self) {
+    // Sets the currently selected task as the active focus target for the timer.
+    // Returns true when the target was set, false when the selection is empty
+    // or already completed: finished work must never become the focus target,
+    // or subsequent sessions would silently credit pomodoros to it.
+    pub fn set_selected_active(&mut self) -> bool {
         // Retrieve filtered indices
         let indices = self.filtered_indices();
         // Get actual index in task vector
         if let Some(&real_idx) = indices.get(self.selected_index) {
             // Retrieve task reference
             if let Some(task) = self.tasks.get(real_idx) {
-                // Set active target ID
-                self.active_task_id = Some(task.id.clone());
+                // Only incomplete tasks may become the active target
+                if !task.completed {
+                    // Set active target ID
+                    self.active_task_id = Some(task.id.clone());
+                    // Report success
+                    return true;
+                }
             }
         }
+        // Nothing targetable at the cursor
+        false
     }
 
     // Increments the pomodoros_spent counter for the active task upon completing a work session
@@ -219,8 +243,13 @@ impl TaskManager {
         if let Some(ref active_id) = self.active_task_id {
             // Find task matching active ID and increment spent count
             if let Some(task) = self.tasks.iter_mut().find(|t| &t.id == active_id) {
-                // Add 1 to completed pomodoro count
-                task.pomodoros_spent += 1;
+                // Defense in depth for legacy data.json files whose
+                // active_task_id points at an already-completed task: finished
+                // work must not accrue new pomodoros
+                if !task.completed {
+                    // Add 1 to completed pomodoro count
+                    task.pomodoros_spent += 1;
+                }
             }
         }
     }
@@ -801,6 +830,103 @@ mod tests {
         assert_eq!(manager.selected_index, 1);
 
         manager.next(); // Down wraps to 0
+        assert_eq!(manager.selected_index, 0);
+    }
+
+    // A finished task must never become the timer's focus target: work
+    // sessions would silently credit pomodoros to something already done.
+    #[test]
+    fn test_set_selected_active_rejects_completed_task() {
+        let mut manager = TaskManager::new();
+        manager.add("Done Thing".to_string(), 2);
+        manager.toggle_selected(); // now completed
+        assert!(manager.tasks[0].completed);
+
+        let set = manager.set_selected_active();
+        assert!(!set, "activating a completed task must be refused");
+        assert_eq!(
+            manager.active_task_id, None,
+            "completed task must not become the active target"
+        );
+    }
+
+    #[test]
+    fn test_set_selected_active_accepts_incomplete_task() {
+        let mut manager = TaskManager::new();
+        manager.add("Live Task".to_string(), 3);
+        assert!(
+            manager.set_selected_active(),
+            "incomplete task is targetable"
+        );
+        assert_eq!(manager.active_task().unwrap().title, "Live Task");
+    }
+
+    // Defense in depth: even if legacy persisted data points active_task_id
+    // at a completed task, completed work sessions must not inflate its
+    // pomodoros_spent counter.
+    #[test]
+    fn test_increment_active_spent_skips_completed_active_task() {
+        let mut manager = TaskManager::new();
+        manager.add("Finished Early".to_string(), 4);
+        manager.tasks[0].pomodoros_spent = 2;
+        manager.tasks[0].completed = true;
+
+        manager.increment_active_spent();
+        assert_eq!(
+            manager.tasks[0].pomodoros_spent, 2,
+            "completed task must not accrue new pomodoros"
+        );
+    }
+
+    // Untoggling the last row of a filtered view empties it; the cursor must
+    // reset instead of pointing at a phantom row.
+    #[test]
+    fn test_toggle_that_empties_filtered_view_resets_cursor() {
+        let mut manager = TaskManager::new();
+        manager.add("Only Done".to_string(), 1);
+        manager.toggle_selected(); // view: All(1), Completed(1)
+
+        manager.filter = TaskFilter::Completed;
+        assert_eq!(manager.filtered_indices().len(), 1);
+        manager.next(); // cursor at 1? no: wraps within 1 item -> stays 0; force it
+        manager.selected_index = 0;
+        manager.toggle_selected(); // untoggle -> Completed view becomes empty
+
+        assert_eq!(manager.filtered_indices().len(), 0);
+        assert_eq!(
+            manager.selected_index, 0,
+            "cursor must reset when a toggle empties the filtered view"
+        );
+    }
+
+    // A toggle that SHRINKS (but does not empty) the filtered view must pull
+    // the cursor back onto a real row — completing the item under the cursor
+    // under Active removes that very row from the visible list.
+    #[test]
+    fn test_toggle_that_shrinks_filtered_view_clamps_cursor() {
+        let mut manager = TaskManager::new();
+        for name in ["A", "B", "C"] {
+            manager.add(name.to_string(), 1);
+        }
+        manager.filter = TaskFilter::Active;
+        assert_eq!(manager.filtered_indices().len(), 3);
+
+        // Cursor on the LAST visible row ("C"), then complete it: the Active
+        // view shrinks to 2 rows and the old cursor position (2) is gone.
+        manager.selected_index = 2;
+        manager.toggle_selected();
+        assert_eq!(manager.filtered_indices().len(), 2);
+        assert!(
+            manager.selected_index < 2,
+            "cursor must clamp into the shrunken view, got {}",
+            manager.selected_index
+        );
+
+        // Same story under Completed with multiple rows.
+        manager.filter = TaskFilter::Completed;
+        assert_eq!(manager.filtered_indices().len(), 1);
+        manager.selected_index = 0;
+        manager.toggle_selected(); // untoggle -> Completed empties
         assert_eq!(manager.selected_index, 0);
     }
 }

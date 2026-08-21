@@ -5,45 +5,34 @@ use crate::theme::ThemeChoice;
 
 // Configuration structure representing all user-customizable preferences
 //
-// Every field carries #[serde(default)] so a data.json written by an older or
-// newer version of the app (missing or extra fields) still parses. Without
-// this, one unrecognized field would fail the whole load and, before the
-// quarantine fix in storage.rs, wipe the user's tasks and history.
+// #[serde(default)] at the CONTAINER level fills every missing field from
+// Config::default(), so a data.json written by an older or newer version of
+// the app (missing or extra fields, or a partial config object) parses into
+// sensible Pomodoro values. Field-level defaults were previously used, whose
+// u32::default() is ZERO — a hand-edited {"config":{}} loaded 0-minute focus
+// sessions instead of the documented 25/5/15 defaults.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(default)]
 pub struct Config {
     // Duration in minutes for standard work focus sessions (default: 25)
-    #[serde(default)]
     pub work_duration_mins: u32,
     // Duration in minutes for short breaks between sessions (default: 5)
-    #[serde(default)]
     pub short_break_mins: u32,
     // Duration in minutes for long breaks after full cycles (default: 15)
-    #[serde(default)]
     pub long_break_mins: u32,
     // Number of focus sessions required before triggering a long break (default: 4)
-    #[serde(default)]
     pub long_break_interval: u32,
     // Whether to automatically start break timers when a work session ends
-    #[serde(default)]
     pub auto_start_breaks: bool,
     // Whether to automatically start work timers when a break ends
-    #[serde(default)]
     pub auto_start_work: bool,
     // Whether to emit terminal audio bells when timer phases complete
-    #[serde(default = "default_true")]
     pub sound_enabled: bool,
     // Whether to trigger OS-level desktop notifications when phases complete
-    #[serde(default = "default_true")]
     pub desktop_notifications: bool,
     // Active visual color theme selection (unknown names fall back to default
     // via ThemeChoice's tolerant Deserialize impl)
-    #[serde(default)]
     pub theme: ThemeChoice,
-}
-
-// serde default helper for boolean fields whose sensible default is true
-fn default_true() -> bool {
-    true
 }
 
 // Inclusive bounds for every numeric setting. These mirror the clamps in the

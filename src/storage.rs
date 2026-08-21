@@ -17,13 +17,22 @@ use crate::stats::StatsHistory;
 use crate::tasks::TaskManager;
 
 // Unified struct representing all serializable application state saved to disk
+//
+// Every field carries #[serde(default)] so a data.json written by an older or
+// newer build that is missing an entire section (for example a pre-stats
+// schema) still parses with defaults for that section. Without this, one
+// absent key failed the whole load and, via the quarantine path, moved the
+// user's surviving tasks aside as if the file were corrupt.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct AppData {
     // Persisted user preferences and theme
+    #[serde(default)]
     pub config: Config,
     // Persisted task list and active target
+    #[serde(default)]
     pub tasks: TaskManager,
     // Persisted session history and analytics
+    #[serde(default)]
     pub stats: StatsHistory,
 }
 
@@ -712,5 +721,79 @@ mod tests {
         // real user profile during tests
         let path = Storage::resolve_data_dir().join("data.json");
         assert!(path.to_string_lossy().contains("termodoro"));
+    }
+
+    // A data.json written by an older/newer build may lack whole sections
+    // (for example a pre-stats version). Missing sections must deserialize as
+    // defaults instead of failing the parse, which would quarantine the file
+    // and destroy every task the user still had.
+    #[test]
+    fn test_appdata_missing_stats_section_loads_with_defaults() {
+        let json =
+            r#"{"config":{"work_duration_mins":45},"tasks":{"tasks":[],"active_task_id":null}}"#;
+        let data: AppData = serde_json::from_str(json).expect("missing stats must not fail parse");
+        assert_eq!(data.config.work_duration_mins, 45);
+        assert_eq!(data.tasks.tasks.len(), 0);
+        assert_eq!(data.stats.sessions.len(), 0);
+    }
+
+    #[test]
+    fn test_appdata_missing_tasks_section_loads_with_defaults() {
+        let json = r#"{"config":{},"stats":{"sessions":[]}}"#;
+        let data: AppData = serde_json::from_str(json).expect("missing tasks must not fail parse");
+        assert_eq!(data.config, Config::default());
+        assert_eq!(data.tasks.tasks.len(), 0);
+        assert_eq!(data.stats.sessions.len(), 0);
+    }
+
+    #[test]
+    fn test_appdata_missing_config_section_loads_with_defaults() {
+        let json = r#"{"tasks":{"tasks":[],"active_task_id":null},"stats":{"sessions":[]}}"#;
+        let data: AppData = serde_json::from_str(json).expect("missing config must not fail parse");
+        assert_eq!(data.config, Config::default());
+    }
+
+    #[test]
+    fn test_appdata_empty_object_yields_full_defaults() {
+        let data: AppData = serde_json::from_str("{}").expect("empty object must not fail parse");
+        assert_eq!(data.config, Config::default());
+        assert_eq!(data.tasks, TaskManager::new());
+        assert_eq!(data.stats, StatsHistory::new());
+    }
+
+    // End-to-end through Storage::load: a legacy file without the stats key
+    // must load with defaults for that section AND keep its tasks intact,
+    // with no quarantine side file appearing.
+    #[test]
+    fn test_storage_legacy_file_without_stats_keeps_tasks() {
+        let temp_dir =
+            std::env::temp_dir().join(format!("termodoro_legacy_{}", uuid::Uuid::new_v4()));
+        let file_path = temp_dir.join("data.json");
+        let storage = Storage::with_path(file_path.clone());
+        let _ = create_dir_all(&temp_dir);
+
+        let _ = fs::write(
+            &file_path,
+            r#"{"config":{"theme":"Nord","work_duration_mins":50},"tasks":{"tasks":[{"id":"legacy-1","title":"Surviving Task","completed":false,"pomodoros_spent":2,"pomodoros_estimated":5,"created_at":"2026-01-01T00:00:00Z"}],"active_task_id":"legacy-1"}}"#,
+        );
+
+        let loaded = storage.load();
+        assert_eq!(loaded.tasks.tasks.len(), 1, "tasks must survive the load");
+        assert_eq!(loaded.tasks.tasks[0].title, "Surviving Task");
+        assert_eq!(loaded.config.work_duration_mins, 50);
+        assert_eq!(loaded.stats.sessions.len(), 0);
+
+        // No quarantine backup may appear: nothing was corrupt
+        let no_quarantine = !fs::read_dir(&temp_dir)
+            .expect("temp dir readable")
+            .filter_map(|e| e.ok())
+            .any(|e| {
+                e.file_name()
+                    .to_string_lossy()
+                    .starts_with("data.json.corrupt-")
+            });
+        assert!(no_quarantine, "valid legacy file must not be quarantined");
+
+        let _ = fs::remove_dir_all(temp_dir);
     }
 }
