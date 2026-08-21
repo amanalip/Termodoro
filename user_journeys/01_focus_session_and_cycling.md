@@ -61,7 +61,7 @@ Termodoro boots instantaneously in less than **10 milliseconds**, presenting **T
 - **Need a quick pause?** Press `Space` to pause the countdown. The badge shifts to `[PAUSED]`.
 - **Ready to resume?** Press `Space` again to pick up exactly where you left off.
 - **Want a clean slate?** Press `r` to reset the active interval back to `25:00` via `PomodoroTimer::reset()`.
-- **Need to skip ahead?** Press `s` to immediately conclude the current phase and step to the next interval via `PomodoroTimer::skip_to_next()`.
+- **Need to skip ahead?** Press `s` to abandon the current phase and step to the next interval via `PomodoroTimer::skip_to_next()`. Skipping is never counted as a completed Pomodoro and does not advance cycle progress, so long breaks stay earned by real focus sessions only.
 
 ---
 

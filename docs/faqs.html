@@ -464,7 +464,7 @@ set -ag terminal-overrides ",xterm-256color:RGB"</code></pre>
                 <ul>
                   <li><kbd>Space</kbd>: <strong>Start / Pause</strong>. Pausing transitions the status to <code>[❚❚ PAUSED]</code> and preserves exact remaining seconds. Pressing <kbd>Space</kbd> again resumes the countdown.</li>
                   <li><kbd>r</kbd>: <strong>Reset Phase</strong>. Resets the clock back to the configured target duration for the current phase (e.g. back to 25:00).</li>
-                  <li><kbd>s</kbd>: <strong>Skip Phase</strong>. Immediately completes the current phase and advances to the next state (e.g., skip the rest of a break if you are ready to focus early).</li>
+                  <li><kbd>s</kbd>: <strong>Skip Phase</strong>. Abandons the current phase and advances to the next state (e.g., skip the rest of a break if you are ready to focus early). Skipping never counts as a completed Pomodoro and does not advance cycle progress.</li>
                   <li><kbd>Tab</kbd> / <kbd>1-4</kbd>: Switch between tabs (Timer, Tasks, Stats, Settings).</li>
                 </ul>
               </div>
@@ -705,7 +705,7 @@ set -ag terminal-overrides ",xterm-256color:RGB"</code></pre>
                 <ul>
                   <li><strong>Immediate-Mode UI Architecture</strong>: Rather than maintaining a complex, mutable virtual DOM that can get out of sync, Ratatui renders the full UI freshly on each frame directly from immutable state structs (<code>&amp;App</code>). This completely eliminates state desynchronization bugs.</li>
                   <li><strong>Cassowary Constraint Layout Engine</strong>: Ratatui incorporates the Cassowary linear constraint solver, allowing Termodoro's 4 views, tables, and modal dialogs to fluidly adapt to any terminal geometry from $20\times 10$ to $350\times 120$ without content clipping.</li>
-                  <li><strong>Headless <code>TestBackend</code> Testing</strong>: Ratatui provides a headless in-memory buffer backend. This enables our <strong>257 automated test suite</strong> to assert exact cell characters, colors, and layout invariants in CI without needing a virtual display server (Xvfb).</li>
+                  <li><strong>Headless <code>TestBackend</code> Testing</strong>: Ratatui provides a headless in-memory buffer backend. This enables our <strong>259 automated test suite</strong> to assert exact cell characters, colors, and layout invariants in CI without needing a virtual display server (Xvfb).</li>
                 </ul>
               </div>
             </details>

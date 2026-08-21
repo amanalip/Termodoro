@@ -1,7 +1,7 @@
 # Termodoro Test Report & Quality Assurance Audit
 
-**Execution Date:** August 18, 2026  
-**Result:** **257 / 257 Tests Passed (100% Success Rate)**  
+**Execution Date:** August 21, 2026  
+**Result:** **259 / 259 Tests Passed (100% Success Rate)**  
 **Duration:** ~0.61s  
 
 ---
@@ -10,7 +10,7 @@
 
 A comprehensive, rigorous quality assurance (QA) overhaul across all layers of the **Termodoro** application was conducted.
 
-Test coverage now spans all **9 core modules plus the rigorous integration E2E suite** with **257 unit, integration, and end-to-end tests** (expanded across all iterations from 7 -> 74 -> 91 -> 93 -> 111 -> 120 -> 126 -> 137 -> 151 -> 154 -> 192 -> 199 -> 257). The test suite verifies every button, key combination, modal state, unhandled modifier, phase transition combinations with auto-start flags, interval boundaries (1 to 24), Unicode & emoji task handling, empty & partial JSON storage error recovery, zero telemetry and local-only filesystem privacy isolation invariants, synthesized audio signal integrity, audio tail decay click prevention, RIFF WAV header data offsets, multi-tab terminal rendering stress tests, extreme viewport geometries, 366-day leap year streak calculations, 18-theme WCAG luminance contrast formulas, full persistence-across-restart workflows, and 1,000-iteration random key input chaos fuzzing.
+Test coverage now spans all **9 core modules plus the rigorous integration E2E suite** with **259 unit, integration, and end-to-end tests** (expanded across all iterations from 7 -> 74 -> 91 -> 93 -> 111 -> 120 -> 126 -> 137 -> 151 -> 154 -> 192 -> 199 -> 257 -> 259). The test suite verifies every button, key combination, modal state, unhandled modifier, phase transition combinations with auto-start flags, interval boundaries (1 to 24), Unicode & emoji task handling, empty & partial JSON storage error recovery, zero telemetry and local-only filesystem privacy isolation invariants, synthesized audio signal integrity, audio tail decay click prevention, RIFF WAV header data offsets, multi-tab terminal rendering stress tests, extreme viewport geometries, 366-day leap year streak calculations, 18-theme WCAG luminance contrast formulas, full persistence-across-restart workflows, and 1,000-iteration random key input chaos fuzzing.
 
 ---
 
@@ -20,7 +20,7 @@ Test coverage now spans all **9 core modules plus the rigorous integration E2E s
 | :--- | :--- | :---: | :---: | :---: |
 | **Application State & End-to-End** | [`src/app.rs`](src/app.rs) | 41 | Key Matrix, Chaos Fuzzing, Auto-start, Direct Tabs & Reassignment | PASS |
 | **Productivity Analytics & Streaks** | [`src/stats.rs`](src/stats.rs) | 29 | 366-Day Leap Year, Multi-Streak, Deduplication & Histograms | PASS |
-| **Timer Engine** | [`src/timer.rs`](src/timer.rs) | 27 | 24-Cycle State Machine, Sub-Second Ticks & Formats | PASS |
+| **Timer Engine** | [`src/timer.rs`](src/timer.rs) | 29 | 24-Cycle State Machine, Sub-Second Ticks & Formats | PASS |
 | **Task Management** | [`src/tasks.rs`](src/tasks.rs) | 32 | UUIDs, Unicode, Boundaries, Filter Clamps & Target Rebinding | PASS |
 | **Audio Engine & Chimes** | [`src/audio.rs`](src/audio.rs) | 20 | Acoustic QA, WAV Signals, Headroom & DAC Click Prevention | PASS |
 | **Terminal UI Rendering** | [`src/ui/mod.rs`](src/ui/mod.rs) | 18 | Buffer Content, Extreme Geometries (350x120), Filter Views & 24 Dots | PASS |
@@ -29,7 +29,7 @@ Test coverage now spans all **9 core modules plus the rigorous integration E2E s
 | **Configuration & Preferences** | [`src/config.rs`](src/config.rs) | 8 | Serde, Extreme Values, Boolean Flags & Defaults | PASS |
 | **ASCII Big Digits Graphic UI** | [`src/ui/digits.rs`](src/ui/digits.rs) | 5 | Glyphs & Block Typography Bounds | PASS |
 | **Rigorous Integration E2E** | [`tests/e2e_rigorous.rs`](tests/e2e_rigorous.rs) | 39 | Persistence-Across-Restart, Relaunch State, Multi-Cycle Workflows | PASS |
-| **Total** | | **257** | **ALL PASSED** | **100%** |
+| **Total** | | **259** | **ALL PASSED** | **100%** |
 
 ---
 
@@ -38,7 +38,7 @@ Test coverage now spans all **9 core modules plus the rigorous integration E2E s
 | Test Category | Invariant Verified | Passing Proof |
 | :--- | :--- | :---: |
 | **Audio Waveforms** | 16-bit PCM RIFF Header, 44.1kHz, Zero Clipping, Exponential Decay | 20 / 20 PASS |
-| **Timer FSM** | 24-Cycle Sub-second Decrement, Long Break Trigger, Phase Transitions | 27 / 27 PASS |
+| **Timer FSM** | 24-Cycle Sub-second Decrement, Long Break Trigger, Skip-No-Credit Semantics, Phase Transitions | 29 / 29 PASS |
 | **Task Operations** | UUID V4 Collision Proof, Unicode Cell-Width, Selection Clamping | 32 / 32 PASS |
 | **Habit Streaks** | Leap Year Continuity, Month/Year Bridges, Zero Break Inflation | 29 / 29 PASS |
 | **Air-Gapped Privacy** | Atomic .tmp File Swap, Zero Network/Telemetry Schema Keys | 22 / 22 PASS |
@@ -50,7 +50,7 @@ Test coverage now spans all **9 core modules plus the rigorous integration E2E s
 
 ---
 
-## 4. Complete Certified List of All 257 Test Cases
+## 4. Complete Certified List of All 259 Test Cases
 
 1. `app::tests::test_all_eighteen_themes_cycle_and_persistence_e2e`
 2. `app::tests::test_all_eighteen_themes_full_ui_render_all_tabs_e2e`
@@ -223,92 +223,94 @@ Test coverage now spans all **9 core modules plus the rigorous integration E2E s
 169. `timer::tests::test_auto_start_settings_on_transition`
 170. `timer::tests::test_formatted_time`
 171. `timer::tests::test_formatted_time_large_values`
-172. `timer::tests::test_pause_and_reset`
-173. `timer::tests::test_phase_advancement`
-174. `timer::tests::test_phase_titles_and_emojis`
-175. `timer::tests::test_progress_ratio`
-176. `timer::tests::test_skip_to_next`
-177. `timer::tests::test_target_duration_secs_all_phases`
-178. `timer::tests::test_tick_when_paused_or_stopped_does_nothing`
-179. `timer::tests::test_tick_when_running_and_completion_event`
-180. `timer::tests::test_timer_exact_phase_transition_cycle_counting`
-181. `timer::tests::test_timer_formatted_time_zero_and_single_digits`
-182. `timer::tests::test_timer_initialization`
-183. `timer::tests::test_timer_long_break_to_work_cycle_reset`
-184. `timer::tests::test_timer_multiple_consecutive_skips`
-185. `timer::tests::test_timer_phase_title_and_emoji_completeness`
-186. `timer::tests::test_timer_progress_ratio_bounds_and_rounding`
-187. `timer::tests::test_timer_rapid_status_flipping_under_tick_loop`
-188. `timer::tests::test_timer_reset_across_all_phases`
-189. `timer::tests::test_timer_serde_roundtrip`
-190. `timer::tests::test_timer_status_transitions_and_predicates`
-191. `timer::tests::test_timer_target_duration_all_phases_with_custom_config`
-192. `timer::tests::test_timer_time_remaining_never_underflows_sub_second_ticks`
-193. `timer::tests::test_timer_toggle_transitions`
-194. `timer::tests::test_timer_zero_total_duration_progress_ratio`
-195. `timer::tests::test_twenty_four_cycle_advancement_and_long_break_trigger`
-196. `ui::digits::tests::test_big_digits_various_large_minutes_formatting`
-197. `ui::digits::tests::test_char_pattern_all_valid_chars`
-198. `ui::digits::tests::test_render_big_time_boundary_values`
-199. `ui::digits::tests::test_render_big_time_structure`
-200. `ui::digits::tests::test_render_big_time_various_values`
-201. `ui::tests::test_buffer_cell_content_assertions_across_views`
-202. `ui::tests::test_render_active_task_card_details_on_timer_view`
-203. `ui::tests::test_render_all_color_themes`
-204. `ui::tests::test_render_all_settings_rows_highlighted`
-205. `ui::tests::test_render_all_tabs_without_panic`
-206. `ui::tests::test_render_all_terminal_dimensions`
-207. `ui::tests::test_render_all_three_task_filter_tabs`
-208. `ui::tests::test_render_all_timer_phases_and_statuses`
-209. `ui::tests::test_render_empty_views`
-210. `ui::tests::test_render_extreme_content_and_dimensions`
-211. `ui::tests::test_render_extreme_high_resolution_terminal`
-212. `ui::tests::test_render_extreme_small_terminals`
-213. `ui::tests::test_render_modals_and_status_message`
-214. `ui::tests::test_render_task_modal_both_focus_states`
-215. `ui::tests::test_render_twenty_four_cycle_dots_timer_view`
-216. `ui::tests::test_render_varied_terminal_geometries_stress`
-217. `ui::tests::test_task_modal_focus_switch_and_cancel_invariants`
-218. `ui::tests::test_ui_render_with_status_message_banner_content`
-219. `big_digits_three_digit_minutes_uniform_width`
-220. `chaos_filter_modal_interleave_maintains_core_invariants`
-221. `chaos_fuzz_mixed_events_with_periodic_persistence_invariants`
-222. `completed_sessions_record_actual_elapsed_duration_even_when_config_mutated`
-223. `completed_task_cannot_become_active_target_via_keys`
-224. `corrupt_state_file_is_quarantined_with_bytes_intact`
-225. `delete_on_empty_and_filtered_out_lists_reports_noop`
-226. `deleting_active_task_mid_day_reassigns_credit_to_next`
-227. `distribution_window_sums_match_recorded_sessions`
-228. `every_theme_survives_save_reload_cycle`
-229. `filter_matrix_add_toggle_delete_maintains_integrity`
-230. `footer_swaps_status_banner_back_to_hints_after_expiry`
-231. `full_workday_simulation_with_restart_between_sessions`
-232. `hand_edited_theme_display_names_survive_reload`
-233. `help_popup_renders_on_tiny_terminal`
-234. `large_task_list_survives_restart_roundtrip`
-235. `long_break_interval_exhaustive_one_to_twenty_four`
-236. `modal_estimate_input_mashing_stays_in_bounds`
-237. `pause_resume_across_many_toggles_never_drifts`
-238. `render_every_tab_modal_geometry_matrix_with_content`
-239. `repeated_saves_leave_no_tmp_litter_and_stay_parseable`
-240. `reset_keeps_cycle_position_and_clears_countdown`
-241. `save_reload_roundtrip_preserves_spent_counts_and_stats`
-242. `save_reload_roundtrip_preserves_unicode_titles_and_target`
-243. `scrolled_task_list_keeps_selection_visible`
-244. `selection_wrapping_under_all_filters_never_panics`
-245. `skip_advances_cycle_without_recording_stats_or_credit`
-246. `storage_loads_file_missing_config_section`
-247. `storage_loads_file_missing_tasks_section`
-248. `storage_loads_legacy_file_missing_stats_section_and_keeps_tasks`
-249. `streak_continuity_across_month_and_year_boundary`
-250. `streak_ignores_future_dated_entries_gracefully`
-251. `timer_state_is_not_persisted_across_restart`
-252. `timer_view_renders_extreme_countdown_values`
-253. `today_metrics_exclude_other_days`
-254. `transient_ui_state_resets_on_restart`
-255. `whitespace_only_title_rejected_then_real_title_accepted`
-256. `work_session_credits_only_the_active_task_across_retargeting`
-257. `zero_duration_direct_construction_never_panics_or_underflows`
+172. `timer::tests::test_natural_completion_still_credits_after_skips`
+173. `timer::tests::test_pause_and_reset`
+174. `timer::tests::test_phase_advancement`
+175. `timer::tests::test_phase_titles_and_emojis`
+176. `timer::tests::test_progress_ratio`
+177. `timer::tests::test_skip_from_work_never_credits_pomodoro_or_cycle`
+178. `timer::tests::test_skip_to_next`
+179. `timer::tests::test_target_duration_secs_all_phases`
+180. `timer::tests::test_tick_when_paused_or_stopped_does_nothing`
+181. `timer::tests::test_tick_when_running_and_completion_event`
+182. `timer::tests::test_timer_exact_phase_transition_cycle_counting`
+183. `timer::tests::test_timer_formatted_time_zero_and_single_digits`
+184. `timer::tests::test_timer_initialization`
+185. `timer::tests::test_timer_long_break_to_work_cycle_reset`
+186. `timer::tests::test_timer_multiple_consecutive_skips`
+187. `timer::tests::test_timer_phase_title_and_emoji_completeness`
+188. `timer::tests::test_timer_progress_ratio_bounds_and_rounding`
+189. `timer::tests::test_timer_rapid_status_flipping_under_tick_loop`
+190. `timer::tests::test_timer_reset_across_all_phases`
+191. `timer::tests::test_timer_serde_roundtrip`
+192. `timer::tests::test_timer_status_transitions_and_predicates`
+193. `timer::tests::test_timer_target_duration_all_phases_with_custom_config`
+194. `timer::tests::test_timer_time_remaining_never_underflows_sub_second_ticks`
+195. `timer::tests::test_timer_toggle_transitions`
+196. `timer::tests::test_timer_zero_total_duration_progress_ratio`
+197. `timer::tests::test_twenty_four_cycle_advancement_and_long_break_trigger`
+198. `ui::digits::tests::test_big_digits_various_large_minutes_formatting`
+199. `ui::digits::tests::test_char_pattern_all_valid_chars`
+200. `ui::digits::tests::test_render_big_time_boundary_values`
+201. `ui::digits::tests::test_render_big_time_structure`
+202. `ui::digits::tests::test_render_big_time_various_values`
+203. `ui::tests::test_buffer_cell_content_assertions_across_views`
+204. `ui::tests::test_render_active_task_card_details_on_timer_view`
+205. `ui::tests::test_render_all_color_themes`
+206. `ui::tests::test_render_all_settings_rows_highlighted`
+207. `ui::tests::test_render_all_tabs_without_panic`
+208. `ui::tests::test_render_all_terminal_dimensions`
+209. `ui::tests::test_render_all_three_task_filter_tabs`
+210. `ui::tests::test_render_all_timer_phases_and_statuses`
+211. `ui::tests::test_render_empty_views`
+212. `ui::tests::test_render_extreme_content_and_dimensions`
+213. `ui::tests::test_render_extreme_high_resolution_terminal`
+214. `ui::tests::test_render_extreme_small_terminals`
+215. `ui::tests::test_render_modals_and_status_message`
+216. `ui::tests::test_render_task_modal_both_focus_states`
+217. `ui::tests::test_render_twenty_four_cycle_dots_timer_view`
+218. `ui::tests::test_render_varied_terminal_geometries_stress`
+219. `ui::tests::test_task_modal_focus_switch_and_cancel_invariants`
+220. `ui::tests::test_ui_render_with_status_message_banner_content`
+221. `big_digits_three_digit_minutes_uniform_width`
+222. `chaos_filter_modal_interleave_maintains_core_invariants`
+223. `chaos_fuzz_mixed_events_with_periodic_persistence_invariants`
+224. `completed_sessions_record_actual_elapsed_duration_even_when_config_mutated`
+225. `completed_task_cannot_become_active_target_via_keys`
+226. `corrupt_state_file_is_quarantined_with_bytes_intact`
+227. `delete_on_empty_and_filtered_out_lists_reports_noop`
+228. `deleting_active_task_mid_day_reassigns_credit_to_next`
+229. `distribution_window_sums_match_recorded_sessions`
+230. `every_theme_survives_save_reload_cycle`
+231. `filter_matrix_add_toggle_delete_maintains_integrity`
+232. `footer_swaps_status_banner_back_to_hints_after_expiry`
+233. `full_workday_simulation_with_restart_between_sessions`
+234. `hand_edited_theme_display_names_survive_reload`
+235. `help_popup_renders_on_tiny_terminal`
+236. `large_task_list_survives_restart_roundtrip`
+237. `long_break_interval_exhaustive_one_to_twenty_four`
+238. `modal_estimate_input_mashing_stays_in_bounds`
+239. `pause_resume_across_many_toggles_never_drifts`
+240. `render_every_tab_modal_geometry_matrix_with_content`
+241. `repeated_saves_leave_no_tmp_litter_and_stay_parseable`
+242. `reset_keeps_cycle_position_and_clears_countdown`
+243. `save_reload_roundtrip_preserves_spent_counts_and_stats`
+244. `save_reload_roundtrip_preserves_unicode_titles_and_target`
+245. `scrolled_task_list_keeps_selection_visible`
+246. `selection_wrapping_under_all_filters_never_panics`
+247. `skip_credits_nothing_and_never_advances_cycle`
+248. `storage_loads_file_missing_config_section`
+249. `storage_loads_file_missing_tasks_section`
+250. `storage_loads_legacy_file_missing_stats_section_and_keeps_tasks`
+251. `streak_continuity_across_month_and_year_boundary`
+252. `streak_ignores_future_dated_entries_gracefully`
+253. `timer_state_is_not_persisted_across_restart`
+254. `timer_view_renders_extreme_countdown_values`
+255. `today_metrics_exclude_other_days`
+256. `transient_ui_state_resets_on_restart`
+257. `whitespace_only_title_rejected_then_real_title_accepted`
+258. `work_session_credits_only_the_active_task_across_retargeting`
+259. `zero_duration_direct_construction_never_panics_or_underflows`
 
 ---
 

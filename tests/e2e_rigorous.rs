@@ -507,10 +507,12 @@ fn full_workday_simulation_with_restart_between_sessions() {
     cleanup(dir);
 }
 
-// Skipping is an explicit user action: it advances the cycle machinery but
-// must NOT fabricate statistics or credit the active task.
+// Skipping is an explicit user action: it abandons the current phase without
+// crediting anything — no statistics, no task credit, no completed-pomodoro
+// count, and no cycle advancement. Long breaks must only be earned by
+// genuinely finishing Work phases.
 #[test]
-fn skip_advances_cycle_without_recording_stats_or_credit() {
+fn skip_credits_nothing_and_never_advances_cycle() {
     let (mut app, dir) = make_app("skip_semantics");
     app.tasks.add("Untouched Task".to_string(), 3);
 
@@ -519,11 +521,19 @@ fn skip_advances_cycle_without_recording_stats_or_credit() {
     advance_one_second(&mut app); // 1s of real progress only
     app.on_key_event(key(KeyCode::Char('s'))); // skip
     assert_eq!(app.timer.phase, PomodoroPhase::ShortBreak);
-    assert_eq!(app.timer.current_cycle, 2);
+    assert_eq!(
+        app.timer.current_cycle, 1,
+        "skipping work must not advance the cycle"
+    );
+    assert_eq!(
+        app.timer.completed_pomodoros, 0,
+        "skipping work must not count as a completed pomodoro"
+    );
 
     // Skip the break too.
     app.on_key_event(key(KeyCode::Char('s')));
     assert_eq!(app.timer.phase, PomodoroPhase::Work);
+    assert_eq!(app.timer.current_cycle, 1);
 
     assert_eq!(
         app.stats.sessions.len(),
@@ -535,6 +545,14 @@ fn skip_advances_cycle_without_recording_stats_or_credit() {
         "skips must not credit tasks"
     );
     assert_eq!(app.stats.today_focus_minutes(), 0);
+
+    // Repeated skip loops can never fabricate a long break or pomodoro credit.
+    for _ in 0..10 {
+        app.on_key_event(key(KeyCode::Char('s')));
+    }
+    assert_eq!(app.timer.completed_pomodoros, 0);
+    assert_eq!(app.timer.current_cycle, 1);
+    assert_eq!(app.stats.total_work_sessions(), 0);
     cleanup(dir);
 }
 

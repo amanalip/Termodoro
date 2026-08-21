@@ -56,7 +56,7 @@ Termodoro intentionally limits external dependencies to a strictly audited set o
 
 ```mermaid
 graph TD
-    A["Termodoro Core"] --> B["Rust 1.74+ (Edition 2021)"]
+    A["Termodoro Core"] --> B["Rust 1.89+ (Edition 2021)"]
     A --> C["Ratatui 0.29.0 and Crossterm 0.28.1"]
     A --> D["Rodio 0.19.0 and Hound 3.5.1"]
     A --> E["Serde 1.0 and Serde_JSON 1.0"]
@@ -332,13 +332,13 @@ std::panic::set_hook(Box::new(move |info| {
 
 ## 10. Automated Quality Assurance & Verification Matrix
 
-Termodoro's architecture is continuously certified by a comprehensive **257-test Rust QA harness** and a **41-test Playwright cross-device web E2E suite** running across Linux, macOS, and Windows:
+Termodoro's architecture is continuously certified by a comprehensive **259-test Rust QA harness** and a **41-test Playwright cross-device web E2E suite** running across Linux, macOS, and Windows:
 
 ```mermaid
-pie title Automated Test Distribution (257 Tests)
+pie title Automated Test Distribution (259 Tests)
     "App and E2E Workflows" : 41
     "Productivity Analytics" : 29
-    "Timer Finite State Machine" : 27
+    "Timer Finite State Machine" : 29
     "Task Management Engine" : 32
     "Audio Synthesis and WAV" : 20
     "TUI Rendering and Buffer" : 18
@@ -351,10 +351,10 @@ pie title Automated Test Distribution (257 Tests)
 
 | Verification Dimension | Verified Standard | Verification Tool | Status |
 | :--- | :--- | :--- | :---: |
-| **Compiler Compliance** | Rust 1.74+ (Edition 2021) | `cargo check` | **PASS** |
+| **Compiler Compliance** | Rust 1.89+ MSRV (Edition 2021, enforced via `rust-version`) | `cargo check` | **PASS** |
 | **Code Formatting** | 100% Rustfmt canonical style | `cargo fmt -- --check` | **PASS** |
 | **Static Analysis** | Zero warnings with fatal pedantic flags | `cargo clippy -- -D warnings` | **PASS** |
-| **Unit & Integration Tests**| 257 / 257 passing across all modules | `cargo test` / `make test` | **PASS** |
+| **Unit & Integration Tests**| 259 / 259 passing across all modules | `cargo test` / `make test` | **PASS** |
 | **Playwright Web E2E** | 41 / 41 passing across 6 responsive viewports | `make test-e2e` (`scripts/e2e-website-test.mjs`) | **PASS** |
 | **Memory Safety** | Zero `unsafe` blocks crate-wide | Compile-time `[lints.rust] unsafe_code = "forbid"` in `Cargo.toml` | **PASS** |
 | **Network Isolation** | Zero HTTP/network client libraries in lockfile | Dependency audit | **PASS** |

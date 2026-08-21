@@ -8,8 +8,8 @@
 
 [![CI](https://github.com/amanalip/Termodoro/actions/workflows/rust.yml/badge.svg)](https://github.com/amanalip/Termodoro/actions)
 [![Website](https://img.shields.io/badge/website-live%20showcase-blue.svg)](https://amanalip.github.io/Termodoro/)
-[![Tests](https://img.shields.io/badge/tests-257%20passed%20(100%25)-brightgreen.svg)](test_report.md)
-[![Rust](https://img.shields.io/badge/rust-1.74%2B%20(Edition%202021)-orange.svg)](https://www.rust-lang.org)
+[![Tests](https://img.shields.io/badge/tests-259%20passed%20(100%25)-brightgreen.svg)](test_report.md)
+[![Rust](https://img.shields.io/badge/rust-1.89%2B%20(Edition%202021)-orange.svg)](https://www.rust-lang.org)
 [![License: GPL-3.0](https://img.shields.io/badge/license-GPL--3.0--or--later-blue.svg)](LICENSE)
 [![Safety](https://img.shields.io/badge/unsafe%20code-0%25%20(Safe%20Rust)-brightgreen.svg)](audit_log.md)
 [![Privacy](https://img.shields.io/badge/telemetry-0%25%20(100%25%20Offline)-blueviolet.svg)](audit_log.md)
@@ -131,7 +131,7 @@ Termodoro/
 ├── System_design.md            # Comprehensive system design, architecture & technical rationale
 ├── IMPLEMENTATION.md           # In-depth engineering specification and algorithms
 ├── WALKTHROUGH.md              # Operational workflows, code tour, and test benchmarks
-├── test_report.md              # Comprehensive 257-test QA audit & test suite report
+├── test_report.md              # Comprehensive 259-test QA audit & test suite report
 ├── audit_log.md                # Permanent audit log & verification history (AUD-001 to AUD-018)
 ├── new_features_tracker.md     # Feature tracking roadmap and specifications
 ├── scripts/                    # Automation helper scripts (test_and_clean.sh)
@@ -204,7 +204,7 @@ If you are new to terminal tools, here is a quick overview of key concepts used 
 
 | Component | Minimum Version | Recommended Tools | Purpose |
 | :--- | :--- | :--- | :--- |
-| **Rust & Cargo** | `1.74.0` or newer | Installed via `rustup` | Compiles the Rust source code into a native binary |
+| **Rust & Cargo** | `1.89.0` or newer | Installed via `rustup` | Compiles the Rust source code into a native binary |
 | **Terminal Emulator** | 24-bit TrueColor (`COLORTERM=truecolor`) | [Alacritty](https://alacritty.org), [Kitty](https://sw.kovidgoyal.net/kitty/), [WezTerm](https://wezfurlong.org/wezterm/), [iTerm2](https://iterm2.com), [Windows Terminal](https://github.com/microsoft/terminal) | Renders rich RGB colors and fast terminal frames |
 | **Unicode Font** | UTF-8 compatible | [Nerd Fonts](https://www.nerdfonts.com) (JetBrains Mono, FiraCode, Hack) | Displays block ASCII art, symbols, and progress indicators |
 | **Notification Daemon** *(Linux only)* | Any Freedesktop-compliant daemon | `dunst`, `mako`, `swaync`, `xfce4-notifyd` | Displays desktop notifications upon phase completion |
@@ -849,12 +849,12 @@ Because the database is standard JSON, you can easily back up, version-control, 
 
 ## 10. Development, Testing & Contribution
 
-### Automated Testing & Cache Cleanup (257 Rust Tests + 41 Playwright E2E Tests)
+### Automated Testing & Cache Cleanup (259 Rust Tests + 41 Playwright E2E Tests)
 
 To run the complete Rust test suite and **automatically clean compiler build cache** (preventing `target/` directory bloat and reclaiming ~1.8 GB of disk space):
 
 ```bash
-# Option A: Run 257 Rust tests using Makefile (Recommended)
+# Option A: Run 259 Rust tests using Makefile (Recommended)
 make test
 
 # Option B: Run full Playwright cross-device E2E test suite (Desktop + Mobile)
@@ -869,7 +869,7 @@ cargo test
 
 ### Static Analysis, Lints & Hygiene
 ```bash
-# Run full verification (fmt + clippy + 257 tests + auto-clean)
+# Run full verification (fmt + clippy + 259 tests + auto-clean)
 make check
 
 # Check code formatting compliance
@@ -906,12 +906,12 @@ node scripts/e2e-website-test.mjs
 
 | Command | Action |
 | :--- | :--- |
-| `make test` | Run 257-test Rust suite and automatically clean `target/` cache |
+| `make test` | Run 259-test Rust suite and automatically clean `target/` cache |
 | `make test-clean` | Run tests and auto-clean (reclaims ~1.8GB disk space) |
 | `make test-e2e` | Run full Playwright cross-device E2E test suite (41/41 tests across 6 viewports) |
 | `make check-facts` | Run full 84-assertion sanity, fact-checking & Markdown link audit |
 | `make check-links` | Verify 100% of all Markdown internal links, cross-file references & anchor slugs |
-| `make check` | Execute `fmt`, `clippy`, full 257-test suite, and clean up |
+| `make check` | Execute `fmt`, `clippy`, full 259-test suite, and clean up |
 | `make build` | Compile optimized release binary in `target/release/termodoro` |
 | `make run` | Launch Termodoro in release mode |
 | `make clean` | Reclaim local disk space immediately via `cargo clean` |
@@ -928,7 +928,7 @@ To provide full confidence to developers, contributors, and users, all claims, m
 
 | Verified Claim / Metric | Documented Value | Audited Source Code Reference | Verification Method & Benchmark | Status |
 | :--- | :--- | :--- | :--- | :---: |
-| **Test Suite Pass Rate** | 257 / 257 Passed (100%) | `src/` & `tests/` (All modules) | `cargo test` execution | **VERIFIED** |
+| **Test Suite Pass Rate** | 259 / 259 Passed (100%) | `src/` & `tests/` (All modules) | `cargo test` execution | **VERIFIED** |
 | **Playwright E2E Pass Rate** | 41 / 41 Passed (100%) | [`scripts/e2e-website-test.mjs`](scripts/e2e-website-test.mjs) | Playwright Chromium across 6 responsive viewports | **VERIFIED** |
 | **Sanity & Fact-Check Audit** | 84 / 84 Verified (100%) | [`scripts/sanity_and_fact_check.mjs`](scripts/sanity_and_fact_check.mjs) | Automated AST, HTML, CSS & audio frequency audit (`make check-facts`) | **VERIFIED** |
 | **Privacy & Zero Telemetry** | 100% Offline & Private (0 Network Calls) | `src/storage.rs` & `Cargo.lock` | Unit tests `test_privacy_zero_telemetry_guarantees` & CI check | **VERIFIED** |
@@ -946,7 +946,7 @@ To provide full confidence to developers, contributors, and users, all claims, m
 Any user can independently reproduce and verify this entire audit report on their local machine by executing:
 
 ```bash
-# 1. Run full 257-test automated suite
+# 1. Run full 259-test automated suite
 cargo test -- --nocapture
 
 # 2. Verify zero compiler warnings or lint issues

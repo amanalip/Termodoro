@@ -78,7 +78,7 @@ pub fn render(f: &mut Frame, theme: &Theme, area: Rect) {
         )),
         Line::from("  [Space]               Start / Pause timer countdown"),
         Line::from("  [r]                   Reset timer to beginning of current phase"),
-        Line::from("  [s]                   Skip current phase and advance to next"),
+        Line::from("  [s]                   Skip current phase (not counted as completed)"),
         Line::from("  [a]                   Quickly add a new task"),
         Line::from(""),
         // Section: Task Management Controls

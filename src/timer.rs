@@ -237,6 +237,41 @@ impl PomodoroTimer {
             PomodoroPhase::ShortBreak | PomodoroPhase::LongBreak => PomodoroPhase::Work,
         };
 
+        // Apply the transition without touching progress counters again
+        self.transition_to(next, config);
+
+        // Return the new phase
+        next
+    }
+
+    // Skips the current phase and transitions directly to the next one.
+    //
+    // Skipping is an act of abandonment, not completion: a skipped Work phase
+    // must NOT increment `completed_pomodoros` and must NOT advance (or wrap)
+    // `current_cycle`, otherwise a user could reach a long break with zero
+    // genuinely finished focus sessions. A skipped Work phase therefore always
+    // falls through to ShortBreak at the same cycle position; the long break
+    // is only ever earned by actually completing the final Work phase.
+    pub fn skip_to_next(&mut self, config: &Config) -> PomodoroPhase {
+        // Determine destination without crediting any progress
+        let next = match self.phase {
+            // Abandoning focus falls through to a short break only
+            PomodoroPhase::Work => PomodoroPhase::ShortBreak,
+            // Skipping any break returns straight to focus
+            PomodoroPhase::ShortBreak | PomodoroPhase::LongBreak => PomodoroPhase::Work,
+        };
+
+        // Apply the transition
+        self.transition_to(next, config);
+
+        // Return the new phase
+        next
+    }
+
+    // Shared transition mechanics: swap in the new phase, load its duration,
+    // and honor auto-start settings. Progress counters are deliberately NOT
+    // touched here; callers decide whether the transition was earned.
+    fn transition_to(&mut self, next: PomodoroPhase, config: &Config) {
         // Update active phase
         self.phase = next;
         // Calculate total seconds for the new phase
@@ -267,15 +302,6 @@ impl PomodoroTimer {
             // Wait for user manual start
             TimerStatus::Stopped
         };
-
-        // Return the new phase
-        next
-    }
-
-    // Skips current phase and transitions directly to the next phase
-    pub fn skip_to_next(&mut self, config: &Config) -> PomodoroPhase {
-        // Advance to next phase
-        self.advance_phase(config)
     }
 }
 
@@ -461,6 +487,68 @@ mod tests {
         assert_eq!(next, PomodoroPhase::ShortBreak);
         assert_eq!(timer.phase, PomodoroPhase::ShortBreak);
         assert_eq!(timer.time_remaining_secs, 5 * 60);
+    }
+
+    #[test]
+    fn test_skip_from_work_never_credits_pomodoro_or_cycle() {
+        let config = Config {
+            long_break_interval: 4,
+            ..Default::default()
+        };
+        let mut timer = PomodoroTimer::new(&config);
+
+        // Skipping a barely-started Work phase must not count it as done
+        timer.skip_to_next(&config);
+        assert_eq!(timer.completed_pomodoros, 0);
+        assert_eq!(timer.current_cycle, 1);
+        assert_eq!(timer.phase, PomodoroPhase::ShortBreak);
+
+        // Skip the break back to Work: still no progress credited
+        timer.skip_to_next(&config);
+        assert_eq!(timer.completed_pomodoros, 0);
+        assert_eq!(timer.current_cycle, 1);
+        assert_eq!(timer.phase, PomodoroPhase::Work);
+
+        // Even skipping from the final cycle slot must never jump to (or
+        // wrap into) a long break without genuinely finishing the work
+        timer.current_cycle = config.long_break_interval;
+        timer.skip_to_next(&config);
+        assert_eq!(timer.phase, PomodoroPhase::ShortBreak);
+        assert_eq!(timer.current_cycle, config.long_break_interval);
+        assert_eq!(timer.completed_pomodoros, 0);
+    }
+
+    #[test]
+    fn test_natural_completion_still_credits_after_skips() {
+        let config = Config {
+            long_break_interval: 2,
+            ..Default::default()
+        };
+        let mut timer = PomodoroTimer::new(&config);
+
+        // Skip one Work phase: no credit
+        timer.skip_to_next(&config);
+        assert_eq!(timer.completed_pomodoros, 0);
+        assert_eq!(timer.current_cycle, 1);
+
+        // Skip back to Work, then actually finish a pomodoro
+        timer.skip_to_next(&config);
+        timer.status = TimerStatus::Running;
+        timer.time_remaining_secs = 1;
+        timer.tick(&config);
+        assert_eq!(timer.completed_pomodoros, 1);
+        assert_eq!(timer.current_cycle, 2);
+        assert_eq!(timer.phase, PomodoroPhase::ShortBreak);
+
+        // Completing the final cycle slot earns the long break
+        timer.skip_to_next(&config); // break -> Work, no credit
+        assert_eq!(timer.completed_pomodoros, 1);
+        timer.status = TimerStatus::Running;
+        timer.time_remaining_secs = 1;
+        timer.tick(&config);
+        assert_eq!(timer.completed_pomodoros, 2);
+        assert_eq!(timer.phase, PomodoroPhase::LongBreak);
+        assert_eq!(timer.current_cycle, 1);
     }
 
     #[test]

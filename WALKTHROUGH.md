@@ -168,11 +168,11 @@ If you are new to Rust or TUI development, here is how the code flows:
 
 ## 4. Verification, Testing & Quality Assurance
 
-### Running the Test Suite & Auto-Cleaning Build Cache (257 Tests + 41 Playwright E2E Tests)
-Termodoro includes a comprehensive suite of **257 automated unit, integration, and UI rendering tests**, alongside **41 Playwright cross-viewport web E2E tests**. You can execute them with automated cache cleanup to keep your disk usage slim:
+### Running the Test Suite & Auto-Cleaning Build Cache (259 Tests + 41 Playwright E2E Tests)
+Termodoro includes a comprehensive suite of **259 automated unit, integration, and UI rendering tests**, alongside **41 Playwright cross-viewport web E2E tests**. You can execute them with automated cache cleanup to keep your disk usage slim:
 
 ```bash
-# Option 1: Run all 257 Rust tests + auto-clean ~1.8GB target cache
+# Option 1: Run all 259 Rust tests + auto-clean ~1.8GB target cache
 make test
 
 # Option 2: Run Playwright cross-device E2E test suite (Desktop + Tablet + Mobile)

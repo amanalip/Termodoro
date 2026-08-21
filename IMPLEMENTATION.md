@@ -374,7 +374,7 @@ In addition, a `TerminalGuard` RAII struct acquires raw mode and the alternate s
 
 ## 11. Automated Testing Strategy & Benchmarks
 
-Termodoro includes **257 automated Rust tests** and **41 automated Playwright web E2E tests**:
+Termodoro includes **259 automated Rust tests** and **41 automated Playwright web E2E tests**:
 
 - **Audio Engine (`src/audio.rs`, 20 tests)**: Tests 16-bit PCM RIFF headers, signal clipping bounds ($>10000$, $<32000$), smooth exponential decay envelopes, pop/click prevention on audio DAC including click-free note boundaries, custom sample rates ($8\text{kHz}$ to $96\text{kHz}$), byte-level RIFF alignment, two-tone/three-tone duration timing, and atomic muting flags.
 - **Timer Engine (`src/timer.rs`, 27 tests)**: Tests 24-cycle state machine progression, underflow safety on sub-second ticks, tuple time formatting, large duration formatting (up to 120 mins), 50 rapid skips, zero-duration progress calculations, pause, toggle, reset transitions, and phase title/emoji parity.
@@ -390,7 +390,7 @@ Termodoro includes **257 automated Rust tests** and **41 automated Playwright we
 
 Run the test suites with:
 ```bash
-# Run 257 Rust tests
+# Run 259 Rust tests
 make test
 # or cargo test
 

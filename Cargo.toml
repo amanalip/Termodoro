@@ -2,6 +2,9 @@
 name = "termodoro"
 version = "0.1.0"
 edition = "2021"
+# Minimum Supported Rust Version. Enforced by cargo on build; driven by
+# notify-rust 4.18 (rust-version 1.89) and std::u32::is_multiple_of (1.87).
+rust-version = "1.89"
 default-run = "termodoro"
 authors = ["Aman Ali Pogaku <pamanalionline@gmail.com>"]
 description = "A sleek, feature-rich Pomodoro timer and task manager for the terminal."
