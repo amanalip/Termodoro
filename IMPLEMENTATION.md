@@ -314,7 +314,7 @@ pub struct AppData {
   - Uses `directories::ProjectDirs::from("com", "termodoro", "termodoro")`.
   - On Linux: `~/.local/share/termodoro/data.json`
   - On macOS: `~/Library/Application Support/com.termodoro.termodoro/data.json`
-  - On Windows: `%APPDATA%\termodoro\termodoro\data.json`
+  - On Windows: `%APPDATA%\termodoro\termodoro\data\data.json`
   - If the platform directory cannot be resolved (for example `HOME` unset under cron or containers), resolution falls back to `$XDG_DATA_HOME/termodoro`, then `$HOME/.local/share/termodoro`, and only as a last resort a loudly announced `./termodoro-data` in the current working directory.
 - **Atomic File Writing**:
   - Automatically creates parent directory paths if missing.

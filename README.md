@@ -156,7 +156,7 @@ Termodoro/
     │   └── generate_screenshots.rs # Automated vector SVG & headless screenshot engine
     └── ui/
         ├── mod.rs              # Root view layout coordinator, tabs, header and footer
-        ├── digits.rs           # 5x3 block font character rasterization for digital clock
+        ├── digits.rs           # 5x4 block font character rasterization for digital clock
         ├── timer_view.rs       # Main timer screen (digits, gauge, cycle dots, target card)
         ├── tasks_view.rs       # Interactive task table, status checkboxes, filter selector
         ├── stats_view.rs       # Metric cards, weekly bar chart, recent activity log
@@ -716,7 +716,7 @@ Termodoro follows the standard XDG base directory conventions on Unix and platfo
 | :--- | :--- |
 | **Linux / BSD** | `~/.local/share/termodoro/data.json` |
 | **macOS** | `~/Library/Application Support/com.termodoro.termodoro/data.json` |
-| **Windows** | `%APPDATA%\termodoro\termodoro\data.json` |
+| **Windows** | `%APPDATA%\termodoro\termodoro\data\data.json` |
 
 ### Annotated `data.json` Schema
 
@@ -772,7 +772,7 @@ Because the database is standard JSON, you can easily back up, version-control, 
 #### Q1: Why is my `target/` directory huge (~1-2 GB) after building, and will `cargo clean` delete my saved data?
 - **Answer**: `target/` is Rust's temporary compiler build cache containing intermediary compilation artifacts (`.rlib`, object code, build scripts). It is **not** where your user data or installed app lives.
 - Running `cargo clean` (or `make clean`) only clears this compiler cache and reclaims ~1.8 GB of disk space.
-- Your saved tasks, streaks, custom durations, and theme choices are stored separately in `~/.local/share/termodoro/data.json` (on Linux) or `%APPDATA%\termodoro\termodoro\data.json` (on Windows) and will **never** be deleted or affected by `cargo clean`.
+- Your saved tasks, streaks, custom durations, and theme choices are stored separately in `~/.local/share/termodoro/data.json` (on Linux) or `%APPDATA%\termodoro\termodoro\data\data.json` (on Windows) and will **never** be deleted or affected by `cargo clean`.
 
 #### Q2: What is the recommended way to install Termodoro without keeping large build files?
 - **Answer**: Run `cargo install --path .` from inside the repository folder. This compiles and installs a tiny, standalone binary (**~5.1 MB**) into `~/.cargo/bin/termodoro`.
@@ -844,7 +844,7 @@ Because the database is standard JSON, you can easily back up, version-control, 
 - **Answer**: Simply copy your `data.json` file to the new machine:
   - **Linux / BSD**: `~/.local/share/termodoro/data.json`
   - **macOS**: `~/Library/Application Support/com.termodoro.termodoro/data.json`
-  - **Windows**: `%APPDATA%\termodoro\termodoro\data.json`
+  - **Windows**: `%APPDATA%\termodoro\termodoro\data\data.json`
   Because the schema is standard JSON, you can also inspect, edit, or version-control your productivity data with Git.
 
 ---

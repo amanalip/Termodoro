@@ -88,7 +88,7 @@ Termodoro divides the terminal window into three main regions:
    - Use `←` / `→`, `h` / `l`, `+` / `-`, or `_` / `=` to set an estimated session count (clamped 1 to 20).
    - Press `Enter` to save.
 3. **Set Active Focus Target**: Highlight the newly created task using `↑` / `k` or `↓` / `j` and press `t`. A `ACTIVE` badge appears next to the item.
-4. **Work on the Task**: Return to Tab 1 (`1` or `Tab`). Notice the active task card now displays `Active Focus: Write unit tests (0/3)`.
+4. **Work on the Task**: Return to Tab 1 with `Shift+Tab` (on the Tasks tab, `1` selects the *All* filter and `Tab` moves forward to Stats, so `Shift+Tab` is the direct way back). Notice the active task card now displays `Active Focus: Write unit tests (0/3)`.
 5. **Completing Sessions**: Each time a 25-minute work session finishes, the task's completed Pomodoro count increments automatically (`1/3`, `2/3`, etc.).
 6. **Marking Done**: Once finished, return to Tasks (`2`), highlight the task, and press `Space` or `Enter` to mark it complete (``).
 
@@ -199,8 +199,8 @@ cargo test
 | **Application State** | `src/app.rs` | 1,000-keystroke chaos fuzzing, 18-theme cycling & persistence E2E, exhaustive 9-row settings clamping, modal input isolation, 24-cycle workflows, sound & desktop notification flags, status expiration, key routing |
 | **Persistence** | `src/storage.rs` | Full dataset roundtrips, atomic writes, empty & partial JSON resilience, custom nested directory creation |
 | **Configuration** | `src/config.rs` | Default parameters and Serde JSON serialization |
-| **Themes** | `src/theme.rs` | All 18 palettes, WCAG AA contrast ratios, and serde roundtrips |
-| **Digital Typography** | `src/ui/digits.rs` | 5x3 block font rasterization for all digits, colon, boundary values, and fallbacks |
+| **Themes** | `src/theme.rs` | All 18 palettes, weighted RGB luminance-separation checks, and serde roundtrips |
+| **Digital Typography** | `src/ui/digits.rs` | 5x4 block font rasterization for all digits, colon, boundary values, and fallbacks |
 | **Terminal UI Rendering** | `src/ui/mod.rs` | Pixel buffer content assertions across all tabs, extreme geometries ($20 \times 10$ to $300 \times 100$), and 24-cycle dot indicators |
 | **Web Portal & Showcase** | [`scripts/e2e-website-test.mjs`](scripts/e2e-website-test.mjs) | Playwright automated E2E testing across 6 viewport profiles (1920x1080 to 320x568), mobile drawer, theme engine, copy buttons |
 | **Sanity & Fact-Check Suite** | [`scripts/sanity_and_fact_check.mjs`](scripts/sanity_and_fact_check.mjs) | 81 programmatic assertions validating source invariants, audio frequencies, theme tokens, and HTML assets |
@@ -220,7 +220,7 @@ To verify that the documented operational workflows match runtime reality, the s
 | **Streak Integrity** | Active if session completed today/yesterday | [`src/stats.rs`](src/stats.rs#L100-L160) | `test_multi_day_streak_yesterday_continuation` | **VERIFIED** |
 | **Theme Cycling** | `l`/`h` cycles across 18 palettes with wrap | [`src/theme.rs`](src/theme.rs#L1-L150) | `test_all_eighteen_themes_cycle_and_persistence_e2e` | **VERIFIED** |
 | **Live Settings Update** | Adjusting durations instantly updates timer | [`src/app.rs`](src/app.rs#L310-L360) | `test_settings_tab_vim_keys_and_live_timer_updates` | **VERIFIED** |
-| **Terminal Clean Exit** | `q` or `Esc` restores raw mode cleanly | [`src/main.rs`](src/main.rs#L25-L65) | `test_app_restart_and_state_recovery_e2e` | **VERIFIED** |
+| **Terminal Clean Exit** | `q` quits and restores raw mode cleanly | [`src/main.rs`](src/main.rs#L25-L65) | `test_app_restart_and_state_recovery_e2e` | **VERIFIED** |
 | **Web Responsive Layout** | 100% mobile-friendly with zero overflow | [`docs/style.css`](docs/style.css) | Playwright E2E (41/41 passing tests) | **VERIFIED** |
 | **Source Truth Verification** | 81/81 assertions verified vs Rust source | [`scripts/sanity_and_fact_check.mjs`](scripts/sanity_and_fact_check.mjs) | `make check-facts` (81/81 passing checks) | **VERIFIED** |
 

@@ -39,10 +39,10 @@ Official Project Website & Knowledge Base:
 
 ## 1. Executive Overview & Design Philosophy
 
-Termodoro is engineered from the ground up to be an **ultra-lightweight, zero-latency, offline-first terminal productivity workstation**. It rejects modern GUI bloat (Electron, WebViews, browser processes, network analytics daemon) in favor of a single statically linked binary with instantaneous startup ($< 10\text{ms}$), minimal memory footprint ($< 15\text{MB}$ RAM), and 100% deterministic local behavior.
+Termodoro is engineered from the ground up to be an **ultra-lightweight, zero-latency, offline-first terminal productivity workstation**. It rejects modern GUI bloat (Electron, WebViews, browser processes, network analytics daemon) in favor of a single self-contained executable with instantaneous startup, minimal memory footprint, and 100% deterministic local behavior. (The performance figures quoted throughout this document — e.g. $< 10\text{ms}$ startup and $< 15\text{MB}$ RAM — are environment-specific measurements from development hardware, not universal guarantees.)
 
 ### Core Design Principles
-1. **Zero Unsafe Rust**: The entire application compiles with `0` `unsafe` blocks, guaranteeing memory safety, borrow-checker proofs, and freedom from undefined behavior.
+1. **Zero Unsafe Rust**: The crate compiles with `unsafe_code = "forbid"`, so `0` `unsafe` blocks exist anywhere in Termodoro's own code. This compiler-enforced lint covers this crate only — it is a strong safety posture, not a formal proof that every transitive dependency is free of undefined behavior.
 2. **Deterministic Offline Execution**: Air-gapped design. Zero network dependencies, zero telemetry, zero analytics tracking, zero cloud accounts, zero HTTP clients.
 3. **Pure Mathematical Audio Synthesis**: Acoustic alerts are synthesized algorithmically in memory at runtime into valid 16-bit PCM RIFF WAV buffers. No external audio assets or binary sound assets bundled or read from disk.
 4. **Immediate-Mode Visual Consistency**: TUI rendering is completely decoupled from state mutation, operating at 4 Hz (250ms tick event loop) with zero visual tearing, flicker, or layout corruption across any terminal dimension from $20\times 10$ to $300\times 100$.
@@ -58,7 +58,7 @@ Termodoro intentionally limits external dependencies to a strictly audited set o
 graph TD
     A["Termodoro Core"] --> B["Rust 1.89+ (Edition 2021)"]
     A --> C["Ratatui 0.29.0 and Crossterm 0.28.1"]
-    A --> D["Rodio 0.19.0 and Hound 3.5.1"]
+    A --> D["Rodio 0.19.0 (WAV Playback)"]
     A --> E["Serde 1.0 and Serde_JSON 1.0"]
     A --> F["Directories 5.0.1"]
     A --> G["Chrono 0.4.45"]
@@ -74,7 +74,7 @@ graph TD
 | **TUI Renderer** | **`ratatui`** | `0.29.0` | Immediate-mode UI layout & widgets | Standard modern Rust TUI library (fork of tui-rs) with rich constraint-based layout engine (`Flex`, `Constraint`, `Layout`), modular widgets (Tabs, Tables, Gauges, Paragraphs), and high-performance terminal diff buffer rendering. |
 | **Terminal Backend** | **`crossterm`** | `0.28.1` | Terminal escape codes & raw mode | Pure cross-platform terminal abstraction supporting raw mode, alternate screen buffers, mouse/keyboard polling, ANSI TrueColor (24-bit RGB), and Windows Console Virtual Terminal sequences. |
 | **Audio Playback** | **`rodio`** | `0.19.0` | Multi-OS audio output stream | Non-blocking cross-platform audio playback pipeline backed by `cpal`. Spawns background worker threads using native OS audio drivers (ALSA on Linux, CoreAudio on macOS, WASAPI on Windows). |
-| **WAV Serialization** | **`hound`** | `3.5.1` | RIFF WAV header encoding | Zero-dependency, pure-Rust WAV header serialization engine. Used to wrap in-memory synthesized PCM sample vectors into standard RFC 2361 RIFF byte buffers wrapped in `std::io::Cursor`. |
+| **WAV Serialization** | *(first-party)* `create_riff_wav_pcm16()` | — | RIFF WAV header encoding | Hand-written encoder in `src/audio.rs` that manually writes the `RIFF`, `WAVE`, `fmt `, and `data` chunks to wrap in-memory synthesized PCM sample vectors into standard RFC 2361 byte buffers wrapped in `std::io::Cursor`. (The `hound` crate appears in the lockfile only as a transitive dependency of `rodio`'s WAV decoder; it is not used for encoding.) |
 | **Data Serialization** | **`serde`** / **`serde_json`** | `1.0` | JSON persistence & configuration | Industry-standard zero-copy serialization framework. Enables human-readable, portable `data.json` storage with robust fallback on corrupted or partial schema formats. |
 | **OS Paths** | **`directories`** | `5.0.1` | Cross-platform standard directories | Adheres strictly to XDG Base Directory specification on Linux (`~/.local/share`), Standard Application Support on macOS, and `%APPDATA%` on Windows. |
 | **Time & Analytics** | **`chrono`** | `0.4.45` | Datetime arithmetic & ISO strings | Reliable date/time manipulation, leap year calculations, calendar day streak continuities, and ISO 8601 UTC timestamps. |
@@ -123,7 +123,7 @@ graph TD
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │                                ui/ (TUI Layer)                              │
 │  - mod.rs (Root Frame Coordinator, Header, Tabs, Footer, Modals)            │
-│  - digits.rs (5x3 Digital Clock ASCII Block Rasterizer)                     │
+│  - digits.rs (5x4 Digital Clock ASCII Block Rasterizer)                     │
 │  - timer_view.rs, tasks_view.rs, stats_view.rs, settings_view.rs            │
 │  - theme.rs (18 Concrete 24-Bit RGB Palettes)                               │
 └─────────────────────────────────────────────────────────────────────────────┘
@@ -163,7 +163,7 @@ flowchart TD
 - **Work Phase**: Increments the active task's `pomodoros_spent` counter upon completion, plays the 528 Hz Zen chime, logs focus minutes to `StatsTracker`, and increments daily focus statistics.
 - **Short Break Trigger**: When current `cycle < long_break_interval` ($1 \le \text{interval} \le 24$), the next phase is set to `ShortBreak`.
 - **Long Break Trigger**: When current `cycle == long_break_interval`, the next phase transitions to `LongBreak`, after which the cycle counter wraps cleanly back to `1`.
-- **Auto-Start Support**: If `auto_start_breaks` or `auto_start_pomodoros` are enabled in configuration, transitions immediately start countdown rather than halting in a `Stopped` state.
+- **Auto-Start Support**: If `auto_start_breaks` or `auto_start_work` are enabled in configuration, transitions immediately start countdown rather than halting in a `Stopped` state.
 
 ---
 
@@ -187,7 +187,7 @@ flowchart TD
 ```
 
 ### Big Digits Block Rasterization
-The 5-row digital block clock on Tab 1 uses a custom ASCII rasterizer (`src/ui/digits.rs`). Each character (`0-9`, `:`) is mapped to a $5\times 3$ grid of block characters (`█` and spaces), guaranteeing bold, readable numbers that scale cleanly across any monospace terminal font.
+The 5-row digital block clock on Tab 1 uses a custom ASCII rasterizer (`src/ui/digits.rs`). Each character (`0-9`, `:`) is mapped to a $5\times 4$ grid of block characters (`█` and spaces), guaranteeing bold, readable numbers that scale cleanly across any monospace terminal font.
 
 ### Responsive Geometry & Adaptive Constraints
 The UI engine uses flexible constraint layouts:
@@ -212,7 +212,7 @@ User data is persisted into a single, clean JSON file (`data.json`):
     "desktop_notifications": true,
     "theme": "catppuccin_mocha",
     "auto_start_breaks": false,
-    "auto_start_pomodoros": false
+    "auto_start_work": false
   },
   "tasks": [
     {
@@ -273,7 +273,7 @@ Where:
                                  │ 16-Bit PCM Signed Integers
                                  ▼
   ┌─────────────────────────────────────────────────────────────┐
-  │ Hound RFC 2361 RIFF WAV Header Encoder (std::io::Cursor)    │
+  │ First-Party RIFF WAV Header Encoder (create_riff_wav_pcm16) │
   └──────────────────────────────┬──────────────────────────────┘
                                  │ In-Memory WAV Bytes
                                  ▼
