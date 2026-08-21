@@ -45,7 +45,7 @@ Termodoro is engineered from the ground up to be an **ultra-lightweight, zero-la
 1. **Zero Unsafe Rust**: The entire application compiles with `0` `unsafe` blocks, guaranteeing memory safety, borrow-checker proofs, and freedom from undefined behavior.
 2. **Deterministic Offline Execution**: Air-gapped design. Zero network dependencies, zero telemetry, zero analytics tracking, zero cloud accounts, zero HTTP clients.
 3. **Pure Mathematical Audio Synthesis**: Acoustic alerts are synthesized algorithmically in memory at runtime into valid 16-bit PCM RIFF WAV buffers. No external audio assets or binary sound assets bundled or read from disk.
-4. **Immediate-Mode Visual Consistency**: TUI rendering is completely decoupled from state mutation, operating at 10 FPS (100ms tick event loop) with zero visual tearing, flicker, or layout corruption across any terminal dimension from $20\times 10$ to $300\times 100$.
+4. **Immediate-Mode Visual Consistency**: TUI rendering is completely decoupled from state mutation, operating at 4 Hz (250ms tick event loop) with zero visual tearing, flicker, or layout corruption across any terminal dimension from $20\times 10$ to $300\times 100$.
 5. **Cross-Platform Parity**: Full feature parity across Linux, macOS, and Windows with OS-specific audio and storage path resolution.
 
 ---
@@ -91,7 +91,7 @@ graph TD
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │                           main.rs (Runtime Root)                           │
 │  - Terminal Initialization (Raw Mode, Alternate Screen, Panic Hook)         │
-│  - 100ms Event Loop (Crossterm Event Poller + Tick Interval Dispatcher)     │
+│  - 250ms Event Loop (Crossterm Event Poller + Tick Interval Dispatcher)     │
 └──────────────────────────────────────┬──────────────────────────────────────┘
                                        │ Keystrokes & Timer Ticks
                                        ▼
@@ -131,7 +131,7 @@ graph TD
 
 ### Core Module Responsibilities
 
-1. **`src/main.rs`**: Entry point. Sets up panic hooks to protect terminal raw mode, initializes `crossterm::terminal`, loads persistent state from `Storage`, and drives the 100ms tick / event loop.
+1. **`src/main.rs`**: Entry point. Sets up panic hooks to protect terminal raw mode, initializes `crossterm::terminal`, loads persistent state from `Storage`, and drives the 250ms tick / event loop.
 2. **`src/app.rs`**: The central state coordinator. Holds instances of `Timer`, `TaskManager`, `StatsTracker`, `AppConfig`, and active UI views. Dispatches keyboard events and handles modal inputs.
 3. **`src/timer.rs`**: Implements the Pomodoro state machine with 24-cycle advancement, sub-second tick calculation, pause/resume/reset mechanics, and phase completion signals.
 4. **`src/tasks.rs`**: Task data model. Manages unique UUID creation, title sanitization, pomodoro estimates vs spent counters, filter states (`All`, `Active`, `Completed`), and target binding.
@@ -174,7 +174,7 @@ Ratatui employs an immediate-mode rendering architecture where the entire screen
 
 ```mermaid
 flowchart TD
-    A["Event Loop (100ms Tick)"] --> B["Update App State and Countdown"]
+    A["Event Loop (250ms Tick)"] --> B["Update App State and Countdown"]
     B --> C["Compute Layout Rectangles"]
     C --> D["Render Header and Tab Selectors"]
     C --> E["Render Active Tab View (Timer / Tasks / Stats / Settings)"]

@@ -454,7 +454,7 @@ To verify your installation:
 2. **Layout Check**: Ensure the 5-row digital block clock renders without wrapping. Terminal window should be at least 80 columns wide by 24 rows high.
 3. **Themes Check**: Press `4` to enter Settings, navigate to **Color Theme**, and press `l` or `→` to cycle through all 18 built-in themes (Catppuccin Mocha/Macchiato/Frappé/Latte, Nord, Gruvbox, Tokyo Night, Dracula, Solarized Dark/Light, Rose Pine, One Dark, Kanagawa, Everforest Dark/Light, Synthwave '84, Monokai Pro, OLED Phosphor).
 4. **Audio Check**: Press `1` to return to the Timer, press `Space` to start, then press `s` to skip phase and confirm acoustic chimes play upon interval completion.
-5. **Persistence Check**: Press `q` to quit, then restart `termodoro`. Confirm that your settings and active state were safely restored.
+5. **Persistence Check**: Press `q` to quit, then restart `termodoro`. Confirm that your settings, tasks, and statistics were safely restored (a running countdown does not carry over).
 
 ---
 
@@ -568,7 +568,7 @@ To remove the source code folder and all Git artifacts:
 
 ### Global Navigation Controls
 
-These shortcuts function across every screen in Termodoro:
+These shortcuts are available everywhere except where noted:
 
 | Keybinding | Action | Description |
 | :--- | :--- | :--- |
@@ -580,6 +580,8 @@ These shortcuts function across every screen in Termodoro:
 | `4` | Switch to Settings | Jump directly to Tab 4 (Settings View) |
 | `?` | Help Modal | Open or close the interactive keybinding reference dialog |
 | `q` | Quit | Save state atomically and exit the application |
+
+> **Note**: On the Tasks tab, `1`/`2`/`3` filter the task list (`All`/`Active`/`Completed`) instead of switching tabs; `4` still jumps directly to Settings.
 
 > **Tip**: Navigation and adjustment keys (`j`/`k`/`h`/`l` and the arrow keys) auto-repeat when held, so you can scroll long task lists or sweep through all 18 themes without tapping repeatedly.
 
@@ -693,7 +695,7 @@ Press `?` at any point from any screen to open the interactive keyboard cheat sh
 
 ## 8. Local Database, Persistence & Restart Recovery
 
-Termodoro features built-in, offline-first local persistence. **No information is lost upon closing or restarting the application.**
+Termodoro features built-in, offline-first local persistence. **Your settings, tasks, and statistics are saved automatically and restored on launch; an in-progress timer session is not — after a restart the countdown always starts fresh from your configured work duration.**
 
 ### How Data Persistence Works
 
