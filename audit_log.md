@@ -25,7 +25,7 @@ This document maintains a transparent, permanent, and structured audit log of re
    - [AUD-015: 18-Theme Native CSS Engine, Navbar Selector & Headless Browser Certification](#aud-015-18-theme-native-css-engine-navbar-selector--headless-browser-certification)
    - [AUD-016: Vector SVG Screenshots, Untruncated Task Backlog & Clean Window Title Headers](#aud-016-vector-svg-screenshots-untruncated-task-backlog--clean-window-title-headers)
    - [AUD-017: Mobile Responsive Navigation, Card-Anchored Copy Buttons & 41-Test Playwright Cross-Viewport E2E Suite](#aud-017-mobile-responsive-navigation-card-anchored-copy-buttons--41-test-playwright-cross-viewport-e2e-suite)
-   - [AUD-018: Installation Architecture Unification, Distro Prerequisites & 81-Check Automated Source Audit](#aud-018-installation-architecture-unification-distro-prerequisites--81-check-automated-source-audit)
+   - [AUD-018: Installation Architecture Unification, Distro Prerequisites & 84-Check Automated Source Audit](#aud-018-installation-architecture-unification-distro-prerequisites--84-check-automated-source-audit)
 3. [Fact-Check, Sanity Audit & Certification Matrix](#3-fact-check-sanity-audit--certification-matrix)
 4. [Future Audit Protocol](#4-future-audit-protocol)
 
@@ -52,7 +52,7 @@ This document maintains a transparent, permanent, and structured audit log of re
 | [**AUD-015**](#aud-015-18-theme-native-css-engine-navbar-selector--headless-browser-certification) | 2026-08-18 | Web Architecture & Theme Engine | `c8cc114` | **CERTIFIED** |
 | [**AUD-016**](#aud-016-vector-svg-screenshots-untruncated-task-backlog--clean-window-title-headers) | 2026-08-18 | Documentation Screenshots & Vector SVG Unification | `5fe415f` | **VERIFIED** |
 | [**AUD-017**](#aud-017-mobile-responsive-navigation-card-anchored-copy-buttons--41-test-playwright-cross-viewport-e2e-suite) | 2026-08-18 | Mobile UX & Playwright E2E Automation | `f0fd3f3` | **VERIFIED** |
-| [**AUD-018**](#aud-018-installation-architecture-unification-distro-prerequisites--81-check-automated-source-audit) | 2026-08-18 | Installation Architecture & Fact-Check Engine | `8aa9253` | **CERTIFIED** |
+| [**AUD-018**](#aud-018-installation-architecture-unification-distro-prerequisites--84-check-automated-source-audit) | 2026-08-18 | Installation Architecture & Fact-Check Engine | `8aa9253` | **CERTIFIED** |
 
 ---
 
@@ -179,7 +179,7 @@ This document maintains a transparent, permanent, and structured audit log of re
   - **Network & Privacy**: 100% offline-first. Zero telemetry, zero analytics tracking, zero network requests, zero credential storage.
   - **Arithmetic Bounds & DoS**: All timer ticks, session durations, and streak counts are bounded and protected against arithmetic underflow / overflow (`u32` saturation). Corrupt JSON automatically falls back to default state without crashing.
   - **Terminal State Preservation**: Custom `std::panic::set_hook` guarantees terminal raw mode is cleanly exited and normal screen buffers restored upon any unhandled panic.
-- **Resolution Status:** **CERTIFIED (Zero Vulnerabilities / Security Rating A+)**
+- **Resolution Status:** **REVIEWED (no known dependency advisories found during the documented manual audit; no automated advisory-scan report is committed to this repository)**
 
 ---
 
@@ -342,19 +342,19 @@ This document maintains a transparent, permanent, and structured audit log of re
 
 ---
 
-### AUD-018: Installation Architecture Unification, Distro Prerequisites & 81-Check Automated Source Audit
+### AUD-018: Installation Architecture Unification, Distro Prerequisites & 84-Check Automated Source Audit
 - **Date:** August 18, 2026
 - **Category:** Installation Architecture, Documentation Veracity & Fact-Checking Engine
 - **Commit:** [`8aa9253`](https://github.com/amanalip/Termodoro/commit/8aa9253)
 - **Severity:** Documentation Clarity, Code Formatting & Automated Source Verification
 - **Description:** 
-  The installation section on the documentation website underwent comprehensive architectural refactoring to eliminate disjointed split boxes, format pure un-commented commands, and introduce an automated 81-check source sanity suite.
+  The installation section on the documentation website underwent comprehensive architectural refactoring to eliminate disjointed split boxes, format pure un-commented commands, and introduce an automated source sanity suite (81 checks at introduction, later expanded to 84).
 - **Technical Remediation & Verification:**
   1. **Unified Single Terminal Card Structure**: Replaced split second hint containers with a single terminal card containing macOS/Linux window control dots (`dot-red`, `dot-yellow`, `dot-green`) and anchored copy buttons.
   2. **Un-Commented Executable Code Snippets**: Formatted commands across Ubuntu/Debian, Arch Linux, Fedora/RHEL, macOS, and Windows with un-commented, copy-ready commands.
   3. **Segmented Desktop Tab Layout**: Optimized `.install-nav` into a sleek single-line segmented control on desktop screens, transitioning into an adaptive 2-column touch grid on mobile viewports.
-  4. **Automated Sanity & Fact-Checking Engine**: Developed [`scripts/sanity_and_fact_check.mjs`](scripts/sanity_and_fact_check.mjs) (`make check-facts`) executing 81 programmatic assertions cross-referencing all 18 theme enum variants, exact audio chime frequencies (528Hz, 587.33Hz, 880.0Hz, 523.25Hz, 659.25Hz, 783.99Hz), default configuration bounds, HTML structural elements, and screenshot assets on disk.
-- **Resolution Status:** **VERIFIED & CERTIFIED (84/84 Sanity Checks + 41/41 Playwright Tests + 257 Rust Tests Passing)**
+  4. **Automated Sanity & Fact-Checking Engine**: Developed [`scripts/sanity_and_fact_check.mjs`](scripts/sanity_and_fact_check.mjs) (`make check-facts`) executing 81 programmatic assertions (later expanded to 84) cross-referencing all 18 theme enum variants, exact audio chime frequencies (528Hz, 587.33Hz, 880.0Hz, 523.25Hz, 659.25Hz, 783.99Hz), default configuration bounds, HTML structural elements, and screenshot assets on disk.
+- **Resolution Status:** **VERIFIED & CERTIFIED (84/84 Sanity Checks + 41/41 Playwright Tests + 311 Rust Tests Passing)**
 
 ---
 
@@ -366,15 +366,15 @@ This document maintains a transparent, permanent, and structured audit log of re
 | **Dependencies** | 10 direct crates (+1 dev-dependency: `proptest`) | Clean resolution | Verified in `Cargo.lock` |
 | **Automated Tests** | 311 Unit, Integration & Property | 311 Passed, 0 Failed | `cargo test` (~1s runtime) |
 | **Playwright Web E2E** | 41 Cross-Device Tests | 41 Passed, 0 Failed | `make test-e2e` across 6 viewports |
-| **Source Sanity Audit** | 81 Fact-Checked Invariants | 81 Passed, 0 Failed | `make check-facts` (`scripts/sanity_and_fact_check.mjs`) |
+| **Source Sanity Audit** | 84 Fact-Checked Invariants | 84 Passed, 0 Failed | `make check-facts` (`scripts/sanity_and_fact_check.mjs`) |
 | **Privacy & Telemetry** | 0 Network Calls / Trackers | 100% Local-First | Unit tests & CI lockfile audit |
 | **Unsafe Blocks** | 0 Unsafe blocks | 100% Safe Rust | Compile-time lint (`unsafe_code = "forbid"` in `Cargo.toml`) |
 | **Linter Warnings** | 0 Warnings | Clean Clippy output | `cargo clippy -- -D warnings` |
-| **Security Rating** | Grade A+ (0 CVEs) | Zero Vulnerabilities | Full threat model audit [AUD-007] |
+| **Security Posture** | Manual threat-model review documented [AUD-007] | No known advisories recorded at audit time | Manual review only; run `cargo audit` for current advisory status |
 | **Command Execution** | 0 Subprocess Calls in the application runtime (screenshot generator utility excepted) | Native D-Bus Alerts | AST scan for `std::process::Command` (`src/bin/generate_screenshots.rs` only) |
 | **Audio Spec** | 16-bit PCM RIFF | 44.1kHz sample rate | RFC 2361 chunk verification |
 | **Storage Standard** | XDG Directory Spec | Clean JSON storage | XDG Base Directory v0.8 |
-| **Installed Binary** | ~5.1 MB Standalone | Zero Dependencies | `ls -lh ~/.cargo/bin/termodoro` |
+| **Installed Binary** | ~5.1 MB standalone executable | Self-contained; 277 crates compiled in per Cargo.lock; no language runtime required (platform libs such as ALSA may be dynamically linked) | `ls -lh ~/.cargo/bin/termodoro` |
 | **Repository Size** | ~3.9 MB Clean | Packfile Optimized | `du -sh .` (Git history preserved) |
 
 ---

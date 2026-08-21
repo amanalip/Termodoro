@@ -102,12 +102,12 @@ The Web Audio synthesizer in `app.js` mirrors the Rust audio engine in `src/audi
 1. Focus Session End (Zen Bowl Chime):
    - Fundamental frequency: 528 Hz
    - Harmonic overtones: 1056 Hz (second harmonic) and 1584 Hz (third harmonic)
-   - Exponential amplitude decay over 3.0 seconds
+   - Exponential amplitude decay over 1.8 seconds
 2. Short Break End (Ascending Two-Tone):
-   - Tone 1: 587.33 Hz (D5) for 180 ms
-   - Tone 2: 880.00 Hz (A5) for 350 ms
+   - Tone 1: 587.33 Hz (D5) for 220 ms
+   - Tone 2: 880.00 Hz (A5) for approximately 1180 ms
 3. Long Break End (Major Triad Arpeggio):
-   - C5 (523.25 Hz), E5 (659.25 Hz), G5 (783.99 Hz) in sequence over 1.2 seconds
+   - C5 (523.25 Hz), E5 (659.25 Hz), G5 (783.99 Hz) in sequence over 2.0 seconds
 
 ---
 
@@ -139,7 +139,7 @@ The documentation portal includes an automated **Playwright End-to-End Testing S
 # Run the automated Playwright E2E test suite (41/41 passing tests)
 make test-e2e
 
-# Run the 81-assertion source sanity and fact-checking audit
+# Run the 84-assertion source sanity and fact-checking audit
 make check-facts
 ```
 

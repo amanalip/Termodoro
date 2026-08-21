@@ -257,7 +257,7 @@ $$\text{Sample}[t] = \sum_{k=1}^{M} A_k \cdot \sin(2\pi f_k t) \cdot e^{-\lambda
 
 Where:
 - $f_k$ represents the harmonic frequency in Hertz.
-- $A_k$ is the amplitude coefficient bounded between $10,000 \le A \le 32,000$ (16-bit signed integer).
+- $A_k$ are small float component gains; they are summed, scaled by $\times 28{,}000$, and clamped to the signed 16-bit sample range.
 - $\lambda$ is the exponential decay factor.
 
 ```
@@ -283,7 +283,7 @@ Where:
 ```
 
 ### Audio Chime Harmonic Algorithms
-1. **Focus Completion (Zen Tibetan Bowl)**: 528 Hz fundamental with subtle harmonic overtone (1056 Hz) and gentle 2.5-second exponential decay.
+1. **Focus Completion (Zen Tibetan Bowl)**: 528 Hz fundamental with harmonic overtones (1056 Hz, 1584 Hz) and an exponential-decay envelope over the 1.8-second chime.
 2. **Short Break Completion (Two-Tone Alert)**: Dual chime at 587.33 Hz ($D_5$) followed by 880.00 Hz ($A_5$).
 3. **Long Break Completion (Major Triad Chord)**: Harmonious major chord comprising $C_5$ (523.25 Hz), $E_5$ (659.25 Hz), and $G_5$ (783.99 Hz).
 
@@ -298,7 +298,7 @@ Termodoro provides native operational parity across all major desktop operating 
 
 | Dimension | Linux & BSD | macOS (Darwin) | Windows (10 / 11) |
 | :--- | :--- | :--- | :--- |
-| **Storage Directory** | `~/.local/share/termodoro/` | `~/Library/Application Support/com.termodoro.termodoro/` | `C:\Users\<User>\AppData\Roaming\termodoro\termodoro\` |
+| **Storage Directory** | `~/.local/share/termodoro/` | `~/Library/Application Support/com.termodoro.termodoro/` | `C:\Users\<User>\AppData\Roaming\termodoro\termodoro\data\` |
 | **Audio Backend** | ALSA / PulseAudio / PipeWire | CoreAudio | WASAPI / DirectSound |
 | **Notifications** | D-Bus / Desktop Portal | Notification Center | WinRT Toast Notifications |
 | **Terminal Mode** | ANSI escape codes | ANSI escape codes | Windows Virtual Terminal Sequences |

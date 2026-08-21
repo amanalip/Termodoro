@@ -162,13 +162,13 @@ Audio is synthesized as 16-bit PCM mono samples at **44,100 Hz**:
 
 1. **Focus Completion (Zen Tibetan Singing Bowl)**:
    - **Fundamental Frequency**: $f_0 = 528\text{ Hz}$ (harmonic clarity frequency).
-   - **Overtones**: First harmonic $1056\text{ Hz}$ (amplitude $0.4$), second harmonic $1584\text{ Hz}$ (amplitude $0.2$).
+   - **Overtones**: First harmonic $1056\text{ Hz}$ (amplitude $0.25$), second harmonic $1584\text{ Hz}$ (amplitude $0.10$).
    - **Envelope**: Exponential decay curve:
-     $$s(t) = \left(\sin(2\pi f_0 t) + 0.4\sin(2\pi \cdot 2f_0 t) + 0.2\sin(2\pi \cdot 3f_0 t)\right) \times e^{-1.8 t}$$
+     $$s(t) = \left(0.65\sin(2\pi f_0 t) + 0.25\sin(2\pi \cdot 2f_0 t) + 0.10\sin(2\pi \cdot 3f_0 t)\right) \times e^{-2.8 t}$$
 
 2. **Short Break Completion (Ascending Two-Tone Alert)**:
-   - **Tone 1**: $D_5$ ($587.33\text{ Hz}$) for $0.25\text{s}$.
-   - **Tone 2**: $A_5$ ($880.00\text{ Hz}$) with smooth decay for $0.9\text{s}$.
+   - **Tone 1**: $D_5$ ($587.33\text{ Hz}$) for $0.22\text{s}$.
+   - **Tone 2**: $A_5$ ($880.00\text{ Hz}$) with smooth decay for $\approx 1.18\text{s}$ (spanning $0.22\text{s}$ to the $1.4\text{s}$ chime end).
 
 3. **Long Break Completion (Major Triad Chord)**:
    - **Chords**: $C_5$ ($523.25\text{ Hz}$) $\rightarrow$ $E_5$ ($659.25\text{ Hz}$) $\rightarrow$ $G_5$ ($783.99\text{ Hz}$).

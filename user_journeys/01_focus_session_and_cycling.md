@@ -67,7 +67,7 @@ Termodoro boots instantaneously in less than **10 milliseconds**, presenting **T
 
 ### Step 4: Completing a Work Phase & Acoustic Chimes
 When the countdown reaches `00:00`, Termodoro triggers its built-in feedback pipeline:
-1. **Zen Tibetan Singing Bowl**: Synthesizes a 528 Hz transformation frequency with overtone harmonics (1056 Hz and 1584 Hz) and exponential decay (`src/audio.rs:49-72`).
+1. **Zen Tibetan Singing Bowl**: Synthesizes a 528 Hz transformation frequency with overtone harmonics (1056 Hz and 1584 Hz) and exponential decay (`src/audio.rs:186-209`).
 2. **Desktop Notification**: An OS native banner appears via D-Bus / Desktop Portal / WinRT (*"Termodoro - FOCUS SESSION Finished!"*).
 3. **Automated Accounting**: If an active task is selected, its spent Pomodoro counter increments automatically (`1 / 4`), and 25 focus minutes are logged to your permanent analytics history (`src/stats.rs`).
 4. **State Transition**: The phase automatically shifts to **SHORT BREAK** (5:00).

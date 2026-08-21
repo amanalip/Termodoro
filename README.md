@@ -99,7 +99,7 @@ The Pomodoro Technique is a time-management methodology created by Francesco Cir
 Modern productivity apps are frequently bloated with heavy web-view containers (Electron), background battery drain, intrusive cloud subscriptions, and distracting telemetry tracking. Termodoro is engineered specifically for developers, sysadmins, writers, and command-line enthusiasts who want:
 
 1. **Instantaneous Startup ($< 10\text{ ms}$)**: Compiled directly to native machine code with zero runtime overhead.
-2. **Minimal Memory Footprint ($< 15\text{ MB}$ RAM)**: Operates silently in a terminal tab, tmux pane, or Zellij floating window without consuming gigabytes of system memory.
+2. **Minimal Memory Footprint ($< 15\text{ MB}$ RAM)**: Operates silently in a terminal tab, tmux pane, or Zellij floating window without consuming gigabytes of system memory (both figures above measured on a Linux development machine, release build; results vary by hardware, OS, and toolchain).
 3. **100% Offline & Private**: All tasks, metrics, and streaks are stored strictly on your local disk with zero network requests or telemetry.
 4. **Keyboard-Driven Fluidity**: Every single action (from task creation to duration adjustment) can be executed via ergonomic vim-inspired keybindings without reaching for a mouse.
 5. **Aesthetic Visual Excellence**: Designed with 18 high-contrast color themes, smooth Unicode gauges, block-font big digits, and real-time status banners.
@@ -715,7 +715,7 @@ Termodoro follows the standard XDG base directory conventions on Unix and platfo
 | Platform | Database File Path |
 | :--- | :--- |
 | **Linux / BSD** | `~/.local/share/termodoro/data.json` |
-| **macOS** | `~/Library/Application Support/com.termodoro.termodoro/data/data.json` |
+| **macOS** | `~/Library/Application Support/com.termodoro.termodoro/data.json` |
 | **Windows** | `%APPDATA%\termodoro\termodoro\data\data.json` |
 
 ### Annotated `data.json` Schema
@@ -843,7 +843,7 @@ Because the database is standard JSON, you can easily back up, version-control, 
 #### Q12: How do I backup or transfer my tasks and history to another computer?
 - **Answer**: Simply copy your `data.json` file to the new machine:
   - **Linux / BSD**: `~/.local/share/termodoro/data.json`
-  - **macOS**: `~/Library/Application Support/com.termodoro.termodoro/data/data.json`
+  - **macOS**: `~/Library/Application Support/com.termodoro.termodoro/data.json`
   - **Windows**: `%APPDATA%\termodoro\termodoro\data\data.json`
   Because the schema is standard JSON, you can also inspect, edit, or version-control your productivity data with Git.
 
@@ -937,7 +937,7 @@ To provide full confidence to developers, contributors, and users, all claims, m
 | **Rust Safety Guarantee** | 100% Safe Rust (`unsafe_code = "forbid"` at compile time) | [`Cargo.toml`](Cargo.toml) `[lints.rust]` | Compiler-enforced lint (replaces fragile grep scans) | **VERIFIED** |
 | **Static Analysis Compliance** | 0 Warnings, 0 Errors | Entire workspace | `cargo clippy -- -D warnings` | **VERIFIED** |
 | **Code Formatting Standard** | 100% Rustfmt Compliant | Code formatting rules | `cargo fmt -- --check` | **VERIFIED** |
-| **Memory Footprint** | $< 15\text{ MB}$ Resident RAM | Runtime metrics via `/proc/[pid]/statm` | Ratatui zero-copy immediate mode rendering | **VERIFIED** |
+| **Memory Footprint** | $< 15\text{ MB}$ Resident RAM (single dev-machine measurement) | Runtime metrics via `/proc/[pid]/statm` | Ratatui zero-copy immediate mode rendering | **VERIFIED** |
 | **Audio Generation Method** | Pure In-Memory PCM RIFF WAV | [`src/audio.rs`](src/audio.rs#L80-L150) | Byte buffer analysis, $f = 44.1\text{ kHz}$, 16-bit signed | **VERIFIED** |
 | **Max Long Break Cycles** | $1 \le N \le 24$ Cycles | [`src/config.rs`](src/config.rs#L12-L28) & [`src/timer.rs`](src/timer.rs#L85-L105) | Unit test `test_twenty_four_cycle_advancement_and_long_break_trigger` | **VERIFIED** |
 | **Streak Calculation Invariant** | Preservation across Month/Year | [`src/stats.rs`](src/stats.rs#L120-L190) | Unit test `test_streak_calculation_across_month_and_year_boundaries` | **VERIFIED** |
