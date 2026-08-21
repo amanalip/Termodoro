@@ -80,9 +80,15 @@ pub fn render(f: &mut Frame, app: &App, theme: &Theme, area: Rect) {
     };
 
     // Construct visual cycle dot indicator e.g. "● ● ◉ ○"
+    //
+    // The interval is clamped to the same 1..=24 range the Settings UI
+    // enforces. Rendering trusts config values, so a corrupt data.json with a
+    // huge interval would previously loop billions of times per frame and
+    // freeze the UI before storage sanitization could help.
+    let cycle_display_max = app.config.long_break_interval.clamp(1, 24);
     let mut cycle_dots = String::new();
-    // Iterate from 1 to long_break_interval
-    for i in 1..=app.config.long_break_interval {
+    // Iterate from 1 to the clamped cycle count
+    for i in 1..=cycle_display_max {
         // Check if cycle is completed, in progress, or upcoming
         if i < app.timer.current_cycle {
             // Completed cycle dot
@@ -95,7 +101,7 @@ pub fn render(f: &mut Frame, app: &App, theme: &Theme, area: Rect) {
             cycle_dots.push('○');
         }
         // Add space separator between dots
-        if i < app.config.long_break_interval {
+        if i < cycle_display_max {
             // Append space
             cycle_dots.push(' ');
         }

@@ -98,6 +98,7 @@ html[data-theme="catppuccin_mocha"], [data-theme="catppuccin_mocha"] {
   --border-color: #313244;
   --border-active: #89b4fa;
   --highlight-bg: #313244;
+  --color-on-primary: #11111b;
 }
 
 html[data-theme="catppuccin_macchiato"], [data-theme="catppuccin_macchiato"] {
@@ -118,6 +119,7 @@ html[data-theme="catppuccin_macchiato"], [data-theme="catppuccin_macchiato"] {
   --border-color: #3c405b;
   --border-active: #8aadf4;
   --highlight-bg: #363a4f;
+  --color-on-primary: #11111b;
 }
 
 html[data-theme="catppuccin_frappe"], [data-theme="catppuccin_frappe"] {
@@ -138,6 +140,7 @@ html[data-theme="catppuccin_frappe"], [data-theme="catppuccin_frappe"] {
   --border-color: #474d6b;
   --border-active: #8caaee;
   --highlight-bg: #414559;
+  --color-on-primary: #11111b;
 }
 
 html[data-theme="catppuccin_latte"], [data-theme="catppuccin_latte"] {
@@ -158,6 +161,7 @@ html[data-theme="catppuccin_latte"], [data-theme="catppuccin_latte"] {
   --border-color: #bcc0cc;
   --border-active: #1e66f5;
   --highlight-bg: #ccd0da;
+  --color-on-primary: #ffffff;
 }
 
 html[data-theme="nord"], [data-theme="nord"] {
@@ -178,6 +182,7 @@ html[data-theme="nord"], [data-theme="nord"] {
   --border-color: #4c566a;
   --border-active: #88c0d0;
   --highlight-bg: #3b4252;
+  --color-on-primary: #11111b;
 }
 
 html[data-theme="gruvbox_dark"], [data-theme="gruvbox_dark"] {
@@ -198,6 +203,7 @@ html[data-theme="gruvbox_dark"], [data-theme="gruvbox_dark"] {
   --border-color: #504945;
   --border-active: #fabd2f;
   --highlight-bg: #3c3836;
+  --color-on-primary: #11111b;
 }
 
 html[data-theme="tokyo_night"], [data-theme="tokyo_night"] {
@@ -218,6 +224,7 @@ html[data-theme="tokyo_night"], [data-theme="tokyo_night"] {
   --border-color: #414868;
   --border-active: #7aa2f7;
   --highlight-bg: #24283b;
+  --color-on-primary: #11111b;
 }
 
 html[data-theme="dracula"], [data-theme="dracula"] {
@@ -238,6 +245,7 @@ html[data-theme="dracula"], [data-theme="dracula"] {
   --border-color: #44475a;
   --border-active: #bd93f9;
   --highlight-bg: #44475a;
+  --color-on-primary: #11111b;
 }
 
 html[data-theme="rose_pine"], [data-theme="rose_pine"] {
@@ -258,6 +266,7 @@ html[data-theme="rose_pine"], [data-theme="rose_pine"] {
   --border-color: #393552;
   --border-active: #c4a7e7;
   --highlight-bg: #2a283e;
+  --color-on-primary: #11111b;
 }
 
 html[data-theme="one_dark"], [data-theme="one_dark"] {
@@ -278,6 +287,7 @@ html[data-theme="one_dark"], [data-theme="one_dark"] {
   --border-color: #3e4452;
   --border-active: #61afef;
   --highlight-bg: #353b45;
+  --color-on-primary: #11111b;
 }
 
 html[data-theme="kanagawa"], [data-theme="kanagawa"] {
@@ -298,6 +308,7 @@ html[data-theme="kanagawa"], [data-theme="kanagawa"] {
   --border-color: #363646;
   --border-active: #7e9cd8;
   --highlight-bg: #2a2a37;
+  --color-on-primary: #11111b;
 }
 
 html[data-theme="everforest_dark"], [data-theme="everforest_dark"] {
@@ -318,6 +329,7 @@ html[data-theme="everforest_dark"], [data-theme="everforest_dark"] {
   --border-color: #475258;
   --border-active: #a7c080;
   --highlight-bg: #343f44;
+  --color-on-primary: #11111b;
 }
 
 html[data-theme="everforest_light"], [data-theme="everforest_light"] {
@@ -338,6 +350,7 @@ html[data-theme="everforest_light"], [data-theme="everforest_light"] {
   --border-color: #d3cbb7;
   --border-active: #3a9486;
   --highlight-bg: #eae4cb;
+  --color-on-primary: #11111b;
 }
 
 html[data-theme="solarized_dark"], [data-theme="solarized_dark"] {
@@ -358,6 +371,7 @@ html[data-theme="solarized_dark"], [data-theme="solarized_dark"] {
   --border-color: #0d5568;
   --border-active: #268bd2;
   --highlight-bg: #073642;
+  --color-on-primary: #11111b;
 }
 
 html[data-theme="solarized_light"], [data-theme="solarized_light"] {
@@ -378,6 +392,7 @@ html[data-theme="solarized_light"], [data-theme="solarized_light"] {
   --border-color: #d3cbb7;
   --border-active: #268bd2;
   --highlight-bg: #eee8d5;
+  --color-on-primary: #11111b;
 }
 
 html[data-theme="synthwave84"], [data-theme="synthwave84"] {
@@ -398,6 +413,7 @@ html[data-theme="synthwave84"], [data-theme="synthwave84"] {
   --border-color: #494363;
   --border-active: #ff7edb;
   --highlight-bg: #34294f;
+  --color-on-primary: #11111b;
 }
 
 html[data-theme="monokai_pro"], [data-theme="monokai_pro"] {
@@ -418,6 +434,7 @@ html[data-theme="monokai_pro"], [data-theme="monokai_pro"] {
   --border-color: #49474a;
   --border-active: #ffd866;
   --highlight-bg: #3a383b;
+  --color-on-primary: #11111b;
 }
 
 html[data-theme="oled_phosphor"], [data-theme="oled_phosphor"] {
@@ -438,6 +455,7 @@ html[data-theme="oled_phosphor"], [data-theme="oled_phosphor"] {
   --border-color: #1a331a;
   --border-active: #00ff66;
   --highlight-bg: #0a1f0a;
+  --color-on-primary: #11111b;
 }
 
 /* Base resets & typography */
@@ -790,7 +808,8 @@ button {
 
 .btn-primary {
   background: var(--color-primary);
-  color: #11111b;
+  /* Ink comes from the active theme so contrast holds on light themes too */
+  color: var(--color-on-primary, #11111b);
 }
 
 .btn-primary:hover {
@@ -1641,6 +1660,14 @@ button {
 }
 
 .theme-card {
+  /* Button element resets: theme cards are real <button>s for keyboard
+     accessibility, so strip the browser chrome to keep the card look */
+  appearance: none;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  width: 100%;
+
   background: var(--bg-card);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
@@ -1656,6 +1683,12 @@ button {
   border-color: var(--color-primary);
   background: var(--bg-card-hover);
   transform: translateY(-2px);
+}
+
+/* Visible focus ring for keyboard users navigating the gallery with Tab */
+.theme-card:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
 
 .theme-card-header {
@@ -2092,7 +2125,7 @@ button {
 
 .faq-pill-btn.active {
   background: var(--color-primary);
-  color: var(--bg-base);
+  color: var(--color-on-primary, #11111b);
   border-color: var(--color-primary);
   font-weight: 600;
 }

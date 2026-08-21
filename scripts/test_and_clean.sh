@@ -3,18 +3,18 @@
 # Termodoro Automated Test & Build Cache Cleanup Utility
 # 
 # Purpose:
-# Executes the 192-test suite and automatically runs `cargo clean` upon completion
+# Executes the full test suite and automatically runs `cargo clean` upon completion
 # to reclaim ~1.8GB of disk space while keeping local configuration and user data intact.
 # ==============================================================================
 
 set -o pipefail
 
-echo "🧪 Running Termodoro 192-test automated suite..."
+echo "🧪 Running Termodoro full automated test suite..."
 cargo test "$@"
 TEST_STATUS=$?
 
 if [ $TEST_STATUS -eq 0 ]; then
-    echo "✅ All 192 tests passed successfully!"
+    echo "✅ All tests passed successfully!"
     echo "🧹 Automatically cleaning 'target/' directory to reclaim disk space..."
     cargo clean
     echo "✨ Workspace cleaned! Disk space reclaimed while keeping data.json and source files intact."

@@ -159,7 +159,7 @@ make check-facts
 2. **Mobile Navigation Drawer**: Tests hamburger toggle button, slide-in drawer animation, backdrop overlay blur, link navigation, close button, and `Esc` key dismissal.
 3. **Code Cards & Fixed Copy Buttons**: Verifies `.code-card-header` bar layout, prevents copy button from floating or overlapping code during horizontal scrolling, tests copy click feedback (`✓ Copied!`), and verifies toast notification triggers.
 4. **18-Theme Palette Engine**: Validates theme switching via navbar dropdown `<select>` and gallery card clicks, testing dynamic CSS custom properties and pure pitch black `#000000` tokens for OLED Phosphor.
-5. **Interactive Screenshot Showcase**: Tests tab switching across all 6 views and numerical keyboard navigation (`1`–`6`).
+5. **Interactive Screenshot Showcase**: Tests tab switching across all 6 views and numerical keyboard navigation (`1` to `6`).
 6. **Keybindings & FAQ Search**: Verifies real-time table row filtering and FAQ accordion query matching.
 7. **Source Fact-Check Engine (`make check-facts`)**: Programmatically verifies all 18 theme enum variants, audio frequencies, configuration bounds, and installation cards against `src/`.
 

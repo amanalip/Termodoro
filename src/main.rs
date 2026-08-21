@@ -4,7 +4,7 @@ use termodoro::{app::App, ui};
 // Import crossterm event poll and read functions
 use crossterm::{
     // Event types and polling
-    event::{self, Event},
+    event::{self, Event, KeyEventKind},
     // Terminal execution helper
     execute,
     // Terminal mode and screen operations
@@ -19,6 +19,36 @@ use std::{
     panic,
     time::{Duration, Instant},
 };
+
+// RAII guard that restores the terminal to a sane state when dropped.
+//
+// Restoring inside main() alone is not enough: if terminal setup fails partway
+// (for example Terminal::new errors after raw mode was already enabled), the
+// `?` operator would return early and skip every restore call, leaving the
+// user's shell in raw mode with a hidden cursor and no echo. Because this
+// struct implements Drop, restoration runs on EVERY exit path: normal return,
+// early error return, and panics alike.
+struct TerminalGuard;
+
+impl TerminalGuard {
+    // Enters raw mode + alternate screen and returns a guard that undoes it
+    fn acquire() -> Result<Self, Box<dyn Error>> {
+        // Enable terminal raw mode (captures keystrokes immediately without waiting for enter)
+        enable_raw_mode()?;
+        // Switch to alternate screen and hide terminal cursor
+        execute!(stdout(), EnterAlternateScreen, crossterm::cursor::Hide)?;
+        Ok(TerminalGuard)
+    }
+}
+
+impl Drop for TerminalGuard {
+    fn drop(&mut self) {
+        // Best-effort restore: each step is independent so one failure does
+        // not prevent the others from running
+        let _ = disable_raw_mode();
+        let _ = execute!(stdout(), LeaveAlternateScreen, crossterm::cursor::Show);
+    }
+}
 
 // Sets up a panic hook to guarantee terminal state is restored if the program encounters a panic
 fn setup_panic_hook() {
@@ -40,15 +70,12 @@ fn main() -> Result<(), Box<dyn Error>> {
     // Install panic hook for terminal safety
     setup_panic_hook();
 
-    // Enable terminal raw mode (captures keystrokes immediately without waiting for enter)
-    enable_raw_mode()?;
-    // Standard output handle
-    let mut stdout_handle = stdout();
-    // Switch to alternate screen and hide terminal cursor
-    execute!(stdout_handle, EnterAlternateScreen, crossterm::cursor::Hide)?;
+    // Acquire the terminal through the RAII guard so ANY early failure or
+    // panic path still restores raw mode, the main screen, and the cursor
+    let _guard = TerminalGuard::acquire()?;
 
     // Construct Crossterm backend for Ratatui
-    let backend = CrosstermBackend::new(stdout_handle);
+    let backend = CrosstermBackend::new(stdout());
     // Initialize Ratatui terminal instance
     let mut terminal = Terminal::new(backend)?;
 
@@ -58,19 +85,8 @@ fn main() -> Result<(), Box<dyn Error>> {
     // Run main application event loop
     let res = run_app(&mut terminal, &mut app);
 
-    // Ensure state is saved on exit
+    // Ensure state is saved on exit (failures are surfaced inside save_state)
     app.save_state();
-
-    // Restore terminal: disable raw mode
-    disable_raw_mode()?;
-    // Leave alternate screen and restore cursor visibility
-    execute!(
-        terminal.backend_mut(),
-        LeaveAlternateScreen,
-        crossterm::cursor::Show
-    )?;
-    // Restore clear terminal screen
-    terminal.show_cursor()?;
 
     // Check if error occurred during main loop
     if let Err(err) = res {
@@ -78,7 +94,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         eprintln!("Application Error: {:?}", err);
     }
 
-    // Return success
+    // _guard drops here (or earlier, on any `?`), restoring the terminal
     Ok(())
 }
 
@@ -88,8 +104,14 @@ fn run_app(
     app: &mut App,
 ) -> Result<(), Box<dyn Error>> {
     // Define tick rate interval (250 milliseconds for responsive UI and status updates)
-    let tick_rate = Duration::from_millis(250);
-    // Track timestamp of last tick execution
+    const TICK_RATE: Duration = Duration::from_millis(250);
+    // Upper bound on how many missed intervals are reconciled in one pass.
+    // Without a cap, a single long stall (network hiccup on a slow SSH link,
+    // blocked disk write) would fire hundreds of ticks at once, bursting
+    // notifications and status expirations; the cap trades perfect catch-up
+    // for bounded, predictable behavior in pathological cases.
+    const MAX_CATCH_UP_TICKS: u128 = 10;
+    // Track timestamp of the next scheduled tick boundary
     let mut last_tick = Instant::now();
 
     // Continuous event loop
@@ -98,7 +120,7 @@ fn run_app(
         terminal.draw(|f| ui::render(f, app))?;
 
         // Calculate dynamic timeout until next tick boundary
-        let timeout = tick_rate
+        let timeout = TICK_RATE
             .checked_sub(last_tick.elapsed())
             .unwrap_or_else(|| Duration::from_secs(0));
 
@@ -106,18 +128,30 @@ fn run_app(
         if event::poll(timeout)? {
             // Read terminal event
             if let Event::Key(key) = event::read()? {
-                // Ensure key press event (filters out release events on certain platforms)
-                if key.kind == event::KeyEventKind::Press {
+                // Accept press AND auto-repeat events: filtering only Press
+                // previously disabled key-repeat entirely, forcing one physical
+                // press per navigation step when holding j/k/h/l.
+                // Release events remain filtered (they double-fire on some platforms).
+                if matches!(key.kind, KeyEventKind::Press | KeyEventKind::Repeat) {
                     // Dispatch key to application handler
                     app.on_key_event(key);
                 }
             }
         }
 
-        // Only invoke periodic application tick logic when the tick interval has elapsed
-        if last_tick.elapsed() >= tick_rate {
-            app.on_tick();
-            last_tick = Instant::now();
+        // Reconcile elapsed wall-clock time against scheduled tick boundaries.
+        // Advancing last_tick BY the interval (instead of resetting it to now)
+        // preserves sub-interval remainders, so recurring stalls no longer
+        // make the countdown visibly lag behind real time.
+        if last_tick.elapsed() >= TICK_RATE {
+            // How many whole tick intervals have elapsed since the deadline
+            let missed = (last_tick.elapsed().as_millis() / TICK_RATE.as_millis()).max(1);
+            // Schedule the next boundary after ALL missed intervals
+            last_tick += TICK_RATE * missed as u32;
+            // Fire one application tick per missed interval, capped for safety
+            for _ in 0..missed.min(MAX_CATCH_UP_TICKS) {
+                app.on_tick();
+            }
         }
 
         // Check if user requested to quit

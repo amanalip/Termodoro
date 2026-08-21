@@ -5,7 +5,7 @@ edition = "2021"
 default-run = "termodoro"
 authors = ["Aman Ali Pogaku <pamanalionline@gmail.com>"]
 description = "A sleek, feature-rich Pomodoro timer and task manager for the terminal."
-license = "GPL-3.0"
+license = "GPL-3.0-or-later"
 
 [dependencies]
 ratatui = "0.29"
@@ -18,4 +18,11 @@ directories = "5.0"
 uuid = { version = "1.10", features = ["v4", "serde"] }
 rodio = { version = "0.19", default-features = false, features = ["wav"] }
 unicode-width = "0.2"
+
+# Workspace-level lint enforcement: forbid any `unsafe` block anywhere in the
+# crate (including the screenshot generator bin). This replaces the old
+# fragile `grep -rn "unsafe" src/` CI check that false-positived on comments
+# and doc text mentioning the word.
+[lints.rust]
+unsafe_code = "forbid"
 

@@ -48,7 +48,7 @@ user_journeys/
   - Launching the app with $<10\text{ms}$ startup time.
   - Starting, pausing, resuming, and resetting countdown intervals via `Space`, `r`, and `s`.
   - Understanding the 5-row rasterized ASCII block clock (`src/ui/digits.rs`).
-  - Progressing across the 24-cycle progress dot matrix (`● ● ○ ○`).
+  - Progressing across the cycle progress dot matrix (`● ● ○ ○`), 4 cycles by default and configurable up to 24.
   - Experiencing mathematical audio feedback: 528 Hz Zen Singing Bowl, two-tone alert ($D_5 \rightarrow A_5$), and major triad chord ($C_5 \rightarrow E_5 \rightarrow G_5$).
 
 ---

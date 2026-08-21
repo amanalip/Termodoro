@@ -4,26 +4,71 @@ use serde::{Deserialize, Serialize};
 use crate::theme::ThemeChoice;
 
 // Configuration structure representing all user-customizable preferences
+//
+// Every field carries #[serde(default)] so a data.json written by an older or
+// newer version of the app (missing or extra fields) still parses. Without
+// this, one unrecognized field would fail the whole load and, before the
+// quarantine fix in storage.rs, wipe the user's tasks and history.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Config {
     // Duration in minutes for standard work focus sessions (default: 25)
+    #[serde(default)]
     pub work_duration_mins: u32,
     // Duration in minutes for short breaks between sessions (default: 5)
+    #[serde(default)]
     pub short_break_mins: u32,
     // Duration in minutes for long breaks after full cycles (default: 15)
+    #[serde(default)]
     pub long_break_mins: u32,
     // Number of focus sessions required before triggering a long break (default: 4)
+    #[serde(default)]
     pub long_break_interval: u32,
     // Whether to automatically start break timers when a work session ends
+    #[serde(default)]
     pub auto_start_breaks: bool,
     // Whether to automatically start work timers when a break ends
+    #[serde(default)]
     pub auto_start_work: bool,
     // Whether to emit terminal audio bells when timer phases complete
+    #[serde(default = "default_true")]
     pub sound_enabled: bool,
     // Whether to trigger OS-level desktop notifications when phases complete
+    #[serde(default = "default_true")]
     pub desktop_notifications: bool,
-    // Active visual color theme selection
+    // Active visual color theme selection (unknown names fall back to default
+    // via ThemeChoice's tolerant Deserialize impl)
+    #[serde(default)]
     pub theme: ThemeChoice,
+}
+
+// serde default helper for boolean fields whose sensible default is true
+fn default_true() -> bool {
+    true
+}
+
+// Inclusive bounds for every numeric setting. These mirror the clamps in the
+// Settings UI handlers exactly so a hand-edited data.json cannot smuggle in
+// values the interface itself would never produce.
+const WORK_MINS_RANGE: (u32, u32) = (1, 120);
+const SHORT_BREAK_MINS_RANGE: (u32, u32) = (1, 60);
+const LONG_BREAK_MINS_RANGE: (u32, u32) = (1, 90);
+const LONG_BREAK_INTERVAL_RANGE: (u32, u32) = (1, 24);
+
+impl Config {
+    // Clamps every numeric field into its valid range in place.
+    //
+    // Called on every load from disk. A corrupted or hand-edited file
+    // containing zero durations previously caused instant phase-completion
+    // loops (stats inflation plus a disk write every second), and absurdly
+    // large values overflowed the minutes-to-seconds conversion at startup.
+    pub fn sanitize(&mut self) {
+        // Clamp helper: saturates value into the inclusive [min, max] range
+        let clamp = |v: u32, range: (u32, u32)| v.clamp(range.0, range.1);
+        self.work_duration_mins = clamp(self.work_duration_mins, WORK_MINS_RANGE);
+        self.short_break_mins = clamp(self.short_break_mins, SHORT_BREAK_MINS_RANGE);
+        self.long_break_mins = clamp(self.long_break_mins, LONG_BREAK_MINS_RANGE);
+        self.long_break_interval = clamp(self.long_break_interval, LONG_BREAK_INTERVAL_RANGE);
+    }
 }
 
 // Implement Default trait to provide standard default settings for Termodoro

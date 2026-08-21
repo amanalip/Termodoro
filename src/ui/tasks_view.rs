@@ -256,8 +256,32 @@ pub fn render(f: &mut Frame, app: &App, theme: &Theme, area: Rect) {
             // Border theme color
             .border_style(Style::default().fg(theme.border)),
     );
-    // Render table into middle chunk
-    f.render_widget(table, chunks[1]);
+    // Render table into middle chunk with scroll tracking.
+    //
+    // A local TableState carries a computed offset so the highlighted row is
+    // always scrolled into view. Without this, lists longer than the visible
+    // area left the cursor on an invisible row with no indication of where
+    // the selection had gone.
+    let mut table_state = ratatui::widgets::TableState::default();
+    {
+        // Rows available below the header and block borders
+        let inner_height = chunks[1].height.saturating_sub(2) as usize;
+        // Header occupies one line plus its bottom margin
+        let visible_rows = inner_height.saturating_sub(2).max(1);
+        // Current scroll offset carried by the state
+        let selected = app.tasks.selected_index;
+        let mut new_offset = table_state.offset();
+        // Scroll down when selection drops below the visible window
+        if selected >= new_offset + visible_rows {
+            new_offset = selected + 1 - visible_rows;
+        }
+        // Scroll up when selection rises above the visible window
+        if selected < new_offset {
+            new_offset = selected;
+        }
+        *table_state.offset_mut() = new_offset;
+    }
+    f.render_stateful_widget(table, chunks[1], &mut table_state);
 
     // 3. Bottom Action Hints
     let action_spans = vec![

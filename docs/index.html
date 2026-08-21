@@ -129,7 +129,7 @@
           <span class="badge-item">🦀 Safe Rust (0% Unsafe)</span>
           <span class="badge-item">⚡ &lt;10ms Cold Startup</span>
           <span class="badge-item">🎨 18 Built-in Themes</span>
-          <span class="badge-item">🛡️ 192 Tests Passed</span>
+          <span class="badge-item">🛡️ 199 Tests Passed</span>
         </div>
 
         <h1 class="hero-title">
@@ -156,28 +156,28 @@
         
         <div class="screenshot-showcase-container">
           <div class="showcase-tabs" role="tablist" aria-label="Terminal Screenshots">
-            <button type="button" class="showcase-tab active" id="tab-ss-1" data-img="assets/screenshots/kde_01_timer_view.png" data-caption="Focus Session in Catppuccin Mocha: 5-row ASCII digital clock, progress gauge, cycle tracker, and active task target.">
+            <button type="button" role="tab" aria-selected="true" aria-controls="showcase-panel" id="tab-ss-1" class="showcase-tab active" data-img="assets/screenshots/kde_01_timer_view.png" data-alt="Termodoro timer view in a KDE terminal showing a large ASCII countdown clock, progress gauge, cycle tracker dots, and the active task target panel." data-caption="Focus Session in Catppuccin Mocha: 5-row ASCII digital clock, progress gauge, cycle tracker, and active task target.">
               <span>[1] Timer</span>
             </button>
-            <button type="button" class="showcase-tab" id="tab-ss-2" data-img="assets/screenshots/kde_02_task_manager.png" data-caption="Task Management Backlog: Target badges, Pomodoro estimations, status checkboxes, and active/completed filters.">
+            <button type="button" role="tab" aria-selected="false" aria-controls="showcase-panel" id="tab-ss-2" tabindex="-1" class="showcase-tab" data-img="assets/screenshots/kde_02_task_manager.png" data-alt="Termodoro tasks view listing tasks with target badges, pomodoro estimates, completion checkboxes, and filter tabs." data-caption="Task Management Backlog: Target badges, Pomodoro estimations, status checkboxes, and active/completed filters.">
               <span>[2] Tasks</span>
             </button>
-            <button type="button" class="showcase-tab" id="tab-ss-3" data-img="assets/screenshots/kde_03_stats_view.png" data-caption="Productivity Dashboard: 7-day focus bar chart, daily streaks, total focus minutes, and completion audit log.">
+            <button type="button" role="tab" aria-selected="false" aria-controls="showcase-panel" id="tab-ss-3" tabindex="-1" class="showcase-tab" data-img="assets/screenshots/kde_03_stats_view.png" data-alt="Termodoro stats dashboard with summary cards, a 7-day focus bar chart, streak counter, and recent session history." data-caption="Productivity Dashboard: 7-day focus bar chart, daily streaks, total focus minutes, and completion audit log.">
               <span>[3] Stats</span>
             </button>
-            <button type="button" class="showcase-tab" id="tab-ss-4" data-img="assets/screenshots/kde_04_settings_view.png" data-caption="Preferences & Theme Switcher: Interactive table for configuring intervals, automation, sound, and 18 color schemes.">
+            <button type="button" role="tab" aria-selected="false" aria-controls="showcase-panel" id="tab-ss-4" tabindex="-1" class="showcase-tab" data-img="assets/screenshots/kde_04_settings_view.png" data-alt="Termodoro settings table for durations, auto-start toggles, notifications, sound, and theme selection." data-caption="Preferences & Theme Switcher: Interactive table for configuring intervals, automation, sound, and 18 color schemes.">
               <span>[4] Settings</span>
             </button>
-            <button type="button" class="showcase-tab" id="tab-ss-5" data-img="assets/screenshots/kde_05_task_modal.png" data-caption="Add Task Dialog Modal: Floating prompt with keyboard inputs for task description and 1-20 Pomodoro estimation.">
+            <button type="button" role="tab" aria-selected="false" aria-controls="showcase-panel" id="tab-ss-5" tabindex="-1" class="showcase-tab" data-img="assets/screenshots/kde_05_task_modal.png" data-alt="Termodoro add-task modal with a description field and pomodoro estimate selector." data-caption="Add Task Dialog Modal: Floating prompt with keyboard inputs for task description and 1-20 Pomodoro estimation.">
               <span>[5] Add Task</span>
             </button>
-            <button type="button" class="showcase-tab" id="tab-ss-6" data-img="assets/screenshots/kde_06_help_modal.png" data-caption="Floating Help & Keybindings Overlay: Instant cheatsheet accessible with [?] anywhere in the application.">
+            <button type="button" role="tab" aria-selected="false" aria-controls="showcase-panel" id="tab-ss-6" tabindex="-1" class="showcase-tab" data-img="assets/screenshots/kde_06_help_modal.png" data-alt="Termodoro help overlay listing every keyboard shortcut grouped by section." data-caption="Floating Help & Keybindings Overlay: Instant cheatsheet accessible with [?] anywhere in the application.">
               <span>[6] Help</span>
             </button>
           </div>
 
-          <div class="showcase-display">
-            <img id="active-showcase-img" src="assets/screenshots/kde_01_timer_view.png" alt="Termodoro KDE Terminal Focus Session" class="showcase-image" loading="eager" />
+          <div class="showcase-display" id="showcase-panel" role="tabpanel" aria-labelledby="tab-ss-1">
+            <img id="active-showcase-img" src="assets/screenshots/kde_01_timer_view.png" alt="Termodoro timer view in a KDE terminal showing a large ASCII countdown clock, progress gauge, cycle tracker dots, and the active task target panel." class="showcase-image" loading="eager" />
             <div id="active-showcase-caption" class="showcase-caption-bar">
               Focus Session in Catppuccin Mocha: 5-row ASCII digital clock, progress gauge, cycle tracker, and active task target.
             </div>
@@ -282,7 +282,7 @@
 
         <div class="themes-palette-grid">
           
-          <div class="theme-card active" data-theme="catppuccin_mocha">
+          <button type="button" class="theme-card active" data-theme="catppuccin_mocha" aria-pressed="true" aria-label="Preview catppuccin mocha theme">
             <div class="theme-card-header"><span>Catppuccin Mocha</span></div>
             <div class="theme-swatches">
               <span class="swatch-item" style="background: #1e1e2e;"></span>
@@ -291,9 +291,9 @@
               <span class="swatch-item" style="background: #a6e3a1;"></span>
               <span class="swatch-item" style="background: #cba6f7;"></span>
             </div>
-          </div>
+          </button>
 
-          <div class="theme-card" data-theme="catppuccin_macchiato">
+          <button type="button" class="theme-card" data-theme="catppuccin_macchiato" aria-pressed="false" aria-label="Preview catppuccin macchiato theme">
             <div class="theme-card-header"><span>Catppuccin Macchiato</span></div>
             <div class="theme-swatches">
               <span class="swatch-item" style="background: #24273a;"></span>
@@ -302,9 +302,9 @@
               <span class="swatch-item" style="background: #a6da95;"></span>
               <span class="swatch-item" style="background: #c6a0f6;"></span>
             </div>
-          </div>
+          </button>
 
-          <div class="theme-card" data-theme="catppuccin_frappe">
+          <button type="button" class="theme-card" data-theme="catppuccin_frappe" aria-pressed="false" aria-label="Preview catppuccin frappe theme">
             <div class="theme-card-header"><span>Catppuccin Frappé</span></div>
             <div class="theme-swatches">
               <span class="swatch-item" style="background: #303446;"></span>
@@ -313,9 +313,9 @@
               <span class="swatch-item" style="background: #a3d18c;"></span>
               <span class="swatch-item" style="background: #ca9ee6;"></span>
             </div>
-          </div>
+          </button>
 
-          <div class="theme-card" data-theme="catppuccin_latte">
+          <button type="button" class="theme-card" data-theme="catppuccin_latte" aria-pressed="false" aria-label="Preview catppuccin latte theme">
             <div class="theme-card-header"><span>Catppuccin Latte</span></div>
             <div class="theme-swatches">
               <span class="swatch-item" style="background: #eff1f5;"></span>
@@ -324,9 +324,9 @@
               <span class="swatch-item" style="background: #40a02b;"></span>
               <span class="swatch-item" style="background: #8839ef;"></span>
             </div>
-          </div>
+          </button>
 
-          <div class="theme-card" data-theme="nord">
+          <button type="button" class="theme-card" data-theme="nord" aria-pressed="false" aria-label="Preview nord theme">
             <div class="theme-card-header"><span>Nord</span></div>
             <div class="theme-swatches">
               <span class="swatch-item" style="background: #2e3440;"></span>
@@ -335,9 +335,9 @@
               <span class="swatch-item" style="background: #a3be8c;"></span>
               <span class="swatch-item" style="background: #81a1c1;"></span>
             </div>
-          </div>
+          </button>
 
-          <div class="theme-card" data-theme="gruvbox_dark">
+          <button type="button" class="theme-card" data-theme="gruvbox_dark" aria-pressed="false" aria-label="Preview gruvbox dark theme">
             <div class="theme-card-header"><span>Gruvbox Dark</span></div>
             <div class="theme-swatches">
               <span class="swatch-item" style="background: #282828;"></span>
@@ -346,9 +346,9 @@
               <span class="swatch-item" style="background: #b8bb26;"></span>
               <span class="swatch-item" style="background: #fe8019;"></span>
             </div>
-          </div>
+          </button>
 
-          <div class="theme-card" data-theme="tokyo_night">
+          <button type="button" class="theme-card" data-theme="tokyo_night" aria-pressed="false" aria-label="Preview tokyo night theme">
             <div class="theme-card-header"><span>Tokyo Night</span></div>
             <div class="theme-swatches">
               <span class="swatch-item" style="background: #1a1b26;"></span>
@@ -357,9 +357,9 @@
               <span class="swatch-item" style="background: #9ece6a;"></span>
               <span class="swatch-item" style="background: #bb9af7;"></span>
             </div>
-          </div>
+          </button>
 
-          <div class="theme-card" data-theme="dracula">
+          <button type="button" class="theme-card" data-theme="dracula" aria-pressed="false" aria-label="Preview dracula theme">
             <div class="theme-card-header"><span>Dracula</span></div>
             <div class="theme-swatches">
               <span class="swatch-item" style="background: #282a36;"></span>
@@ -368,9 +368,9 @@
               <span class="swatch-item" style="background: #50fa7b;"></span>
               <span class="swatch-item" style="background: #8be9fd;"></span>
             </div>
-          </div>
+          </button>
 
-          <div class="theme-card" data-theme="rose_pine">
+          <button type="button" class="theme-card" data-theme="rose_pine" aria-pressed="false" aria-label="Preview rose pine theme">
             <div class="theme-card-header"><span>Rose Pine</span></div>
             <div class="theme-swatches">
               <span class="swatch-item" style="background: #191724;"></span>
@@ -379,9 +379,9 @@
               <span class="swatch-item" style="background: #31748f;"></span>
               <span class="swatch-item" style="background: #c4a7e7;"></span>
             </div>
-          </div>
+          </button>
 
-          <div class="theme-card" data-theme="one_dark">
+          <button type="button" class="theme-card" data-theme="one_dark" aria-pressed="false" aria-label="Preview one dark theme">
             <div class="theme-card-header"><span>One Dark</span></div>
             <div class="theme-swatches">
               <span class="swatch-item" style="background: #282c34;"></span>
@@ -390,9 +390,9 @@
               <span class="swatch-item" style="background: #98c379;"></span>
               <span class="swatch-item" style="background: #c678dd;"></span>
             </div>
-          </div>
+          </button>
 
-          <div class="theme-card" data-theme="kanagawa">
+          <button type="button" class="theme-card" data-theme="kanagawa" aria-pressed="false" aria-label="Preview kanagawa theme">
             <div class="theme-card-header"><span>Kanagawa</span></div>
             <div class="theme-swatches">
               <span class="swatch-item" style="background: #1f1f28;"></span>
@@ -401,9 +401,9 @@
               <span class="swatch-item" style="background: #76946a;"></span>
               <span class="swatch-item" style="background: #957fb8;"></span>
             </div>
-          </div>
+          </button>
 
-          <div class="theme-card" data-theme="everforest_dark">
+          <button type="button" class="theme-card" data-theme="everforest_dark" aria-pressed="false" aria-label="Preview everforest dark theme">
             <div class="theme-card-header"><span>Everforest Dark</span></div>
             <div class="theme-swatches">
               <span class="swatch-item" style="background: #2d353b;"></span>
@@ -412,9 +412,9 @@
               <span class="swatch-item" style="background: #a7c080;"></span>
               <span class="swatch-item" style="background: #d699b6;"></span>
             </div>
-          </div>
+          </button>
 
-          <div class="theme-card" data-theme="everforest_light">
+          <button type="button" class="theme-card" data-theme="everforest_light" aria-pressed="false" aria-label="Preview everforest light theme">
             <div class="theme-card-header"><span>Everforest Light</span></div>
             <div class="theme-swatches">
               <span class="swatch-item" style="background: #fdf6e3;"></span>
@@ -423,9 +423,9 @@
               <span class="swatch-item" style="background: #8da101;"></span>
               <span class="swatch-item" style="background: #df69ba;"></span>
             </div>
-          </div>
+          </button>
 
-          <div class="theme-card" data-theme="solarized_dark">
+          <button type="button" class="theme-card" data-theme="solarized_dark" aria-pressed="false" aria-label="Preview solarized dark theme">
             <div class="theme-card-header"><span>Solarized Dark</span></div>
             <div class="theme-swatches">
               <span class="swatch-item" style="background: #002b36;"></span>
@@ -434,9 +434,9 @@
               <span class="swatch-item" style="background: #859900;"></span>
               <span class="swatch-item" style="background: #2aa198;"></span>
             </div>
-          </div>
+          </button>
 
-          <div class="theme-card" data-theme="solarized_light">
+          <button type="button" class="theme-card" data-theme="solarized_light" aria-pressed="false" aria-label="Preview solarized light theme">
             <div class="theme-card-header"><span>Solarized Light</span></div>
             <div class="theme-swatches">
               <span class="swatch-item" style="background: #fdf6e3;"></span>
@@ -445,9 +445,9 @@
               <span class="swatch-item" style="background: #859900;"></span>
               <span class="swatch-item" style="background: #6c71c4;"></span>
             </div>
-          </div>
+          </button>
 
-          <div class="theme-card" data-theme="synthwave84">
+          <button type="button" class="theme-card" data-theme="synthwave84" aria-pressed="false" aria-label="Preview synthwave84 theme">
             <div class="theme-card-header"><span>Synthwave '84</span></div>
             <div class="theme-swatches">
               <span class="swatch-item" style="background: #262335;"></span>
@@ -456,9 +456,9 @@
               <span class="swatch-item" style="background: #72f1b8;"></span>
               <span class="swatch-item" style="background: #ff7edb;"></span>
             </div>
-          </div>
+          </button>
 
-          <div class="theme-card" data-theme="monokai_pro">
+          <button type="button" class="theme-card" data-theme="monokai_pro" aria-pressed="false" aria-label="Preview monokai pro theme">
             <div class="theme-card-header"><span>Monokai Pro</span></div>
             <div class="theme-swatches">
               <span class="swatch-item" style="background: #2d2a2e;"></span>
@@ -467,9 +467,9 @@
               <span class="swatch-item" style="background: #a9dc76;"></span>
               <span class="swatch-item" style="background: #ab9df2;"></span>
             </div>
-          </div>
+          </button>
 
-          <div class="theme-card" data-theme="oled_phosphor">
+          <button type="button" class="theme-card" data-theme="oled_phosphor" aria-pressed="false" aria-label="Preview oled phosphor theme">
             <div class="theme-card-header"><span>OLED Phosphor</span></div>
             <div class="theme-swatches">
               <span class="swatch-item" style="background: #000000;"></span>
@@ -478,7 +478,7 @@
               <span class="swatch-item" style="background: #33ff66;"></span>
               <span class="swatch-item" style="background: #ffff33;"></span>
             </div>
-          </div>
+          </button>
 
         </div>
 

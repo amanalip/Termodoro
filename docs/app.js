@@ -187,19 +187,17 @@ function applyTheme(themeKey, saveToStorage = true) {
     }
   }
 
-  // Update theme selector label if present
-  const themeLabel = document.getElementById('current-theme-name');
-  if (themeLabel) themeLabel.textContent = t.name;
-
-  const themeSelect = document.getElementById('sim-theme-select');
-  if (themeSelect) themeSelect.value = themeKey;
-
+  // Keep the navigation theme dropdown in sync when the theme changes from
+  // any other control (gallery card, another page, saved preference)
   const navThemeSelect = document.getElementById('nav-theme-select');
   if (navThemeSelect) navThemeSelect.value = themeKey;
 
-  // Update active state in theme gallery
+  // Update active state in theme gallery (cards are real buttons now, so the
+  // pressed state is mirrored into ARIA for assistive technology)
   document.querySelectorAll('.theme-card').forEach(card => {
-    card.classList.toggle('active', card.dataset.theme === themeKey);
+    const isActive = card.dataset.theme === themeKey;
+    card.classList.toggle('active', isActive);
+    card.setAttribute('aria-pressed', isActive ? 'true' : 'false');
   });
 }
 
@@ -355,22 +353,49 @@ function initShowcase() {
   if (!tabs.length || !img) return;
 
   function setTab(tab) {
-    tabs.forEach(t => t.classList.remove('active'));
+    tabs.forEach(t => {
+      t.classList.remove('active');
+      // Keep the ARIA tab pattern in sync so screen readers announce the
+      // active tab instead of a tablist containing zero selected tabs
+      t.setAttribute('aria-selected', 'false');
+      t.tabIndex = -1;
+    });
     tab.classList.add('active');
+    tab.setAttribute('aria-selected', 'true');
+    tab.tabIndex = 0;
 
     const imgSrc = tab.dataset.img;
     const capText = tab.dataset.caption;
+    // Each screenshot describes different content; a static alt attribute
+    // previously announced the wrong screen to screen reader users
+    const altText = tab.dataset.alt || capText;
 
     img.style.opacity = '0.3';
     setTimeout(() => {
       img.src = imgSrc;
+      img.alt = altText;
       if (caption) caption.textContent = capText;
       img.style.opacity = '1';
     }, 80);
   }
 
-  tabs.forEach(tab => {
+  tabs.forEach((tab, index) => {
     tab.addEventListener('click', () => setTab(tab));
+
+    // Roving-focus arrow key navigation, the standard ARIA tabs pattern
+    tab.addEventListener('keydown', (e) => {
+      let targetIdx = null;
+      if (e.key === 'ArrowRight') targetIdx = (index + 1) % tabs.length;
+      if (e.key === 'ArrowLeft') targetIdx = (index - 1 + tabs.length) % tabs.length;
+      if (e.key === 'Home') targetIdx = 0;
+      if (e.key === 'End') targetIdx = tabs.length - 1;
+      if (targetIdx === null) return;
+
+      e.preventDefault();
+      const nextTab = tabs[targetIdx];
+      setTab(nextTab);
+      nextTab.focus();
+    });
   });
 
   // Numeric keyboard navigation [1] to [6] to switch showcase screenshots
@@ -498,14 +523,26 @@ function setupCommonListeners() {
     btn.addEventListener('click', () => {
       const codeTargetId = btn.dataset.target;
       const codeEl = document.getElementById(codeTargetId);
-      if (codeEl) {
-        navigator.clipboard.writeText(codeEl.textContent.trim()).then(() => {
-          const originalText = btn.textContent;
-          btn.textContent = '✓ Copied!';
-          showToast('Snippet copied to clipboard');
-          setTimeout(() => { btn.textContent = originalText; }, 2000);
-        });
+      if (!codeEl) return;
+
+      // The async Clipboard API only exists on secure origins (https or
+      // localhost). Opening these static pages from file:// or plain http
+      // leaves navigator.clipboard undefined, which previously crashed the
+      // handler with a TypeError and gave zero feedback.
+      if (!navigator.clipboard || typeof navigator.clipboard.writeText !== 'function') {
+        showToast('Copy not supported here. Select the text manually.');
+        return;
       }
+
+      navigator.clipboard.writeText(codeEl.textContent.trim()).then(() => {
+        const originalText = btn.textContent;
+        btn.textContent = '✓ Copied!';
+        showToast('Snippet copied to clipboard');
+        setTimeout(() => { btn.textContent = originalText; }, 2000);
+      }).catch(() => {
+        // Permission denied or transient clipboard failure
+        showToast('Copy failed. Please copy the snippet manually.');
+      });
     });
   });
 
@@ -528,6 +565,9 @@ function setupCommonListeners() {
   const faqGroups = document.querySelectorAll('.faq-group');
   const faqItems = document.querySelectorAll('.faq-item');
   const faqEmptyState = document.getElementById('faq-empty-state');
+  // Items whose open state was set automatically by the search filter (not
+  // by the user), so they can be re-collapsed responsibly later
+  const autoOpenedItems = new Set();
 
   function filterFAQs() {
     if (!faqSearchInput) return;
@@ -555,8 +595,13 @@ function setupCommonListeners() {
 
         if (matchesQuery) {
           item.style.display = '';
-          if (query.length > 2) {
+          // Auto-open answers for substantive queries, but remember which
+          // items WE opened so they can be re-collapsed when the query no
+          // longer justifies it. Without this bookkeeping every matched
+          // answer stayed permanently expanded after the first search.
+          if (query.length > 2 && !item.hasAttribute('open')) {
             item.setAttribute('open', '');
+            autoOpenedItems.add(item);
           }
           visibleInGroup++;
           totalVisible++;
@@ -566,6 +611,21 @@ function setupCommonListeners() {
       });
 
       group.style.display = visibleInGroup > 0 ? '' : 'none';
+    });
+
+    // Re-collapse items that search auto-opened but that either no longer
+    // match or no longer have a substantive query. Items the user opened
+    // manually are never in this set and stay untouched.
+    autoOpenedItems.forEach(item => {
+      const shouldStayOpen =
+        query.length > 2 &&
+        item.style.display !== 'none' &&
+        (item.querySelector('summary')?.textContent.toLowerCase().includes(query) ||
+         item.querySelector('.faq-content')?.textContent.toLowerCase().includes(query));
+      if (!shouldStayOpen) {
+        item.removeAttribute('open');
+        autoOpenedItems.delete(item);
+      }
     });
 
     if (faqEmptyState) {

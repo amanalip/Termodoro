@@ -168,11 +168,11 @@ If you are new to Rust or TUI development, here is how the code flows:
 
 ## 4. Verification, Testing & Quality Assurance
 
-### Running the Test Suite & Auto-Cleaning Build Cache (192 Tests + 41 Playwright E2E Tests)
-Termodoro includes a comprehensive suite of **192 automated unit, integration, and UI rendering tests**, alongside **41 Playwright cross-viewport web E2E tests**. You can execute them with automated cache cleanup to keep your disk usage slim:
+### Running the Test Suite & Auto-Cleaning Build Cache (199 Tests + 41 Playwright E2E Tests)
+Termodoro includes a comprehensive suite of **199 automated unit, integration, and UI rendering tests**, alongside **41 Playwright cross-viewport web E2E tests**. You can execute them with automated cache cleanup to keep your disk usage slim:
 
 ```bash
-# Option 1: Run full 192 Rust tests + auto-clean ~1.8GB target cache
+# Option 1: Run all 199 Rust tests + auto-clean ~1.8GB target cache
 make test
 
 # Option 2: Run Playwright cross-device E2E test suite (Desktop + Tablet + Mobile)
@@ -241,7 +241,7 @@ To verify that the documented operational workflows match runtime reality, the s
 
 ## 7. References and Citations
 
-1. **Cirillo, Francesco (2006)**. *The Pomodoro Technique*. FC Garage GmbH. [https://francescocirillo.com/products/the-pomodoro-technique](https://francescocirillo.com/products/the-pomodoro-technique)
+1. **Cirillo, Francesco (2006)**. *The Pomodoro Technique*. FC Garage GmbH. [https://francescocirillo.com](https://francescocirillo.com)
 2. **Ratatui Documentation & Guide**. *Official Ratatui Book*. [https://ratatui.rs/](https://ratatui.rs/)
 3. **Crossterm Documentation**. *Crossterm Crates.io Reference*. [https://docs.rs/crossterm/](https://docs.rs/crossterm/)
 4. **The Rust Reference**. *Behavior of Panic Hooks and Raw Mode*. [https://doc.rust-lang.org/reference/](https://doc.rust-lang.org/reference/)

@@ -68,13 +68,14 @@ jobs:
         # Execute clippy analyzer across all targets and treat warnings as fatal errors
         run: cargo clippy --all-targets --all-features -- -D warnings
 
-      # Step 6: Security & Privacy Audit: Verify zero network crates and zero unsafe code
-      - name: Verify Zero Network Dependencies & Zero Unsafe Blocks
+      # Step 6: Security & Privacy Audit: Verify zero network crates
+      # (Unsafe-code enforcement now lives in Cargo.toml as
+      # [lints.rust] unsafe_code = "forbid", which is compile-time accurate and
+      # cannot false-positive on comments or doc text like the old grep did.)
+      - name: Verify Zero Network Dependencies
         shell: bash
         run: |
-          # 1. Ensure zero unsafe code blocks across all source files
-          ! grep -rn "unsafe" src/
-          # 2. Verify Cargo.lock contains zero HTTP/network client libraries (reqwest, ureq, hyper, curl, tungstenite, tokio-tungstenite)
+          # Verify Cargo.lock contains zero HTTP/network client libraries (reqwest, ureq, hyper, curl, tungstenite, tokio-tungstenite)
           ! grep -E "^name = \"(reqwest|ureq|hyper|curl|tungstenite|tokio-tungstenite|sentry|datadog|posthog)\"" Cargo.lock
 
       # Step 7: Compile the application binary and all test harnesses
@@ -91,9 +92,29 @@ jobs:
       - name: Verify Global Cargo Install Workflow
         run: cargo install --path .
 
-      # Step 10: Verify Screenshot Generator Execution
+      # Step 10a: Install librsvg2-bin (provides rsvg-convert) on Linux.
+      # The screenshot generator shells out to rsvg-convert; without this
+      # package the verification step below would silently rasterize nothing.
+      # macOS/Windows equivalents exist (brew install librsvg, choco/chicken
+      # installers), but to keep CI deterministic we simply pin the screenshot
+      # verification step itself to Linux runners via the `if:` condition.
+      - name: Install rsvg-convert (librsvg2-bin)
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y librsvg2-bin
+
+      # Step 10b: Verify Screenshot Generator Execution (Linux only).
+      # NOTE ON DRIFT: the regenerated SVGs embed today-dated content
+      # (chrono::Utc::now() seeds the stats view), so a `git diff --exit-code`
+      # against tracked files would fail on every new day for reasons unrelated
+      # to correctness. Instead we verify the generator exits 0 and then
+      # restore the tracked files so the workspace stays byte-identical to the
+      # commit under test. A real drift check belongs in a dedicated
+      # date-independent regeneration workflow.
       - name: Verify Screenshot Generator Execution
-        run: cargo run --bin generate_screenshots
+        if: runner.os == 'Linux'
+        run: |
+          cargo run --bin generate_screenshots
+          git checkout -- assets/screenshots docs/assets/screenshots
 
       # Step 11: Automatically clean target build cache to maintain runner disk hygiene
       - name: Clean build cache

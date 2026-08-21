@@ -153,8 +153,11 @@ impl StatsHistory {
         // Get local calendar date for yesterday
         let yesterday = today.pred_opt().unwrap_or(today);
 
-        // Check the most recent work date
-        let last_date = *dates.last().unwrap();
+        // Check the most recent work date, clamped to today so future-dated
+        // entries cannot invalidate a live streak. Future dates occur
+        // legitimately when the system clock ran ahead during recording or
+        // after traveling east across the dateline.
+        let last_date = (*dates.last().unwrap()).min(today);
         // If the user did not work today or yesterday, streak is broken
         if last_date != today && last_date != yesterday {
             // Return 0 days
@@ -290,27 +293,50 @@ mod tests {
     // Import super module items
     use super::*;
 
+    // Converts a naive local wall clock time into a UTC timestamp for test
+    // fixtures. Panics with a clear message when the chosen instant falls
+    // inside a daylight saving gap or ambiguity instead of an opaque unwrap.
+    fn local_to_utc(date: NaiveDate, hour: u32) -> DateTime<Utc> {
+        date.and_hms_opt(hour, 0, 0)
+            .expect("valid test datetime")
+            .and_local_timezone(Local)
+            .single()
+            .expect("test datetime maps to local time")
+            .with_timezone(&Utc)
+    }
+
+    // Builds a completed Work session of `mins` minutes finishing at `hour`
+    // local time on the given calendar date
+    fn work_session(date: NaiveDate, hour: u32, mins: u32) -> CompletedSession {
+        CompletedSession {
+            timestamp: local_to_utc(date, hour),
+            phase: PomodoroPhase::Work,
+            duration_mins: mins,
+            task_id: None,
+            task_title: None,
+        }
+    }
+
     // Test recording sessions and calculating daily totals
     #[test]
     fn test_stats_recording() {
         // Initialize empty stats history
         let mut stats = StatsHistory::new();
-        // Record work session 1 (25 mins)
-        stats.record(
-            PomodoroPhase::Work,
-            25,
-            Some("task-1".to_string()),
-            Some("Task 1".to_string()),
-        );
-        // Record short break (5 mins)
-        stats.record(PomodoroPhase::ShortBreak, 5, None, None);
-        // Record work session 2 (25 mins)
-        stats.record(
-            PomodoroPhase::Work,
-            25,
-            Some("task-1".to_string()),
-            Some("Task 1".to_string()),
-        );
+        // Snapshot today once and inject fixed timestamps so a midnight
+        // rollover mid-test cannot move sessions out of the asserted day
+        let today = Local::now().date_naive();
+        // Work session 1 (25 mins)
+        stats.sessions.push(work_session(today, 10, 25));
+        // Short break (5 mins)
+        stats.sessions.push(CompletedSession {
+            timestamp: local_to_utc(today, 11),
+            phase: PomodoroPhase::ShortBreak,
+            duration_mins: 5,
+            task_id: None,
+            task_title: None,
+        });
+        // Work session 2 (25 mins)
+        stats.sessions.push(work_session(today, 12, 25));
 
         // Verify today work sessions count is 2
         assert_eq!(stats.today_work_sessions(), 2);
@@ -354,14 +380,8 @@ mod tests {
         let mut stats = StatsHistory::new();
         let today = Local::now().date_naive();
         let yesterday = today - chrono::Duration::days(1);
-        let yesterday_utc = yesterday
-            .and_hms_opt(12, 0, 0)
-            .unwrap()
-            .and_local_timezone(Local)
-            .unwrap()
-            .with_timezone(&Utc);
         stats.sessions.push(CompletedSession {
-            timestamp: yesterday_utc,
+            timestamp: local_to_utc(yesterday, 12),
             phase: PomodoroPhase::Work,
             duration_mins: 25,
             task_id: None,
@@ -378,14 +398,8 @@ mod tests {
         let mut stats = StatsHistory::new();
         let today = Local::now().date_naive();
         let two_days_ago = today - chrono::Duration::days(2);
-        let two_days_ago_utc = two_days_ago
-            .and_hms_opt(12, 0, 0)
-            .unwrap()
-            .and_local_timezone(Local)
-            .unwrap()
-            .with_timezone(&Utc);
         stats.sessions.push(CompletedSession {
-            timestamp: two_days_ago_utc,
+            timestamp: local_to_utc(two_days_ago, 12),
             phase: PomodoroPhase::Work,
             duration_mins: 25,
             task_id: None,
@@ -405,19 +419,7 @@ mod tests {
         // Simulate 4-day streak ending 5 days ago: today-8, today-7, today-6, today-5
         for offset in (5..=8).rev() {
             let date = today - chrono::Duration::days(offset);
-            let dt = date
-                .and_hms_opt(10, 0, 0)
-                .unwrap()
-                .and_local_timezone(Local)
-                .unwrap()
-                .with_timezone(&Utc);
-            stats.sessions.push(CompletedSession {
-                timestamp: dt,
-                phase: PomodoroPhase::Work,
-                duration_mins: 25,
-                task_id: None,
-                task_title: None,
-            });
+            stats.sessions.push(work_session(date, 10, 25));
         }
 
         // Gap on today-4, today-3
@@ -425,19 +427,7 @@ mod tests {
         // Simulate 3-day current streak: today-2, today-1, today
         for offset in (0..=2).rev() {
             let date = today - chrono::Duration::days(offset);
-            let dt = date
-                .and_hms_opt(10, 0, 0)
-                .unwrap()
-                .and_local_timezone(Local)
-                .unwrap()
-                .with_timezone(&Utc);
-            stats.sessions.push(CompletedSession {
-                timestamp: dt,
-                phase: PomodoroPhase::Work,
-                duration_mins: 25,
-                task_id: None,
-                task_title: None,
-            });
+            stats.sessions.push(work_session(date, 10, 25));
         }
 
         // Current active streak is 3 days
@@ -449,9 +439,11 @@ mod tests {
     #[test]
     fn test_same_day_multiple_sessions_dedup() {
         let mut stats = StatsHistory::new();
-        // Record 5 work sessions today
-        for _ in 0..5 {
-            stats.record(PomodoroPhase::Work, 25, None, None);
+        // Inject 5 work sessions stamped today from a single today snapshot
+        // so a midnight rollover mid-test cannot split them across two days
+        let today = Local::now().date_naive();
+        for hour in 8..13 {
+            stats.sessions.push(work_session(today, hour, 25));
         }
 
         assert_eq!(stats.today_work_sessions(), 5);
@@ -465,9 +457,11 @@ mod tests {
     #[test]
     fn test_last_days_distribution() {
         let mut stats = StatsHistory::new();
-        // Record 2 sessions today
-        stats.record(PomodoroPhase::Work, 25, None, None);
-        stats.record(PomodoroPhase::Work, 25, None, None);
+        // Inject 2 sessions stamped today from a single today snapshot so
+        // the asserted distribution slot cannot shift at local midnight
+        let today = Local::now().date_naive();
+        stats.sessions.push(work_session(today, 10, 25));
+        stats.sessions.push(work_session(today, 11, 25));
 
         let dist = stats.last_days_distribution(7);
         assert_eq!(dist.len(), 7);
@@ -485,19 +479,7 @@ mod tests {
         // 4 consecutive days of work ending yesterday (offset 1, 2, 3, 4) - today has 0 sessions
         for offset in 1..=4 {
             let date = today - chrono::Duration::days(offset);
-            let dt = date
-                .and_hms_opt(14, 0, 0)
-                .unwrap()
-                .and_local_timezone(Local)
-                .unwrap()
-                .with_timezone(&Utc);
-            stats.sessions.push(CompletedSession {
-                timestamp: dt,
-                phase: PomodoroPhase::Work,
-                duration_mins: 25,
-                task_id: None,
-                task_title: None,
-            });
+            stats.sessions.push(work_session(date, 14, 25));
         }
 
         // Streak from yesterday should be 4 days
@@ -515,19 +497,7 @@ mod tests {
         let offsets = [0, 3, 1, 2];
         for &offset in &offsets {
             let date = today - chrono::Duration::days(offset);
-            let dt = date
-                .and_hms_opt(9, 0, 0)
-                .unwrap()
-                .and_local_timezone(Local)
-                .unwrap()
-                .with_timezone(&Utc);
-            stats.sessions.push(CompletedSession {
-                timestamp: dt,
-                phase: PomodoroPhase::Work,
-                duration_mins: 30,
-                task_id: None,
-                task_title: None,
-            });
+            stats.sessions.push(work_session(date, 9, 30));
         }
 
         // Distinct dates should be 4 and sorted properly
@@ -544,7 +514,10 @@ mod tests {
     #[test]
     fn test_distribution_variable_day_windows() {
         let mut stats = StatsHistory::new();
-        stats.record(PomodoroPhase::Work, 25, None, None);
+        // Inject one work session stamped today from a single today snapshot
+        // so window assertions stay anchored to the same calendar day
+        let today = Local::now().date_naive();
+        stats.sessions.push(work_session(today, 10, 25));
 
         // 0 days window
         let dist0 = stats.last_days_distribution(0);
@@ -573,55 +546,19 @@ mod tests {
         // Streak 1: 3-day streak from today-20 to today-18
         for offset in 18..=20 {
             let date = today - chrono::Duration::days(offset);
-            let dt = date
-                .and_hms_opt(12, 0, 0)
-                .unwrap()
-                .and_local_timezone(Local)
-                .unwrap()
-                .with_timezone(&Utc);
-            stats.sessions.push(CompletedSession {
-                timestamp: dt,
-                phase: PomodoroPhase::Work,
-                duration_mins: 25,
-                task_id: None,
-                task_title: None,
-            });
+            stats.sessions.push(work_session(date, 12, 25));
         }
 
         // Streak 2: 6-day streak from today-15 to today-10
         for offset in 10..=15 {
             let date = today - chrono::Duration::days(offset);
-            let dt = date
-                .and_hms_opt(12, 0, 0)
-                .unwrap()
-                .and_local_timezone(Local)
-                .unwrap()
-                .with_timezone(&Utc);
-            stats.sessions.push(CompletedSession {
-                timestamp: dt,
-                phase: PomodoroPhase::Work,
-                duration_mins: 25,
-                task_id: None,
-                task_title: None,
-            });
+            stats.sessions.push(work_session(date, 12, 25));
         }
 
         // Streak 3: 2-day current streak: today-1 and today
         for offset in 0..=1 {
             let date = today - chrono::Duration::days(offset);
-            let dt = date
-                .and_hms_opt(12, 0, 0)
-                .unwrap()
-                .and_local_timezone(Local)
-                .unwrap()
-                .with_timezone(&Utc);
-            stats.sessions.push(CompletedSession {
-                timestamp: dt,
-                phase: PomodoroPhase::Work,
-                duration_mins: 25,
-                task_id: None,
-                task_title: None,
-            });
+            stats.sessions.push(work_session(date, 12, 25));
         }
 
         assert_eq!(stats.current_streak_days(), 2);
@@ -659,15 +596,10 @@ mod tests {
         let d3 = NaiveDate::from_ymd_opt(2026, 1, 1).unwrap();
         let d4 = NaiveDate::from_ymd_opt(2026, 1, 2).unwrap();
 
+        // Convert each intended local date through the local timezone like
+        // the other fixtures so UTC+13/+14 zones keep the same calendar day
         for date in [d1, d2, d3, d4] {
-            let dt = date.and_hms_opt(12, 0, 0).unwrap().and_utc();
-            stats.sessions.push(CompletedSession {
-                timestamp: dt,
-                phase: PomodoroPhase::Work,
-                duration_mins: 25,
-                task_id: None,
-                task_title: None,
-            });
+            stats.sessions.push(work_session(date, 12, 25));
         }
 
         // Longest streak across year boundary should be 4 days
@@ -748,14 +680,8 @@ mod tests {
         // Simulate 366 consecutive days of focus sessions (full leap year)
         for offset in 0..366 {
             let date = today - chrono::Duration::days(offset);
-            let dt = date
-                .and_hms_opt(10, 0, 0)
-                .unwrap()
-                .and_local_timezone(Local)
-                .unwrap()
-                .with_timezone(&Utc);
             stats.sessions.push(CompletedSession {
-                timestamp: dt,
+                timestamp: local_to_utc(date, 10),
                 phase: PomodoroPhase::Work,
                 duration_mins: 25,
                 task_id: Some(format!("task-day-{}", offset)),
@@ -778,19 +704,7 @@ mod tests {
         // Segment 1: 5 days continuous (today-4 down to today)
         for offset in 0..5 {
             let date = today - chrono::Duration::days(offset);
-            let dt = date
-                .and_hms_opt(11, 0, 0)
-                .unwrap()
-                .and_local_timezone(Local)
-                .unwrap()
-                .with_timezone(&Utc);
-            stats.sessions.push(CompletedSession {
-                timestamp: dt,
-                phase: PomodoroPhase::Work,
-                duration_mins: 30,
-                task_id: None,
-                task_title: None,
-            });
+            stats.sessions.push(work_session(date, 11, 30));
         }
 
         // Gap of 2 days (today-5, today-6 have NO sessions)
@@ -798,19 +712,7 @@ mod tests {
         // Segment 2: 12 days continuous (today-18 to today-7)
         for offset in 7..=18 {
             let date = today - chrono::Duration::days(offset);
-            let dt = date
-                .and_hms_opt(11, 0, 0)
-                .unwrap()
-                .and_local_timezone(Local)
-                .unwrap()
-                .with_timezone(&Utc);
-            stats.sessions.push(CompletedSession {
-                timestamp: dt,
-                phase: PomodoroPhase::Work,
-                duration_mins: 30,
-                task_id: None,
-                task_title: None,
-            });
+            stats.sessions.push(work_session(date, 11, 30));
         }
 
         // Current streak should be 5 (active today)
@@ -831,19 +733,9 @@ mod tests {
 
         let mut stats_yesterday = StatsHistory::new();
         let yesterday = (Local::now() - chrono::Duration::days(1)).date_naive();
-        let dt = yesterday
-            .and_hms_opt(12, 0, 0)
-            .unwrap()
-            .and_local_timezone(Local)
-            .unwrap()
-            .with_timezone(&Utc);
-        stats_yesterday.sessions.push(CompletedSession {
-            timestamp: dt,
-            phase: PomodoroPhase::Work,
-            duration_mins: 25,
-            task_id: None,
-            task_title: None,
-        });
+        stats_yesterday
+            .sessions
+            .push(work_session(yesterday, 12, 25));
         // Streak preserved from yesterday
         assert_eq!(stats_yesterday.current_streak_days(), 1);
         assert_eq!(stats_yesterday.longest_streak_days(), 1);
@@ -917,9 +809,18 @@ mod tests {
         assert_eq!(stats.today_work_sessions(), 0);
         assert_eq!(stats.today_focus_minutes(), 0);
 
-        stats.record(PomodoroPhase::Work, 25, None, None);
-        stats.record(PomodoroPhase::ShortBreak, 5, None, None);
-        stats.record(PomodoroPhase::Work, 50, None, None);
+        // Inject fixed timestamps from one today snapshot so a midnight
+        // rollover mid-test cannot move sessions out of the asserted day
+        let today = Local::now().date_naive();
+        stats.sessions.push(work_session(today, 9, 25));
+        stats.sessions.push(CompletedSession {
+            timestamp: local_to_utc(today, 10),
+            phase: PomodoroPhase::ShortBreak,
+            duration_mins: 5,
+            task_id: None,
+            task_title: None,
+        });
+        stats.sessions.push(work_session(today, 11, 50));
 
         assert_eq!(stats.today_work_sessions(), 2);
         assert_eq!(stats.today_focus_minutes(), 75);
@@ -932,19 +833,7 @@ mod tests {
         // 5 consecutive days 10 days ago (10 to 6 days ago)
         for offset in (6..=10).rev() {
             let d = today - chrono::Duration::days(offset);
-            let dt = d
-                .and_hms_opt(12, 0, 0)
-                .unwrap()
-                .and_local_timezone(Local)
-                .unwrap()
-                .with_timezone(&Utc);
-            stats.sessions.push(CompletedSession {
-                timestamp: dt,
-                phase: PomodoroPhase::Work,
-                duration_mins: 25,
-                task_id: None,
-                task_title: None,
-            });
+            stats.sessions.push(work_session(d, 12, 25));
         }
 
         // Current streak should be 0 because 6 days have passed
@@ -977,19 +866,7 @@ mod tests {
         let today = Local::now().date_naive();
         for offset in 0..7 {
             let d = today - chrono::Duration::days(offset);
-            let dt = d
-                .and_hms_opt(10, 0, 0)
-                .unwrap()
-                .and_local_timezone(Local)
-                .unwrap()
-                .with_timezone(&Utc);
-            stats.sessions.push(CompletedSession {
-                timestamp: dt,
-                phase: PomodoroPhase::Work,
-                duration_mins: 30,
-                task_id: None,
-                task_title: None,
-            });
+            stats.sessions.push(work_session(d, 10, 30));
         }
 
         let dist = stats.last_days_distribution(7);

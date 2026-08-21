@@ -123,15 +123,15 @@ From anywhere in Termodoro, press `2` (or press `Tab`) to navigate to **Tab 2: T
 
 | Keybinding | Action | Codebase Handler & Behavior |
 | :---: | :--- | :--- |
-| `j` / `↓` | **Select Next** | [`src/app.rs:535`](../src/app.rs#L535) (`tasks.next()`) |
-| `k` / `↑` | **Select Previous** | [`src/app.rs:540`](../src/app.rs#L540) (`tasks.previous()`) |
-| `a` | **Add Task** | [`src/app.rs:502`](../src/app.rs#L502) (`open_task_modal()`) |
-| `Space` / `Enter` | **Toggle Done** | [`src/app.rs:507`](../src/app.rs#L507) (`tasks.toggle_selected()`) |
-| `t` | **Set Active Target** | [`src/app.rs:514`](../src/app.rs#L514) (`tasks.set_selected_active()`) |
-| `d` / `x` | **Delete Task** | [`src/app.rs:526`](../src/app.rs#L526) (`tasks.remove_selected()`) |
-| `1` | **Filter: All** | [`src/app.rs:545`](../src/app.rs#L545) (`tasks.filter = TaskFilter::All`) |
-| `2` | **Filter: Active** | [`src/app.rs:552`](../src/app.rs#L552) (`tasks.filter = TaskFilter::Active`) |
-| `3` | **Filter: Completed** | [`src/app.rs:559`](../src/app.rs#L559) (`tasks.filter = TaskFilter::Completed`) |
-| `Tab` / `BackTab` | **Switch Tabs** | [`src/app.rs:268-286`](../src/app.rs#L268-L286) (`next_tab()` / `previous_tab()`) |
-| `?` | **Help Overlay** | [`src/app.rs:261`](../src/app.rs#L261) (`show_help = true`) |
-| `q` | **Quit** | [`src/app.rs:254`](../src/app.rs#L254) (`should_quit = true`) |
+| `j` / `↓` | **Select Next** | [`src/app.rs:565`](../src/app.rs#L565) (`tasks.next()`) |
+| `k` / `↑` | **Select Previous** | [`src/app.rs:570`](../src/app.rs#L570) (`tasks.previous()`) |
+| `a` | **Add Task** | [`src/app.rs:526`](../src/app.rs#L526) (`open_task_modal()`) |
+| `Space` / `Enter` | **Toggle Done** | [`src/app.rs:531`](../src/app.rs#L531) (`tasks.toggle_selected()`) |
+| `t` | **Set Active Target** | [`src/app.rs:538`](../src/app.rs#L538) (`tasks.set_selected_active()`) |
+| `d` / `x` | **Delete Task** | [`src/app.rs:552`](../src/app.rs#L552) (`tasks.remove_selected()`) |
+| `1` | **Filter: All** | [`src/app.rs:575`](../src/app.rs#L575) (`tasks.filter = TaskFilter::All`) |
+| `2` | **Filter: Active** | [`src/app.rs:582`](../src/app.rs#L582) (`tasks.filter = TaskFilter::Active`) |
+| `3` | **Filter: Completed** | [`src/app.rs:589`](../src/app.rs#L589) (`tasks.filter = TaskFilter::Completed`) |
+| `Tab` / `BackTab` | **Switch Tabs** | [`src/app.rs:291-306`](../src/app.rs#L291-L306) (`next_tab()` / `previous_tab()`) |
+| `?` | **Help Overlay** | [`src/app.rs:286`](../src/app.rs#L286) (`show_help = true`) |
+| `q` | **Quit** | [`src/app.rs:279`](../src/app.rs#L279) (`should_quit = true`) |

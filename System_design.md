@@ -236,7 +236,10 @@ User data is persisted into a single, clean JSON file (`data.json`):
 ```
 
 ### Atomic Disk Persistence Pattern
-To prevent data loss during sudden system shutdowns or power outages, `Storage::save()` writes to a temporary file (`data.json.tmp`) and performs an atomic filesystem rename/replace onto `data.json`.
+To prevent data loss during sudden system shutdowns or power outages, `Storage::save()` writes to a temporary file (`data.json.tmp`), forces it to stable storage with `sync_all()`, and performs an atomic filesystem rename/replace onto `data.json`. A file that exists but cannot be opened, read, or parsed is quarantined (renamed to `data.json.corrupt-<unix-timestamp>`) so the original bytes survive for manual recovery, and every successful load clamps configuration values back into their valid ranges via `Config::sanitize()`.
+
+### Single-Instance Ownership Invariant
+Termodoro intentionally assumes **one running instance per user data file**. Each process holds its state in memory and persists the full snapshot on every mutation, so two simultaneous instances would silently overwrite each other's changes (classic last-writer-wins). Atomic writes guarantee each snapshot lands intact, but cross-instance merging is out of scope by design; launching a second instance against the same `data.json` is unsupported.
 
 ### Zero-Telemetry & Air-Gapped Privacy Invariant
 - **No Network Crates**: `Cargo.lock` contains zero networking dependencies (`reqwest`, `hyper`, `curl`, `ureq`).
@@ -329,18 +332,18 @@ std::panic::set_hook(Box::new(move |info| {
 
 ## 10. Automated Quality Assurance & Verification Matrix
 
-Termodoro's architecture is continuously certified by a comprehensive **192-test Rust QA harness** and a **41-test Playwright cross-device web E2E suite** running across Linux, macOS, and Windows:
+Termodoro's architecture is continuously certified by a comprehensive **199-test Rust QA harness** and a **41-test Playwright cross-device web E2E suite** running across Linux, macOS, and Windows:
 
 ```mermaid
-pie title Automated Test Distribution (192 Tests)
-    "App and E2E Workflows" : 35
+pie title Automated Test Distribution (199 Tests)
+    "App and E2E Workflows" : 37
     "Productivity Analytics" : 29
     "Timer Finite State Machine" : 27
     "Task Management Engine" : 27
-    "Audio Synthesis and WAV" : 19
-    "TUI Rendering and Buffer" : 18
-    "Storage and Zero-Telemetry" : 14
-    "Theme Palettes and Contrast" : 10
+    "Audio Synthesis and WAV" : 20
+    "TUI Rendering and Buffer" : 23
+    "Storage and Zero-Telemetry" : 17
+    "Theme Palettes and Contrast" : 11
     "Configuration and Serde" : 8
     "ASCII Block Typography" : 5
 ```
@@ -350,8 +353,8 @@ pie title Automated Test Distribution (192 Tests)
 | **Compiler Compliance** | Rust 1.74+ (Edition 2021) | `cargo check` | **PASS** |
 | **Code Formatting** | 100% Rustfmt canonical style | `cargo fmt -- --check` | **PASS** |
 | **Static Analysis** | Zero warnings with fatal pedantic flags | `cargo clippy -- -D warnings` | **PASS** |
-| **Unit & Integration Tests**| 192 / 192 passing across all 9 modules | `cargo test` / `make test` | **PASS** |
+| **Unit & Integration Tests**| 199 / 199 passing across all 9 modules | `cargo test` / `make test` | **PASS** |
 | **Playwright Web E2E** | 41 / 41 passing across 6 responsive viewports | `make test-e2e` (`scripts/e2e-website-test.mjs`) | **PASS** |
-| **Memory Safety** | Zero `unsafe` keywords in `src/` | AST regex scan | **PASS** |
+| **Memory Safety** | Zero `unsafe` blocks crate-wide | Compile-time `[lints.rust] unsafe_code = "forbid"` in `Cargo.toml` | **PASS** |
 | **Network Isolation** | Zero HTTP/network client libraries in lockfile | Dependency audit | **PASS** |
 | **Multi-OS CI Matrix** | Ubuntu Latest, macOS Latest, Windows Latest | GitHub Actions CI | **PASS** |

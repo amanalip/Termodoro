@@ -1,10 +1,16 @@
 // Import Color from ratatui style module for rendering terminal colors
 use ratatui::style::Color;
-// Import Deserialize and Serialize traits from serde for configuration persistence
-use serde::{Deserialize, Serialize};
+// Import Serialize trait from serde for configuration persistence; Deserialize
+// is implemented manually below (fully qualified) rather than derived
+use serde::Serialize;
 
 // Enum representing the selectable visual color themes in the application
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]
+//
+// NOTE: Deserialize is intentionally NOT derived here. It is implemented
+// manually below so that an unknown theme string in data.json falls back to
+// the default theme instead of failing the entire AppData parse (which would
+// otherwise reset all user data). Serialize stays derived as before.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Default)]
 pub enum ThemeChoice {
     // Catppuccin Mocha theme (modern pastel dark palette)
     #[default]
@@ -94,6 +100,42 @@ impl ThemeChoice {
             ThemeChoice::MonokaiPro => "Monokai Pro",
             ThemeChoice::OledPhosphor => "OLED Phosphor",
         }
+    }
+}
+
+impl std::str::FromStr for ThemeChoice {
+    type Err = ();
+
+    // Parses a theme from its serialized variant name (for example
+    // "CatppuccinMocha") or its human display name ("Catppuccin Mocha").
+    // Matching is case-insensitive and ignores separators so hand-edited
+    // config files still load. Unknown names yield Err, which the Deserialize
+    // impl below converts into the default theme.
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let normalize =
+            |v: &str| -> String { v.trim().to_ascii_lowercase().replace([' ', '-', '_'], "") };
+        let wanted = normalize(s);
+        for choice in ThemeChoice::all() {
+            let variant = normalize(format!("{:?}", choice).as_str());
+            let display = normalize(choice.name());
+            if wanted == variant || wanted == display {
+                return Ok(*choice);
+            }
+        }
+        Err(())
+    }
+}
+
+// Tolerant deserialization: any unrecognized theme name maps to the default
+// variant instead of erroring out. This keeps one bad string in data.json
+// from invalidating the whole file (and wiping the user's saved data).
+impl<'de> serde::Deserialize<'de> for ThemeChoice {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let raw = String::deserialize(deserializer)?;
+        Ok(raw.parse::<ThemeChoice>().unwrap_or_default())
     }
 }
 
@@ -257,70 +299,81 @@ impl Theme {
             // Build Dracula palette
             ThemeChoice::Dracula => Theme {
                 choice,
-                bg: Color::Rgb(40, 42, 54),               // #282a36
-                fg: Color::Rgb(248, 248, 242),            // #f8f8f2
-                primary: Color::Rgb(189, 147, 249),       // #bd93f9
-                secondary: Color::Rgb(139, 233, 253),     // #8be9fd
-                work: Color::Rgb(255, 85, 85),            // #ff5555
-                short_break: Color::Rgb(80, 250, 123),    // #50fa7b
-                long_break: Color::Rgb(139, 233, 253),    // #8be9fd
-                success: Color::Rgb(80, 250, 123),        // #50fa7b
-                warning: Color::Rgb(241, 250, 140),       // #f1fa8c
-                border: Color::Rgb(68, 71, 90),           // #44475a
+                bg: Color::Rgb(40, 42, 54),            // #282a36
+                fg: Color::Rgb(248, 248, 242),         // #f8f8f2
+                primary: Color::Rgb(189, 147, 249),    // #bd93f9
+                secondary: Color::Rgb(139, 233, 253),  // #8be9fd
+                work: Color::Rgb(255, 85, 85),         // #ff5555
+                short_break: Color::Rgb(80, 250, 123), // #50fa7b
+                // Dracula orange instead of cyan: cyan duplicated the secondary
+                // accent, defeating phase color-coding
+                long_break: Color::Rgb(255, 184, 108), // #ffb86c
+                success: Color::Rgb(80, 250, 123),     // #50fa7b
+                warning: Color::Rgb(241, 250, 140),    // #f1fa8c
+                border: Color::Rgb(68, 71, 90),        // #44475a
                 border_active: Color::Rgb(189, 147, 249), // #bd93f9
-                muted: Color::Rgb(98, 114, 164),          // #6272a4
-                highlight: Color::Rgb(68, 71, 90),        // #44475a
+                muted: Color::Rgb(98, 114, 164),       // #6272a4
+                // Slightly lighter than the border so selected rows stand out
+                highlight: Color::Rgb(78, 82, 102), // #4e5266
             },
             // Build Solarized Dark palette
             ThemeChoice::SolarizedDark => Theme {
                 choice,
-                bg: Color::Rgb(0, 43, 54),               // #002b36
-                fg: Color::Rgb(131, 148, 150),           // #839496
-                primary: Color::Rgb(38, 139, 210),       // #268bd2
-                secondary: Color::Rgb(42, 161, 152),     // #2aa198
-                work: Color::Rgb(220, 50, 47),           // #dc322f
-                short_break: Color::Rgb(133, 153, 0),    // #859900
-                long_break: Color::Rgb(42, 161, 152),    // #2aa198
-                success: Color::Rgb(133, 153, 0),        // #859900
-                warning: Color::Rgb(181, 137, 0),        // #b58900
-                border: Color::Rgb(7, 54, 66),           // #073642
+                bg: Color::Rgb(0, 43, 54),            // #002b36
+                fg: Color::Rgb(131, 148, 150),        // #839496
+                primary: Color::Rgb(38, 139, 210),    // #268bd2
+                secondary: Color::Rgb(42, 161, 152),  // #2aa198
+                work: Color::Rgb(220, 50, 47),        // #dc322f
+                short_break: Color::Rgb(133, 153, 0), // #859900
+                // Solarized violet instead of cyan: cyan duplicated the
+                // secondary accent, defeating phase color-coding
+                long_break: Color::Rgb(108, 113, 196), // #6c71c4
+                success: Color::Rgb(133, 153, 0),      // #859900
+                warning: Color::Rgb(181, 137, 0),      // #b58900
+                border: Color::Rgb(7, 54, 66),         // #073642
                 border_active: Color::Rgb(38, 139, 210), // #268bd2
-                muted: Color::Rgb(88, 110, 117),         // #586e75
-                highlight: Color::Rgb(7, 54, 66),        // #073642
+                muted: Color::Rgb(88, 110, 117),       // #586e75
+                // Slightly lighter than the border so selected rows stand out
+                highlight: Color::Rgb(13, 74, 89), // #0d4a59
             },
             // Build Solarized Light palette (Light)
             ThemeChoice::SolarizedLight => Theme {
                 choice,
-                bg: Color::Rgb(253, 246, 227),           // #fdf6e3
-                fg: Color::Rgb(101, 123, 131),           // #657b83
-                primary: Color::Rgb(38, 139, 210),       // #268bd2
-                secondary: Color::Rgb(108, 113, 196),    // #6c71c4
-                work: Color::Rgb(220, 50, 47),           // #dc322f
-                short_break: Color::Rgb(133, 153, 0),    // #859900
-                long_break: Color::Rgb(42, 161, 152),    // #2aa198
-                success: Color::Rgb(133, 153, 0),        // #859900
-                warning: Color::Rgb(181, 137, 0),        // #b58900
-                border: Color::Rgb(238, 232, 213),       // #eee8d5
+                bg: Color::Rgb(253, 246, 227),        // #fdf6e3
+                fg: Color::Rgb(101, 123, 131),        // #657b83
+                primary: Color::Rgb(38, 139, 210),    // #268bd2
+                secondary: Color::Rgb(108, 113, 196), // #6c71c4
+                work: Color::Rgb(220, 50, 47),        // #dc322f
+                short_break: Color::Rgb(133, 153, 0), // #859900
+                // Solarized magenta instead of cyan: cyan duplicated the
+                // secondary accent (violet is taken here), defeating color-coding
+                long_break: Color::Rgb(211, 54, 130), // #d33682
+                success: Color::Rgb(133, 153, 0),     // #859900
+                warning: Color::Rgb(181, 137, 0),     // #b58900
+                border: Color::Rgb(238, 232, 213),    // #eee8d5
                 border_active: Color::Rgb(38, 139, 210), // #268bd2
-                muted: Color::Rgb(147, 161, 161),        // #93a1a1
-                highlight: Color::Rgb(238, 232, 213),    // #eee8d5
+                muted: Color::Rgb(147, 161, 161),     // #93a1a1
+                // Slightly darker than the border so selected rows stand out
+                highlight: Color::Rgb(227, 220, 195), // #e3dcc3
             },
             // Build Rose Pine palette
             ThemeChoice::RosePine => Theme {
                 choice,
-                bg: Color::Rgb(25, 23, 36),               // #191724
-                fg: Color::Rgb(224, 222, 244),            // #e0def4
-                primary: Color::Rgb(156, 207, 216),       // #9ccfd8
-                secondary: Color::Rgb(196, 167, 231),     // #c4a7e7
-                work: Color::Rgb(235, 111, 146),          // #eb6f92
-                short_break: Color::Rgb(49, 116, 143),    // #31748f
-                long_break: Color::Rgb(156, 207, 216),    // #9ccfd8
-                success: Color::Rgb(49, 116, 143),        // #31748f
-                warning: Color::Rgb(246, 193, 119),       // #f6c177
-                border: Color::Rgb(38, 35, 58),           // #26233a
+                bg: Color::Rgb(25, 23, 36),            // #191724
+                fg: Color::Rgb(224, 222, 244),         // #e0def4
+                primary: Color::Rgb(156, 207, 216),    // #9ccfd8
+                secondary: Color::Rgb(196, 167, 231),  // #c4a7e7
+                work: Color::Rgb(235, 111, 146),       // #eb6f92
+                short_break: Color::Rgb(49, 116, 143), // #31748f
+                // Rose Pine "rose" instead of foam: foam duplicated the primary
+                // accent, defeating phase color-coding
+                long_break: Color::Rgb(235, 188, 186), // #ebbcba
+                success: Color::Rgb(49, 116, 143),     // #31748f
+                warning: Color::Rgb(246, 193, 119),    // #f6c177
+                border: Color::Rgb(38, 35, 58),        // #26233a
                 border_active: Color::Rgb(196, 167, 231), // #c4a7e7
-                muted: Color::Rgb(110, 106, 134),         // #6e6a86
-                highlight: Color::Rgb(42, 40, 62),        // #2a283e
+                muted: Color::Rgb(110, 106, 134),      // #6e6a86
+                highlight: Color::Rgb(42, 40, 62),     // #2a283e
             },
             // Build One Dark (Atom Pro) palette
             ThemeChoice::OneDark => Theme {
@@ -388,41 +441,46 @@ impl Theme {
                 border: Color::Rgb(234, 228, 203),       // #eae4cb
                 border_active: Color::Rgb(58, 148, 134), // #3a9486
                 muted: Color::Rgb(147, 170, 159),        // #93aa9f
-                highlight: Color::Rgb(234, 228, 203),    // #eae4cb
+                // Slightly darker than the border so selected rows stand out
+                highlight: Color::Rgb(223, 216, 190), // #dfd8be
             },
             // Build Synthwave '84 palette
             ThemeChoice::Synthwave84 => Theme {
                 choice,
-                bg: Color::Rgb(38, 35, 53),               // #262335
-                fg: Color::Rgb(240, 239, 241),            // #f0eff1
-                primary: Color::Rgb(54, 249, 246),        // #36f9f6
-                secondary: Color::Rgb(255, 126, 219),     // #ff7edb
-                work: Color::Rgb(254, 68, 80),            // #fe4450
-                short_break: Color::Rgb(114, 241, 184),   // #72f1b8
-                long_break: Color::Rgb(54, 249, 246),     // #36f9f6
-                success: Color::Rgb(114, 241, 184),       // #72f1b8
-                warning: Color::Rgb(254, 222, 93),        // #fede5d
-                border: Color::Rgb(73, 67, 99),           // #494363
+                bg: Color::Rgb(38, 35, 53),             // #262335
+                fg: Color::Rgb(240, 239, 241),          // #f0eff1
+                primary: Color::Rgb(54, 249, 246),      // #36f9f6
+                secondary: Color::Rgb(255, 126, 219),   // #ff7edb
+                work: Color::Rgb(254, 68, 80),          // #fe4450
+                short_break: Color::Rgb(114, 241, 184), // #72f1b8
+                // Synthwave orange instead of cyan: cyan duplicated the primary
+                // accent, defeating phase color-coding
+                long_break: Color::Rgb(255, 139, 57), // #ff8b39
+                success: Color::Rgb(114, 241, 184),   // #72f1b8
+                warning: Color::Rgb(254, 222, 93),    // #fede5d
+                border: Color::Rgb(73, 67, 99),       // #494363
                 border_active: Color::Rgb(255, 126, 219), // #ff7edb
-                muted: Color::Rgb(132, 139, 189),         // #848bbd
-                highlight: Color::Rgb(52, 41, 79),        // #34294f
+                muted: Color::Rgb(132, 139, 189),     // #848bbd
+                highlight: Color::Rgb(52, 41, 79),    // #34294f
             },
             // Build Monokai Pro palette
             ThemeChoice::MonokaiPro => Theme {
                 choice,
-                bg: Color::Rgb(45, 42, 46),               // #2d2a2e
-                fg: Color::Rgb(252, 252, 250),            // #fcfcfa
-                primary: Color::Rgb(120, 220, 232),       // #78dce8
-                secondary: Color::Rgb(171, 157, 242),     // #ab9df2
-                work: Color::Rgb(255, 97, 136),           // #ff6188
-                short_break: Color::Rgb(169, 220, 118),   // #a9dc76
-                long_break: Color::Rgb(120, 220, 232),    // #78dce8
-                success: Color::Rgb(169, 220, 118),       // #a9dc76
-                warning: Color::Rgb(255, 216, 102),       // #ffd866
-                border: Color::Rgb(64, 62, 65),           // #403e41
+                bg: Color::Rgb(45, 42, 46),             // #2d2a2e
+                fg: Color::Rgb(252, 252, 250),          // #fcfcfa
+                primary: Color::Rgb(120, 220, 232),     // #78dce8
+                secondary: Color::Rgb(171, 157, 242),   // #ab9df2
+                work: Color::Rgb(255, 97, 136),         // #ff6188
+                short_break: Color::Rgb(169, 220, 118), // #a9dc76
+                // Monokai orange instead of blue: blue duplicated the primary
+                // accent, defeating phase color-coding
+                long_break: Color::Rgb(252, 152, 103), // #fc9867
+                success: Color::Rgb(169, 220, 118),    // #a9dc76
+                warning: Color::Rgb(255, 216, 102),    // #ffd866
+                border: Color::Rgb(64, 62, 65),        // #403e41
                 border_active: Color::Rgb(255, 216, 102), // #ffd866
-                muted: Color::Rgb(114, 112, 114),         // #727072
-                highlight: Color::Rgb(58, 56, 59),        // #3a383b
+                muted: Color::Rgb(114, 112, 114),      // #727072
+                highlight: Color::Rgb(58, 56, 59),     // #3a383b
             },
             // Build OLED Phosphor palette
             ThemeChoice::OledPhosphor => Theme {
@@ -526,6 +584,21 @@ mod tests {
     }
 
     #[test]
+    fn test_theme_choice_unknown_name_falls_back_to_default() {
+        // An unknown theme string must not fail the whole AppData parse; it
+        // should silently map to the default theme instead.
+        for bogus in ["\"NotATheme\"", "\"\"", "\"catppuccin mocha typo\""] {
+            let parsed: ThemeChoice = serde_json::from_str(bogus).expect("must not error");
+            assert_eq!(parsed, ThemeChoice::default(), "bogus input: {}", bogus);
+        }
+        // Case and separator tolerance still resolves known names
+        let parsed: ThemeChoice = serde_json::from_str("\"dracula\"").expect("must parse");
+        assert_eq!(parsed, ThemeChoice::Dracula);
+        let parsed: ThemeChoice = serde_json::from_str("\"Synthwave 84\"").expect("must parse");
+        assert_eq!(parsed, ThemeChoice::Synthwave84);
+    }
+
+    #[test]
     fn test_theme_luminance_contrast_across_all_18_palettes() {
         for choice in ThemeChoice::all() {
             let theme = Theme::from_choice(*choice);
@@ -555,20 +628,44 @@ mod tests {
     #[test]
     fn test_theme_palette_index_cycling() {
         let all = ThemeChoice::all();
+
+        // Expected palette count keeps accidental variant additions/removals visible
         assert_eq!(all.len(), 18);
 
-        // Forward cycling
+        // No duplicates: cycling would otherwise skip or repeat themes
         for (i, choice) in all.iter().enumerate() {
-            let next_idx = (i + 1) % all.len();
-            assert_eq!(all[next_idx], all[(i + 1) % 18]);
-            assert!(!choice.name().is_empty());
+            assert!(
+                !all[..i].contains(choice),
+                "ThemeChoice::all() contains duplicate {:?}",
+                choice
+            );
         }
 
-        // Backward cycling
-        for (i, _) in all.iter().enumerate() {
-            let prev_idx = if i == 0 { all.len() - 1 } else { i - 1 };
-            assert_eq!(all[prev_idx], all[(i + 17) % 18]);
+        // Simulate the UI's forward cycle ((i + 1) % len): starting anywhere,
+        // stepping all.len() times must visit every theme exactly once and
+        // land back on the starting theme.
+        for start in 0..all.len() {
+            let mut idx = start;
+            let mut visited: Vec<ThemeChoice> = Vec::with_capacity(all.len());
+            for _ in 0..all.len() {
+                assert!(
+                    !visited.contains(&all[idx]),
+                    "cycle revisited {:?}",
+                    all[idx]
+                );
+                visited.push(all[idx]);
+                idx = (idx + 1) % all.len();
+            }
+            assert_eq!(
+                idx, start,
+                "cycle from {} did not return to its start",
+                start
+            );
         }
+
+        // The last element's forward neighbor is the first element, and the
+        // two must be distinct so pressing Next on the last theme visibly moves
+        assert_ne!(all[all.len() - 1], all[0]);
     }
 
     #[test]
@@ -580,6 +677,27 @@ mod tests {
                 format!("{:?}", theme.work),
                 format!("{:?}", theme.short_break),
                 "Theme {:?} work and short_break colors collide",
+                choice
+            );
+            // Long break must be visually distinct from both accent colors,
+            // otherwise the phase loses its own color-coding
+            assert_ne!(
+                format!("{:?}", theme.long_break),
+                format!("{:?}", theme.primary),
+                "Theme {:?} long_break and primary colors collide",
+                choice
+            );
+            assert_ne!(
+                format!("{:?}", theme.long_break),
+                format!("{:?}", theme.secondary),
+                "Theme {:?} long_break and secondary colors collide",
+                choice
+            );
+            // Selected rows would be invisible if highlight matched the border
+            assert_ne!(
+                format!("{:?}", theme.highlight),
+                format!("{:?}", theme.border),
+                "Theme {:?} highlight and border colors collide",
                 choice
             );
         }

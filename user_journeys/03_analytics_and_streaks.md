@@ -99,10 +99,10 @@ In [`src/stats.rs`](../src/stats.rs), the analytics engine guarantees mathematic
 
 | Keybinding | Action | Codebase Handler & Behavior |
 | :---: | :--- | :--- |
-| `1` | **Switch to Timer** | [`src/app.rs:288`](../src/app.rs#L288) (`active_tab = ActiveTab::Timer`) |
-| `2` | **Switch to Tasks** | [`src/app.rs:295`](../src/app.rs#L295) (`active_tab = ActiveTab::Tasks`) |
-| `3` | **Switch to Stats** | [`src/app.rs:302`](../src/app.rs#L302) (`active_tab = ActiveTab::Stats`) |
-| `4` | **Switch to Settings** | [`src/app.rs:308`](../src/app.rs#L308) (`active_tab = ActiveTab::Settings`) |
-| `Tab` / `Shift+Tab` | **Cycle Tabs** | [`src/app.rs:268-286`](../src/app.rs#L268-L286) (`next_tab()` / `previous_tab()`) |
-| `?` | **Help Overlay** | [`src/app.rs:261`](../src/app.rs#L261) (`show_help = true`) |
-| `q` | **Quit** | [`src/app.rs:254`](../src/app.rs#L254) (`should_quit = true`) |
+| `1` | **Switch to Timer** | [`src/app.rs:311`](../src/app.rs#L311) (`active_tab = ActiveTab::Timer`) |
+| `2` | **Switch to Tasks** | [`src/app.rs:317`](../src/app.rs#L317) (`active_tab = ActiveTab::Tasks`) |
+| `3` | **Switch to Stats** | [`src/app.rs:323`](../src/app.rs#L323) (`active_tab = ActiveTab::Stats`) |
+| `4` | **Switch to Settings** | [`src/app.rs:329`](../src/app.rs#L329) (`active_tab = ActiveTab::Settings`) |
+| `Tab` / `Shift+Tab` | **Cycle Tabs** | [`src/app.rs:291-306`](../src/app.rs#L291-L306) (`next_tab()` / `previous_tab()`) |
+| `?` | **Help Overlay** | [`src/app.rs:286`](../src/app.rs#L286) (`show_help = true`) |
+| `q` | **Quit** | [`src/app.rs:279`](../src/app.rs#L279) (`should_quit = true`) |

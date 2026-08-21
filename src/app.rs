@@ -125,9 +125,18 @@ impl App {
     }
 
     // Persists current application state (config, tasks, stats) to disk
-    pub fn save_state(&self) {
-        // Invoke storage save method
-        self.storage.save(&self.config, &self.tasks, &self.stats);
+    //
+    // Persistence failures are never silent: they are logged to stderr and
+    // surfaced as a footer banner so a full disk or read-only mount cannot
+    // quietly discard an entire session of tasks and statistics.
+    pub fn save_state(&mut self) {
+        // Invoke storage save method and translate any failure into user feedback
+        if let Err(err) = self.storage.save(&self.config, &self.tasks, &self.stats) {
+            // Always leave a diagnostic trail for terminal logs
+            eprintln!("termodoro: failed to save state: {}", err);
+            // Show a warning banner (reuses the standard expiry countdown)
+            self.set_status_message(format!("⚠ Save failed: {}", err));
+        }
     }
 
     // Sets a temporary notification banner message shown in the footer
@@ -537,10 +546,16 @@ impl App {
             }
             // 'd' or 'x' deletes selected task
             KeyCode::Char('d') | KeyCode::Char('x') => {
-                // Remove task
-                self.tasks.remove_selected();
-                // Set notification
-                self.set_status_message("Task deleted.".to_string());
+                // Remove task; remove_selected reports whether anything was
+                // actually deleted so we never announce a deletion that did
+                // not happen (for example on an empty or filtered-out list)
+                if self.tasks.remove_selected() {
+                    // Set notification
+                    self.set_status_message("Task deleted.".to_string());
+                } else {
+                    // Nothing was removed; tell the user instead of lying
+                    self.set_status_message("No task selected to delete.".to_string());
+                }
                 // Persist state
                 self.save_state();
             }
@@ -1375,7 +1390,9 @@ mod tests {
     #[test]
     fn test_notify_phase_completed_sound_and_notification_flags() {
         let (mut app, temp_dir) = create_test_app();
-        crate::audio::set_audio_muted_for_tests(true);
+        // Scoped mute: holds the shared audio flag lock and restores the
+        // previous value on drop, so parallel tests cannot race on it
+        let _audio_mute_guard = crate::audio::audio_mute_guard_for_tests(true);
 
         // Sound enabled = true, notifications = true
         app.config.sound_enabled = true;
@@ -1391,14 +1408,15 @@ mod tests {
         app.config.sound_enabled = true;
         app.notify_phase_completed(PomodoroPhase::LongBreak, PomodoroPhase::Work);
 
-        crate::audio::set_audio_muted_for_tests(false);
         let _ = std::fs::remove_dir_all(temp_dir);
     }
 
     #[test]
     fn test_twenty_four_cycle_app_e2e_workflow() {
         let (mut app, temp_dir) = create_test_app();
-        crate::audio::set_audio_muted_for_tests(true);
+        // Scoped mute: holds the shared audio flag lock and restores the
+        // previous value on drop, so parallel tests cannot race on it
+        let _audio_mute_guard = crate::audio::audio_mute_guard_for_tests(true);
         app.config.long_break_interval = 24;
         app.config.auto_start_breaks = true;
         app.config.auto_start_work = true;
@@ -1428,7 +1446,6 @@ mod tests {
             }
         }
 
-        crate::audio::set_audio_muted_for_tests(false);
         let _ = std::fs::remove_dir_all(temp_dir);
     }
 
@@ -1738,7 +1755,9 @@ mod tests {
     #[test]
     fn test_phase_transitions_with_auto_start_disabled_combinations() {
         let (mut app, temp_dir) = create_test_app();
-        crate::audio::set_audio_muted_for_tests(true);
+        // Scoped mute: holds the shared audio flag lock and restores the
+        // previous value on drop, so parallel tests cannot race on it
+        let _audio_mute_guard = crate::audio::audio_mute_guard_for_tests(true);
         app.config.auto_start_breaks = false;
         app.config.auto_start_work = false;
 
@@ -1762,14 +1781,15 @@ mod tests {
         assert_eq!(app.timer.phase, PomodoroPhase::Work);
         assert_eq!(app.timer.status, crate::timer::TimerStatus::Stopped);
 
-        crate::audio::set_audio_muted_for_tests(false);
         let _ = std::fs::remove_dir_all(temp_dir);
     }
 
     #[test]
     fn test_long_break_interval_boundary_one_and_twenty_four() {
         let (mut app, temp_dir) = create_test_app();
-        crate::audio::set_audio_muted_for_tests(true);
+        // Scoped mute: holds the shared audio flag lock and restores the
+        // previous value on drop, so parallel tests cannot race on it
+        let _audio_mute_guard = crate::audio::audio_mute_guard_for_tests(true);
 
         // Test long_break_interval = 1 (every focus session leads directly to long break)
         app.config.long_break_interval = 1;
@@ -1782,14 +1802,15 @@ mod tests {
         assert_eq!(app.timer.phase, PomodoroPhase::LongBreak);
         assert_eq!(app.timer.current_cycle, 1);
 
-        crate::audio::set_audio_muted_for_tests(false);
         let _ = std::fs::remove_dir_all(temp_dir);
     }
 
     #[test]
     fn test_fuzz_randomized_key_events_chaos_resilience() {
         let (mut app, temp_dir) = create_test_app();
-        crate::audio::set_audio_muted_for_tests(true);
+        // Scoped mute: holds the shared audio flag lock and restores the
+        // previous value on drop, so parallel tests cannot race on it
+        let _audio_mute_guard = crate::audio::audio_mute_guard_for_tests(true);
 
         // Pre-populate tasks and stats
         app.tasks.add("Task 1".to_string(), 3);
@@ -1849,7 +1870,6 @@ mod tests {
             assert!(app.task_input_estimated >= 1 && app.task_input_estimated <= 20);
         }
 
-        crate::audio::set_audio_muted_for_tests(false);
         let _ = std::fs::remove_dir_all(temp_dir);
     }
 

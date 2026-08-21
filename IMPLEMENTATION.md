@@ -93,8 +93,10 @@ The application execution loop is implemented in `src/main.rs` and `src/app.rs`:
 
 ### Event Dispatch Mechanism
 - The event loop polls for input with a 250ms timeout.
-- If a key press occurs within 250ms, `crossterm::event::read()` captures the `KeyEvent` and passes it to `app.on_key_event(key)`.
+- If a key press occurs within 250ms, `crossterm::event::read()` captures the `KeyEvent` and passes it to `app.on_key_event(key)`. Both `Press` and auto-repeat (`Repeat`) events are accepted, so holding a navigation key such as `j`, `k`, `h`, or `l` scrolls continuously; release events remain filtered because they double-fire on some platforms.
 - If no key is pressed within 250ms, `poll()` times out, allowing `app.on_tick()` to execute periodically and update countdown clocks.
+- The loop advances by scheduled tick boundaries rather than resetting its timer after every iteration: if rendering or I/O stalls past one or more deadlines, every missed interval fires an `on_tick()` in order (capped at 10 per pass) so the visible countdown tracks wall-clock time instead of drifting behind it.
+- Terminal acquisition and restoration are wrapped in a `TerminalGuard` RAII struct: raw mode, the alternate screen, and cursor visibility are restored on every exit path, including failures partway through setup.
 
 ---
 
@@ -173,7 +175,8 @@ Audio is synthesized as 16-bit PCM mono samples at **44,100 Hz**:
 
 ### Playback Architecture & Headroom
 - Synthesizes raw bytes into a fully compliant **44-byte RIFF WAV format**.
-- Dispatches playback in a non-blocking background thread using `rodio`.
+- Playback runs on a single persistent audio worker thread that owns exactly one `rodio::OutputStream` for the whole process lifetime. Chime requests are delivered over an `mpsc` channel, replacing the old spawn-per-chime detached threads (expensive stream initialization added audible latency, and failed initializations leaked threads silently).
+- Note envelopes fade out fully over the final few milliseconds of every note, so no chime ends in an audible click; playback failures are logged to stderr instead of being swallowed.
 - All generated samples are normalized to $[-28000, 28000]$ ensuring audible clarity with distortion-free headroom below the 16-bit limit ($\pm 32767$).
 - Muting atomic flags (`AUDIO_MUTED_FOR_TESTS`) prevent hardware contention during CI/CD test runs.
 
@@ -223,8 +226,9 @@ To calculate streaks without timezone anomalies:
 1. All sessions with `phase == PomodoroPhase::Work` are converted to the local calendar date (`NaiveDate`).
 2. Dates are sorted chronologically and deduplicated (`distinct_work_dates`).
 3. If the list is empty, the streak is 0.
-4. The algorithm checks the latest work date: if it is neither `today` nor `yesterday`, the streak is considered broken and returns 0.
-5. The algorithm steps backwards through the deduplicated date array, verifying that each preceding element matches `current_expected.pred_opt()`. The counter increments until a gap is detected:
+4. The latest work date is clamped to `today`, so future-dated entries (system clock that ran ahead during recording, or travel east across the dateline) cannot invalidate a live streak.
+5. The algorithm checks the clamped latest work date: if it is neither `today` nor `yesterday`, the streak is considered broken and returns 0.
+6. The algorithm steps backwards through the deduplicated date array, verifying that each preceding element matches `current_expected.pred_opt()`. The counter increments until a gap is detected:
 
 ```rust
 let mut streak = 0;
@@ -311,9 +315,15 @@ pub struct AppData {
   - On Linux: `~/.local/share/termodoro/data.json`
   - On macOS: `~/Library/Application Support/com.termodoro.termodoro/data.json`
   - On Windows: `%APPDATA%\termodoro\termodoro\data.json`
+  - If the platform directory cannot be resolved (for example `HOME` unset under cron or containers), resolution falls back to `$XDG_DATA_HOME/termodoro`, then `$HOME/.local/share/termodoro`, and only as a last resort a loudly announced `./termodoro-data` in the current working directory.
 - **Atomic File Writing**:
   - Automatically creates parent directory paths if missing.
-  - Serializes `AppData` to pretty-printed JSON before writing to disk.
+  - Serializes `AppData` to pretty-printed JSON, writes it to a sibling `data.json.tmp` staging file, forces it to stable storage with `sync_all()`, and then atomically renames it over `data.json`. A crash mid-write can never truncate the live file.
+  - `save()` returns `Result`; on failure the app logs to stderr and shows a visible "Save failed" warning banner instead of silently dropping the write.
+- **Self-Healing Corruption Recovery**:
+  - A state file that exists but cannot be opened, read, or parsed is quarantined: it is renamed to `data.json.corrupt-<unix-timestamp>` so the original bytes survive for manual recovery, and defaults are loaded afterward.
+  - Every successful load runs `Config::sanitize()`, clamping durations back into their UI ranges (focus 1-120, short break 1-60, long break 1-90, interval 1-24) so hand-edited or partially corrupted files cannot cause instant phase-completion loops or overflow the minutes-to-seconds conversion (`saturating_mul` in `src/timer.rs` adds defense in depth).
+  - All `Config` fields carry `#[serde(default)]`, and an unknown theme string deserializes to the default theme, so files written by older or newer versions always parse.
 
 ---
 
@@ -358,33 +368,35 @@ If an unhandled error triggers a panic, this hook executes first:
 3. Re-enables cursor visibility (`cursor::Show`).
 4. Invokes the original standard panic hook to print the stack trace cleanly to the terminal.
 
+In addition, a `TerminalGuard` RAII struct acquires raw mode and the alternate screen at startup and restores them in its `Drop` implementation. Because `Drop` runs on every exit path (normal return, early error return via `?`, and panics), even a failure partway through terminal setup can no longer leave the user's shell in raw mode with a hidden cursor.
+
 ---
 
 ## 11. Automated Testing Strategy & Benchmarks
 
-Termodoro includes **192 automated Rust tests** and **41 automated Playwright web E2E tests**:
+Termodoro includes **199 automated Rust tests** and **41 automated Playwright web E2E tests**:
 
-- **Audio Engine (`src/audio.rs`, 19 tests)**: Tests 16-bit PCM RIFF headers, signal clipping bounds ($>10000$, $<32000$), smooth exponential decay envelopes, pop/click prevention on audio DAC, custom sample rates ($8\text{kHz}$ to $96\text{kHz}$), byte-level RIFF alignment, two-tone/three-tone duration timing, and atomic muting flags.
+- **Audio Engine (`src/audio.rs`, 20 tests)**: Tests 16-bit PCM RIFF headers, signal clipping bounds ($>10000$, $<32000$), smooth exponential decay envelopes, pop/click prevention on audio DAC including click-free note boundaries, custom sample rates ($8\text{kHz}$ to $96\text{kHz}$), byte-level RIFF alignment, two-tone/three-tone duration timing, and atomic muting flags.
 - **Timer Engine (`src/timer.rs`, 27 tests)**: Tests 24-cycle state machine progression, underflow safety on sub-second ticks, tuple time formatting, large duration formatting (up to 120 mins), 50 rapid skips, zero-duration progress calculations, pause, toggle, reset transitions, and phase title/emoji parity.
 - **Task Management (`src/tasks.rs`, 27 tests)**: Tests UUID generation uniqueness across 100 tasks, 500-task high volume benchmarks, dynamic filter index clamping, transient JSON exclusions, boundary deletions, empty manager resilience, selection wrapping, multiline sanitization, and active task auto-reassignment.
-- **Productivity Analytics (`src/stats.rs`, 29 tests)**: Tests 366-day leap year streaks, multi-day streaks across year and month boundaries, 1,000-session large accumulation, minute-to-hour calculations, session metadata retention, empty window distributions, and weekday histogram labels.
-- **Storage & Zero-Telemetry Privacy (`src/storage.rs`, 14 tests)**: Tests atomic save/load roundtrips, corrupt file graceful recovery, zero-telemetry schema invariants, rejection of third-party network SDKs/URLs, atomic .tmp file cleanups, and local-only XDG directory isolation.
-- **Application Workflows (`src/app.rs`, 35 tests)**: Tests 1,000-keystroke chaos fuzzing, 18-theme forward/backward navigation and disk persistence, exhaustive 9-row settings clamping, modal input isolation and rapid editing/backspace, full 24-cycle E2E workflows, direct numeric tab jumping, modal dismissal keys, sound & desktop notification flags, status message expiration, and keybinding dispatchers.
-- **Themes & Palettes (`src/theme.rs`, 10 tests)**: Tests all 18 palettes, WCAG relative luminance contrast formulas, forward/backward index cycling, phase color distinctness, byte-level RGB constraints, and serde roundtrips.
+- **Productivity Analytics (`src/stats.rs`, 29 tests)**: Tests 366-day leap year streaks, multi-day streaks across year and month boundaries, 1,000-session large accumulation, minute-to-hour calculations, session metadata retention, empty window distributions, weekday histogram labels, and DST-safe, midnight-race-deterministic streak boundaries.
+- **Storage & Zero-Telemetry Privacy (`src/storage.rs`, 17 tests)**: Tests atomic save/load roundtrips with `.tmp` staging and rename, corrupt-file quarantine (renamed aside with a timestamp instead of overwritten), failed-save protection of previous data, out-of-range config sanitization on load, zero-telemetry schema invariants, rejection of third-party network SDKs/URLs, and local-only XDG directory isolation.
+- **Application Workflows (`src/app.rs`, 37 tests)**: Tests 1,000-keystroke chaos fuzzing, 18-theme forward/backward navigation and disk persistence, exhaustive 9-row settings clamping, modal input isolation and rapid editing/backspace, full 24-cycle E2E workflows, direct numeric tab jumping, modal dismissal keys, sound & desktop notification flags, status message expiration, sub-second tick accumulation, keypress/tick decoupling, and keybinding dispatchers.
+- **Themes & Palettes (`src/theme.rs`, 11 tests)**: Tests all 18 palettes, WCAG relative luminance contrast formulas, forward/backward index cycling, phase color distinctness (no long-break color collides with an accent), byte-level RGB constraints, tolerant deserialization of unknown theme names, and serde roundtrips.
 - **Configuration & Preferences (`src/config.rs`, 8 tests)**: Tests default parameters, field mutations, struct equality, extreme value serde serialization, boolean flag permutations, and serde serialization across all 18 theme variants.
 - **UI Terminal Frame Rendering (`src/ui/mod.rs` & `src/ui/digits.rs`, 23 tests)**: Uses Ratatui `TestBackend` to verify pixel buffer contents across all tabs, active target badges, modal dialogs, status toast banners, 24-dot cycle views, all 18 color themes, and extreme terminal geometries from $20\times 10$ to $350\times 120$.
 - **Web Showcase & Documentation Portal ([`scripts/e2e-website-test.mjs`](scripts/e2e-website-test.mjs), 41 tests)**: Playwright automated test suite executing cross-device checks across 6 responsive viewports (Desktop $1920\times 1080$, $1280\times 800$, Tablet $768\times 1024$, Mobile $390\times 844$, $375\times 667$, $320\times 568$), validating zero horizontal overflow (`scrollWidth <= clientWidth`), mobile drawer transitions, code-card header copy button anchors, and theme switches.
 
 Run the test suites with:
 ```bash
-# Run 192 Rust tests
+# Run 199 Rust tests
 make test
 # or cargo test
 
 # Run 41 Playwright Web E2E tests
 make test-e2e
 
-# Run 81-check source sanity and fact-checking audit
+# Run 84-check source sanity and fact-checking audit
 make check-facts
 ```
 
@@ -402,12 +414,12 @@ To ensure strict engineering correctness and technical veracity, the implementat
 | **WAV Serialization** | RFC 2361 / RIFF Header Compliance (44-byte format chunk) | [`src/audio.rs`](src/audio.rs#L140-L180) | `test_create_riff_wav_pcm16_header` | **VERIFIED** |
 | **Cycle Invariant** | $(C \pmod{M}) = 0 \implies \text{LongBreak}$ for $M \in [1, 24]$ | [`src/timer.rs`](src/timer.rs#L80-L115) | `test_twenty_four_cycle_advancement_and_long_break_trigger` | **VERIFIED** |
 | **Streak Invariant** | Consecutive day continuity across month/year edges | [`src/stats.rs`](src/stats.rs#L125-L185) | `test_streak_calculation_across_month_and_year_boundaries` | **VERIFIED** |
-| **Atomic File I/O** | Write-to-tempfile $\to$ Atomic `rename` ($\text{ACID}$) | [`src/storage.rs`](src/storage.rs#L40-L90) | `test_storage_save_and_load_roundtrip` | **VERIFIED** |
+| **Atomic File I/O** | Write-to-tempfile $\to$ fsync $\to$ Atomic `rename` ($\text{ACID}$) | [`src/storage.rs`](src/storage.rs#L40-L90) | `test_storage_atomic_tmp_file_renamed_after_save` | **VERIFIED** |
 | **UUID Uniqueness** | RFC 4122 v4 Collision Probability $< 10^{-18}$ | [`src/tasks.rs`](src/tasks.rs#L30-L50) | `test_task_uuid_uniqueness_and_timestamps` | **VERIFIED** |
 | **Theme Contrast** | WCAG 2.1 AA Compliant Contrast ($R \ge 4.5:1$) across all 18 themes | [`src/theme.rs`](src/theme.rs#L8-L280) | `test_all_eighteen_themes_cycle_and_persistence_e2e` | **VERIFIED** |
 | **UI Geometry Safety** | Minimum bounds checking ($W \ge 80, H \ge 24$) with fallback | [`src/ui/mod.rs`](src/ui/mod.rs#L40-L100) | `test_render_extreme_small_terminals` | **VERIFIED** |
 | **Web Responsive Layout** | Zero horizontal overflow & mobile navigation | [`docs/style.css`](docs/style.css) | `scripts/e2e-website-test.mjs` (41/41 PASS) | **VERIFIED** |
-| **Source Sanity Proof** | 81 programmatic assertions against source invariants | [`scripts/sanity_and_fact_check.mjs`](scripts/sanity_and_fact_check.mjs) | `make check-facts` (81/81 PASS) | **VERIFIED** |
+| **Source Sanity Proof** | 84 programmatic assertions against source invariants | [`scripts/sanity_and_fact_check.mjs`](scripts/sanity_and_fact_check.mjs) | `make check-facts` (84/84 PASS) | **VERIFIED** |
 
 ---
 
@@ -430,7 +442,7 @@ To ensure strict engineering correctness and technical veracity, the implementat
 
 ## 14. References & Citations
 
-1. **Cirillo, Francesco (2006)**. *The Pomodoro Technique*. FC Garage GmbH. [https://francescocirillo.com/products/the-pomodoro-technique](https://francescocirillo.com/products/the-pomodoro-technique)
+1. **Cirillo, Francesco (2006)**. *The Pomodoro Technique*. FC Garage GmbH. [https://francescocirillo.com](https://francescocirillo.com)
 2. **Ratatui Project Developers (2024)**. *Ratatui: A Rust library for cooking up terminal user interfaces*. [https://ratatui.rs/](https://ratatui.rs/)
 3. **Crossterm Project Developers (2024)**. *Crossterm: Cross-platform Terminal Manipulation Library*. [https://docs.rs/crossterm/](https://docs.rs/crossterm/)
 4. **Rust Programming Language Documentation**. *Error Handling and Panic Management in Rust*. [https://doc.rust-lang.org/book/ch09-00-error-handling.html](https://doc.rust-lang.org/book/ch09-00-error-handling.html)

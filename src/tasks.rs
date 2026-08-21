@@ -120,13 +120,26 @@ impl TaskManager {
             }
             // Push task to the task vector
             self.tasks.push(task);
-            // Update selected index to highlight the newly created task
-            self.selected_index = self.tasks.len().saturating_sub(1);
+
+            // Highlight the newly created task in the CURRENTLY FILTERED view.
+            // selected_index addresses filtered_indices(), not the raw task
+            // vector, so using tasks.len()-1 here previously landed out of
+            // bounds whenever an Active/Completed filter was engaged (the new
+            // task either sat at a different visible position or was hidden
+            // entirely), silently no-oping every subsequent action.
+            let new_real_idx = self.tasks.len() - 1;
+            self.selected_index = self
+                .filtered_indices()
+                .iter()
+                .position(|&idx| idx == new_real_idx)
+                .unwrap_or(0);
         }
     }
 
-    // Deletes the currently selected task in the UI list
-    pub fn remove_selected(&mut self) {
+    // Deletes the currently selected task in the UI list.
+    // Returns true if a task was actually removed, false when there was
+    // nothing to delete (empty or fully filtered-out list).
+    pub fn remove_selected(&mut self) -> bool {
         // Retrieve indices that match current filter
         let indices = self.filtered_indices();
         // Check if current selected index points to a valid task
@@ -149,6 +162,17 @@ impl TaskManager {
                 // Move selection to last item
                 self.selected_index = new_indices_len - 1;
             }
+            // An emptied view must not keep pointing at a phantom row:
+            // reset so later filter switches start from a clean state
+            if new_indices_len == 0 {
+                self.selected_index = 0;
+            }
+            // Report that a deletion really happened
+            true
+        } else {
+            // Nothing matched the selection: report no-op so callers do not
+            // claim success for a deletion that never occurred
+            false
         }
     }
 

@@ -52,7 +52,7 @@ Termodoro boots instantaneously in less than **10 milliseconds**, presenting **T
 ### Step 2: Starting the Countdown Timer
 - Press `Space` to initiate the focus block.
 - The status switches to `[RUNNING]` via `PomodoroTimer::toggle()`.
-- The clock smoothly decrements every second in the 100ms event loop (`src/main.rs`), while the progress gauge at the bottom fills proportionally.
+- The clock smoothly decrements every second by the 250ms event loop in `src/main.rs`, which reconciles missed intervals against wall-clock time so the countdown never drifts, while the progress gauge at the bottom fills proportionally.
 - You can minimize the terminal or send it to the background; Termodoro calculates remaining time with monotonic timestamp precision.
 
 ---
@@ -111,9 +111,9 @@ Below is the live operational layout of Tab 1 during an active focus session:
 
 ## 4. Under the Hood: Engineering & Logic Architecture
 
-- **Sub-Second Tick Accuracy**: In [`src/timer.rs`](../src/timer.rs), ticks are processed on a 100ms interval loop. Time remaining calculation avoids integer underflow with saturating subtraction.
+- **Wall-Clock Tick Accuracy**: In [`src/timer.rs`](../src/timer.rs) and [`src/main.rs`](../src/main.rs), ticks fire on a 250ms interval and the loop advances by scheduled boundaries, catching up any seconds lost to system stalls so the countdown tracks real time. Time remaining calculation avoids integer underflow with saturating subtraction.
 - **Pure In-Memory Audio**: Audio is not loaded from `.wav` files. Sample buffers are generated mathematically into standard 16-bit PCM RIFF WAV headers in `std::io::Cursor` and decoded via `rodio` on a dedicated background thread.
-- **Terminal Raw Mode Protection**: A custom panic hook in `src/main.rs` guarantees the terminal raw mode and alternate screen buffer are restored even if the process crashes.
+- **Terminal Raw Mode Protection**: A custom panic hook plus a RAII `TerminalGuard` in `src/main.rs` guarantee that raw mode, the alternate screen buffer, and the cursor are restored on every exit path, including setup failures and crashes.
 
 ---
 
@@ -135,11 +135,11 @@ Below is the live operational layout of Tab 1 during an active focus session:
 
 | Keybinding | Action | Codebase Handler & Behavior |
 | :---: | :--- | :--- |
-| `Space` | **Start / Pause** | [`src/app.rs:468`](../src/app.rs#L468) (`timer.toggle()`) |
-| `r` | **Reset** | [`src/app.rs:473`](../src/app.rs#L473) (`timer.reset()`) |
-| `s` | **Skip** | [`src/app.rs:480`](../src/app.rs#L480) (`timer.skip_to_next()`) |
-| `a` | **Quick Add Task** | [`src/app.rs:487`](../src/app.rs#L487) (`open_task_modal()`) |
-| `1` - `4` | **Switch Tab** | [`src/app.rs:288-311`](../src/app.rs#L288-L311) (`active_tab = ActiveTab::...`) |
-| `Tab` / `Shift+Tab` | **Cycle Tabs** | [`src/app.rs:268-286`](../src/app.rs#L268-L286) (`next_tab()` / `previous_tab()`) |
-| `?` | **Help Overlay** | [`src/app.rs:261`](../src/app.rs#L261) (`show_help = true`) |
-| `q` | **Quit** | [`src/app.rs:254`](../src/app.rs#L254) (`should_quit = true`) |
+| `Space` | **Start / Pause** | [`src/app.rs:493`](../src/app.rs#L493) (`timer.toggle()`) |
+| `r` | **Reset** | [`src/app.rs:498`](../src/app.rs#L498) (`timer.reset()`) |
+| `s` | **Skip** | [`src/app.rs:505`](../src/app.rs#L505) (`timer.skip_to_next()`) |
+| `a` | **Quick Add Task** | [`src/app.rs:512`](../src/app.rs#L512) (`open_task_modal()`) |
+| `1` - `4` | **Switch Tab** | [`src/app.rs:311-330`](../src/app.rs#L311-L330) (`active_tab = ActiveTab::...`) |
+| `Tab` / `Shift+Tab` | **Cycle Tabs** | [`src/app.rs:291-306`](../src/app.rs#L291-L306) (`next_tab()` / `previous_tab()`) |
+| `?` | **Help Overlay** | [`src/app.rs:286`](../src/app.rs#L286) (`show_help = true`) |
+| `q` | **Quit** | [`src/app.rs:279`](../src/app.rs#L279) (`should_quit = true`) |

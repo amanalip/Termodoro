@@ -1,0 +1,15 @@
+{
+  "name": "termodoro-website",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Node toolchain for the Termodoro documentation website: Playwright end-to-end tests and link integrity audits.",
+  "type": "module",
+  "scripts": {
+    "test:e2e": "node scripts/e2e-website-test.mjs",
+    "check:facts": "node scripts/sanity_and_fact_check.mjs",
+    "check:links": "node scripts/verify_markdown_links.mjs"
+  },
+  "devDependencies": {
+    "playwright": "^1.47.0"
+  }
+}

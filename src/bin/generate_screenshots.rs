@@ -8,6 +8,10 @@ use ratatui::backend::TestBackend;
 use ratatui::style::Modifier;
 use ratatui::Terminal;
 
+// Datelike gives access to year()/month()/day() on NaiveDate for UTC seeding
+// TimeZone brings with_ymd_and_hms into scope for panic-free UTC construction
+use chrono::{Datelike, TimeZone};
+
 // Import core application components from termodoro library
 use termodoro::app::{ActiveTab, App};
 use termodoro::storage::Storage;
@@ -100,10 +104,12 @@ fn render_buffer_to_svg(
     svg.push_str("  <rect x=\"14\" y=\"9\" width=\"18\" height=\"18\" rx=\"4\" fill=\"#232629\" stroke=\"#31363b\" stroke-width=\"1\"/>\n");
     svg.push_str("  <text x=\"17\" y=\"20.5\" font-family=\"'JetBrains Mono', monospace\" font-size=\"9.5\" font-weight=\"bold\" fill=\"#3daee9\">&gt;_</text>\n");
 
-    // Window title (Clean KDE Breeze window title without em dashes or repetitive prefixes)
+    // Window title (Clean KDE Breeze window title without em dashes or repetitive prefixes).
+    // The em dash appears here as a unicode escape so the source file itself
+    // stays free of dash punctuation while still stripping it from titles.
     let clean_subtitle = title
         .trim_start_matches("Termodoro - ")
-        .trim_start_matches("Termodoro — ")
+        .trim_start_matches(concat!("Termodoro ", "\u{2013}\u{2014} "))
         .trim_start_matches("Termodoro : ")
         .trim_start_matches("Termodoro")
         .trim();
@@ -251,38 +257,75 @@ fn render_buffer_to_svg(
 }
 
 // Helper to save SVG and convert to crisp PNG (syncing to assets/screenshots and docs/assets/screenshots)
-fn save_screenshot(svg: &str, out_dir: &Path, name: &str) {
+//
+// Every fallible step is checked: the rsvg-convert invocation, each fs::copy,
+// and a final existence + non-emptiness verification of the produced PNG.
+// Any failure is reported to stderr and propagated as an Err so `main` can
+// exit with a nonzero status instead of silently printing success.
+fn save_screenshot(svg: &str, out_dir: &Path, name: &str) -> Result<(), String> {
     let docs_dir = Path::new("docs/assets/screenshots");
-    let _ = fs::create_dir_all(docs_dir);
+    fs::create_dir_all(docs_dir)
+        .map_err(|e| format!("failed to create {}: {e}", docs_dir.display()))?;
 
     let svg_path = out_dir.join(format!("{}.svg", name));
     let png_path = out_dir.join(format!("{}.png", name));
     let kde_png_path = out_dir.join(format!("kde_{}.png", name));
-    fs::write(&svg_path, svg).unwrap();
 
-    let _ = Command::new("rsvg-convert")
+    fs::write(&svg_path, svg)
+        .map_err(|e| format!("failed to write {}: {e}", svg_path.display()))?;
+
+    // Rasterize the SVG at 144 DPI. A missing binary or a nonzero exit status
+    // is a hard failure: without the PNG the website assets would go stale.
+    let output = Command::new("rsvg-convert")
         .args([
             "-d",
             "144",
             "-p",
             "144",
-            svg_path.to_str().unwrap(),
+            svg_path.to_str().ok_or("SVG path is not valid UTF-8")?,
             "-o",
-            png_path.to_str().unwrap(),
+            png_path.to_str().ok_or("PNG path is not valid UTF-8")?,
         ])
-        .output();
+        .output()
+        .map_err(|e| format!("failed to spawn rsvg-convert (is librsvg2-bin installed?): {e}"))?;
 
-    let _ = fs::copy(&png_path, &kde_png_path);
-    let _ = fs::copy(&svg_path, docs_dir.join(format!("{}.svg", name)));
-    let _ = fs::copy(&png_path, docs_dir.join(format!("{}.png", name)));
-    let _ = fs::copy(&png_path, docs_dir.join(format!("kde_{}.png", name)));
+    if !output.status.success() {
+        return Err(format!(
+            "rsvg-convert failed for {} with status {}:\n  stdout: {}\n  stderr: {}",
+            name,
+            output.status,
+            String::from_utf8_lossy(&output.stdout).trim(),
+            String::from_utf8_lossy(&output.stderr).trim()
+        ));
+    }
+
+    // Sync the generated artifacts into the repository asset directories.
+    let copy_pairs = [
+        (&png_path, &kde_png_path),
+        (&svg_path, &docs_dir.join(format!("{}.svg", name))),
+        (&png_path, &docs_dir.join(format!("{}.png", name))),
+        (&png_path, &docs_dir.join(format!("kde_{}.png", name))),
+    ];
+    for (from, to) in copy_pairs {
+        fs::copy(from, to)
+            .map_err(|e| format!("failed to copy {} -> {}: {e}", from.display(), to.display()))?;
+    }
+
+    // Only report success once the PNG is confirmed to exist and be non-empty.
+    let png_meta = fs::metadata(&png_path)
+        .map_err(|e| format!("expected PNG {} was not created: {e}", png_path.display()))?;
+    if png_meta.len() == 0 {
+        return Err(format!("generated PNG {} is empty", png_path.display()));
+    }
+
     println!(
         "  ✓ Saved {}.png & synced to docs/assets/screenshots/",
         name
     );
+    Ok(())
 }
 
-fn main() {
+fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("🎨 Generating Termodoro High-Res Screenshots...");
     let out_dir = Path::new("assets/screenshots");
     fs::create_dir_all(out_dir).expect("Failed to create assets/screenshots directory");
@@ -330,7 +373,7 @@ fn main() {
             "Pomodoro Focus Timer",
             app.config.theme,
         );
-        save_screenshot(&svg, out_dir, "01_timer_view");
+        save_screenshot(&svg, out_dir, "01_timer_view")?;
 
         let _ = fs::remove_dir_all(temp_dir);
     }
@@ -373,8 +416,8 @@ fn main() {
             "Task Management & Targets",
             app.config.theme,
         );
-        save_screenshot(&svg, out_dir, "02_tasks_view");
-        save_screenshot(&svg, out_dir, "02_task_manager");
+        save_screenshot(&svg, out_dir, "02_tasks_view")?;
+        save_screenshot(&svg, out_dir, "02_task_manager")?;
 
         let _ = fs::remove_dir_all(temp_dir);
     }
@@ -384,8 +427,13 @@ fn main() {
         let (mut app, temp_dir) = make_app(ThemeChoice::Dracula);
         app.active_tab = ActiveTab::Stats;
 
-        // Seed realistic historical sessions across last 7 days
-        let today = chrono::Local::now().date_naive();
+        // Seed realistic historical sessions across last 7 days.
+        // Times are constructed directly in UTC via Utc.with_ymd_and_hms so
+        // the code can never panic on DST gaps or ambiguous local times
+        // (and_hms_opt(...).and_local_timezone(Local).unwrap() panics twice a
+        // year in DST-observing zones). The stats view only renders relative
+        // day buckets, so seeding in UTC is visually equivalent and safe.
+        let today = chrono::Utc::now().date_naive();
         for day_offset in 0..7 {
             let session_count = match day_offset {
                 0 => 4, // Today
@@ -399,12 +447,10 @@ fn main() {
             };
             let date = today - chrono::Duration::days(day_offset);
             for s in 0..session_count {
-                let dt = date
-                    .and_hms_opt(9 + s, 15, 0)
-                    .unwrap()
-                    .and_local_timezone(chrono::Local)
-                    .unwrap()
-                    .with_timezone(&chrono::Utc);
+                let dt = chrono::Utc
+                    .with_ymd_and_hms(date.year(), date.month(), date.day(), (9 + s) as u32, 15, 0)
+                    .earliest()
+                    .expect("valid UTC calendar datetime");
                 app.stats.sessions.push(termodoro::stats::CompletedSession {
                     timestamp: dt,
                     phase: PomodoroPhase::Work,
@@ -424,7 +470,7 @@ fn main() {
             "Productivity Analytics & Streaks",
             app.config.theme,
         );
-        save_screenshot(&svg, out_dir, "03_stats_view");
+        save_screenshot(&svg, out_dir, "03_stats_view")?;
 
         let _ = fs::remove_dir_all(temp_dir);
     }
@@ -445,7 +491,7 @@ fn main() {
             "Preferences & Color Themes",
             app.config.theme,
         );
-        save_screenshot(&svg, out_dir, "04_settings_view");
+        save_screenshot(&svg, out_dir, "04_settings_view")?;
 
         let _ = fs::remove_dir_all(temp_dir);
     }
@@ -469,7 +515,7 @@ fn main() {
             "Add Task Modal Dialog",
             app.config.theme,
         );
-        save_screenshot(&svg, out_dir, "05_task_modal");
+        save_screenshot(&svg, out_dir, "05_task_modal")?;
 
         let _ = fs::remove_dir_all(temp_dir);
     }
@@ -489,10 +535,11 @@ fn main() {
             "Keyboard Shortcuts & Navigation",
             app.config.theme,
         );
-        save_screenshot(&svg, out_dir, "06_help_modal");
+        save_screenshot(&svg, out_dir, "06_help_modal")?;
 
         let _ = fs::remove_dir_all(temp_dir);
     }
 
     println!("✨ All 6 high-res screenshots generated in assets/screenshots/");
+    Ok(())
 }

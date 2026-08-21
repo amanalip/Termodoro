@@ -136,7 +136,7 @@ This document maintains a transparent, permanent, and structured audit log of re
 ### AUD-006: 18-Color Theme Palette Implementation & E2E Verification
 - **Date:** August 17, 2026
 - **Category:** Visual Design & 18 Theme Palettes
-- **Commit:** [`7bdfec3`](https://github.com/amanalip/Termodoro/commit/7bdfec3)
+- **Commit:** Local commit `7bdfec3` (see `git log` on the repository)
 - **Severity:** Feature Expansion & UI Theming
 - **Description:**
   - Implemented all 10 theme catalog specifications from Section A (`TH-01` through `TH-10`) in `src/theme.rs`, expanding the color palette system from 6 to 18 themes:
@@ -186,7 +186,7 @@ This document maintains a transparent, permanent, and structured audit log of re
 ### AUD-008: Automated Build Cache Cleanup & Makefile Disk Optimization
 - **Date:** August 17, 2026
 - **Category:** Disk Storage Hygiene & Automation
-- **Commit:** [`7a14e9f`](https://github.com/amanalip/Termodoro/commit/7a14e9f)
+- **Commit:** Local commit `7a14e9f` (see `git log` on the repository)
 - **Severity:** Enhancement / Storage Efficiency
 - **Description:**
   - Resolved local developer disk bloat caused by intermediate unstripped debug symbols and test runner binaries in `target/` (~1.8 GB).
@@ -272,7 +272,7 @@ This document maintains a transparent, permanent, and structured audit log of re
   2. **Plaintext Network Tracker Rejection**: Added `test_storage_schema_fields_contain_no_device_or_telemetry_keys` in [`src/storage.rs`](src/storage.rs) verifying that serialized data contains no HTTP/HTTPS URLs, Sentry, Mixpanel, Amplitude, or Google Analytics identifiers.
   3. **Local Filesystem Isolation Test**: Added `test_storage_data_isolation_local_only` ensuring storage paths resolve strictly to local user folders conforming to XDG/OS standards.
   4. **GitHub Actions CI Security Step**: Added dedicated CI step `Verify Zero Network Dependencies & Zero Unsafe Blocks` running automated AST regex grep scans against `src/` and `Cargo.lock` to fail CI if network crates (reqwest, ureq, hyper, curl, tungstenite, sentry, posthog) or `unsafe` blocks are introduced.
-- **Resolution Status:** **VERIFIED & CERTIFIED (All 192 Tests Passing)**
+- **Resolution Status:** **VERIFIED & CERTIFIED (All 199 Tests Passing)**
 
 ---
 
@@ -319,10 +319,10 @@ This document maintains a transparent, permanent, and structured audit log of re
   Refactored screenshot generation to ensure zero text truncation in task lists and clean window headers across all documentation channels.
 - **Technical Remediation & Verification:**
   1. **Task Title Calibration**: Shortened and sanitized demonstration task backlog entries to prevent column truncation under terminal table layout constraints (`📊 Track Daily Focus Goals`, `🦀 Build Ratatui TUI Framework`, `🎵 Synthesize 16-Bit Audio Chimes`).
-  2. **Window Header Formatting**: Eliminated em dashes (`—`), vertical pipes (`|`), and duplicate `Termodoro - ` prefixes in SVG terminal title bars.
+  2. **Window Header Formatting**: Eliminated dash punctuation (em dashes), vertical pipes (`|`), and duplicate `Termodoro - ` prefixes in SVG terminal title bars.
   3. **Vector SVG Markdown Unification**: Replaced raster PNG references in all Markdown files (`README.md`, `WALKTHROUGH.md`, and all `user_journeys/` docs) with vector SVG assets matching the documentation website.
   4. **Zero-Delay Rendering**: Vector SVGs render instantaneously with crisp typography on all viewports without Camo CDN proxy cache collisions.
-- **Resolution Status:** **VERIFIED & CERTIFIED (All 192 Tests Passing)**
+- **Resolution Status:** **VERIFIED & CERTIFIED (All 199 Tests Passing)**
 
 ---
 
@@ -332,13 +332,13 @@ This document maintains a transparent, permanent, and structured audit log of re
 - **Commit:** [`f0fd3f3`](https://github.com/amanalip/Termodoro/commit/f0fd3f3)
 - **Severity:** Mobile Usability & Automated Verification
 - **Description:** 
-  The GitHub Pages documentation portal (`amanalip.github.io/Termodoro/`) required mobile usability enhancements for small viewport screens (320px–768px), and installation copy buttons were floating over code text when scrolled.
+  The GitHub Pages documentation portal (`amanalip.github.io/Termodoro/`) required mobile usability enhancements for small viewport screens (320px to 768px), and installation copy buttons were floating over code text when scrolled.
 - **Technical Remediation & Verification:**
   1. **Mobile Slide-in Navigation Drawer**: Added animated 3-bar hamburger toggle button, slide-in drawer with backdrop blur, full touch navigation, and `Esc` key dismissal.
   2. **Code Card Header Architecture**: Replaced free-floating copy buttons with structured `.code-card` containers where `.copy-btn` and titles are anchored inside a dedicated top bar (`.code-card-header`), preventing overlap and drifting during horizontal code scrolling.
   3. **Zero Horizontal Overflow**: Guaranteed `scrollWidth <= clientWidth` on all viewports down to 320px ultra-compact phones.
   4. **Playwright Automated E2E Test Suite**: Implemented [`scripts/e2e-website-test.mjs`](scripts/e2e-website-test.mjs) and `make test-e2e` executing 41 automated tests across 6 device viewport profiles (Desktop 1920x1080 & 1280x800, Tablet 768x1024, Mobile 390x844, 375x667, 320x568).
-- **Resolution Status:** **VERIFIED & CERTIFIED (41/41 Playwright E2E Tests + 192 Rust Tests Passing)**
+- **Resolution Status:** **VERIFIED & CERTIFIED (41/41 Playwright E2E Tests + 199 Rust Tests Passing)**
 
 ---
 
@@ -354,7 +354,7 @@ This document maintains a transparent, permanent, and structured audit log of re
   2. **Un-Commented Executable Code Snippets**: Formatted commands across Ubuntu/Debian, Arch Linux, Fedora/RHEL, macOS, and Windows with un-commented, copy-ready commands.
   3. **Segmented Desktop Tab Layout**: Optimized `.install-nav` into a sleek single-line segmented control on desktop screens, transitioning into an adaptive 2-column touch grid on mobile viewports.
   4. **Automated Sanity & Fact-Checking Engine**: Developed [`scripts/sanity_and_fact_check.mjs`](scripts/sanity_and_fact_check.mjs) (`make check-facts`) executing 81 programmatic assertions cross-referencing all 18 theme enum variants, exact audio chime frequencies (528Hz, 587.33Hz, 880.0Hz, 523.25Hz, 659.25Hz, 783.99Hz), default configuration bounds, HTML structural elements, and screenshot assets on disk.
-- **Resolution Status:** **VERIFIED & CERTIFIED (81/81 Sanity Checks + 41/41 Playwright Tests + 192 Rust Tests Passing)**
+- **Resolution Status:** **VERIFIED & CERTIFIED (81/81 Sanity Checks + 41/41 Playwright Tests + 199 Rust Tests Passing)**
 
 ---
 
@@ -364,7 +364,7 @@ This document maintains a transparent, permanent, and structured audit log of re
 | :--- | :--- | :--- | :--- |
 | **Compiler Toolchain** | Rust 1.74+ | Edition 2021 | Tested on `rustc 1.80+` |
 | **Dependencies** | 9 direct crates | Clean resolution | Verified in `Cargo.lock` |
-| **Automated Tests** | 192 Unit & Integration | 192 Passed, 0 Failed | `cargo test` (1.16s runtime) |
+| **Automated Tests** | 199 Unit & Integration | 199 Passed, 0 Failed | `cargo test` (~1s runtime) |
 | **Playwright Web E2E** | 41 Cross-Device Tests | 41 Passed, 0 Failed | `make test-e2e` across 6 viewports |
 | **Source Sanity Audit** | 81 Fact-Checked Invariants | 81 Passed, 0 Failed | `make check-facts` (`scripts/sanity_and_fact_check.mjs`) |
 | **Privacy & Telemetry** | 0 Network Calls / Trackers | 100% Local-First | Unit tests & CI lockfile audit |

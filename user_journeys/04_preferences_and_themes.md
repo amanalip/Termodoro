@@ -42,9 +42,9 @@ From any tab in Termodoro, press `4` to enter **Tab 4: Settings View**.
 
 ### Step 2: Customizing Focus & Break Interval Durations
 1. Use `j` / `k` (or `↑` / `↓` arrows) to select duration rows:
-   - **Work Duration**: Default 25 min (clamped to $1 \le N \le 120\text{ min}$ in `src/app.rs:627`).
-   - **Short Break Duration**: Default 5 min (clamped to $1 \le N \le 60\text{ min}$ in `src/app.rs:640`).
-   - **Long Break Duration**: Default 15 min (clamped to $1 \le N \le 90\text{ min}$ in `src/app.rs:653`).
+   - **Work Duration**: Default 25 min (clamped to $1 \le N \le 120\text{ min}$ in `src/app.rs:656`).
+   - **Short Break Duration**: Default 5 min (clamped to $1 \le N \le 60\text{ min}$ in `src/app.rs:669`).
+   - **Long Break Duration**: Default 15 min (clamped to $1 \le N \le 90\text{ min}$ in `src/app.rs:682`).
 2. Use `h` / `l` (or `Left` / `Right` arrows, `-` / `+`) to increment or decrement the duration.
 3. The active countdown clock on Tab 1 immediately recalibrates to your new duration!
 
@@ -52,7 +52,7 @@ From any tab in Termodoro, press `4` to enter **Tab 4: Settings View**.
 
 ### Step 3: Scaling the Long Break Cycle Ceiling (Up to 24 Cycles)
 - Select row 4: **Long Break Interval**.
-- Adjust the number of focus cycles before a Long Break is triggered (clamped from **1 to 24 cycles** in `src/app.rs:666`).
+- Adjust the number of focus cycles before a Long Break is triggered (clamped from **1 to 24 cycles** in `src/app.rs:695`).
 - Tab 1 automatically updates its visual cycle dots (`● ● ○ ○ ...`) to match your exact cycle configuration.
 
 ---
@@ -129,12 +129,12 @@ In [`src/app.rs`](../src/app.rs), configuration changes propagate immediately:
 
 | Keybinding | Action | Codebase Handler & Behavior |
 | :---: | :--- | :--- |
-| `j` / `↓` | **Next Setting** | [`src/app.rs:579`](../src/app.rs#L579) (`settings_index += 1`) |
-| `k` / `↑` | **Previous Setting** | [`src/app.rs:590`](../src/app.rs#L590) (`settings_index -= 1`) |
-| `h` / `←` / `-` | **Decrease / Prev Theme** | [`src/app.rs:606`](../src/app.rs#L606) (`adjust_setting(-1)`) |
-| `l` / `→` / `+` | **Increase / Next Theme** | [`src/app.rs:601`](../src/app.rs#L601) (`adjust_setting(1)`) |
-| `Space` / `Enter` | **Toggle State** | [`src/app.rs:611`](../src/app.rs#L611) (`toggle_setting()`) |
-| `1` - `4` | **Switch Tab** | [`src/app.rs:288-311`](../src/app.rs#L288-L311) (`active_tab = ActiveTab::...`) |
-| `Tab` / `Shift+Tab` | **Cycle Tabs** | [`src/app.rs:268-286`](../src/app.rs#L268-L286) (`next_tab()` / `previous_tab()`) |
-| `?` | **Help Overlay** | [`src/app.rs:261`](../src/app.rs#L261) (`show_help = true`) |
-| `q` | **Quit** | [`src/app.rs:254`](../src/app.rs#L254) (`should_quit = true`) |
+| `j` / `↓` | **Next Setting** | [`src/app.rs:612`](../src/app.rs#L612) (`settings_index += 1`) |
+| `k` / `↑` | **Previous Setting** | [`src/app.rs:623`](../src/app.rs#L623) (`settings_index -= 1`) |
+| `h` / `←` / `-` | **Decrease / Prev Theme** | [`src/app.rs:637`](../src/app.rs#L637) (`adjust_setting(-1)`) |
+| `l` / `→` / `+` | **Increase / Next Theme** | [`src/app.rs:632`](../src/app.rs#L632) (`adjust_setting(1)`) |
+| `Space` / `Enter` | **Toggle State** | [`src/app.rs:642`](../src/app.rs#L642) (`toggle_setting()`) |
+| `1` - `4` | **Switch Tab** | [`src/app.rs:311-330`](../src/app.rs#L311-L330) (`active_tab = ActiveTab::...`) |
+| `Tab` / `Shift+Tab` | **Cycle Tabs** | [`src/app.rs:291-306`](../src/app.rs#L291-L306) (`next_tab()` / `previous_tab()`) |
+| `?` | **Help Overlay** | [`src/app.rs:286`](../src/app.rs#L286) (`show_help = true`) |
+| `q` | **Quit** | [`src/app.rs:279`](../src/app.rs#L279) (`should_quit = true`) |

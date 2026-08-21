@@ -30,13 +30,23 @@ const MIME_TYPES = {
 };
 
 // 1. Lightweight Local HTTP Static Server
+// Resolves with the running server, or rejects with a clear message when the
+// port is unavailable (previously an unhandled 'error' event crashed raw).
 function startServer(port = 8089) {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     const server = http.createServer((req, res) => {
-      let reqPath = req.url.split('?')[0];
+      let reqPath = decodeURIComponent(req.url.split('?')[0]);
       if (reqPath === '/' || reqPath === '') reqPath = '/index.html';
 
-      const filePath = path.join(DOCS_DIR, reqPath);
+      // Path traversal guard: resolve the request inside DOCS_DIR and reject
+      // anything that escapes it (for example /../../etc/passwd).
+      const filePath = path.resolve(path.join(DOCS_DIR, reqPath));
+      if (!filePath.startsWith(DOCS_DIR + path.sep) && filePath !== DOCS_DIR) {
+        res.writeHead(403, { 'Content-Type': 'text/plain' });
+        res.end('403 Forbidden: path escapes docs directory');
+        return;
+      }
+
       const ext = path.extname(filePath).toLowerCase();
       const contentType = MIME_TYPES[ext] || 'application/octet-stream';
 
@@ -49,6 +59,11 @@ function startServer(port = 8089) {
           res.end(content);
         }
       });
+    });
+
+    // Surface bind failures (port already in use, permissions) as a rejection
+    server.on('error', (err) => {
+      reject(new Error(`Could not start test server on port ${port}: ${err.message}`));
     });
 
     server.listen(port, () => {
@@ -320,9 +335,12 @@ async function runTestSuite() {
       if (await timerPill.isVisible()) {
         await timerPill.click();
         await page.waitForTimeout(100);
+        // Category isolation: the timer group stays visible while a group from
+        // another category (audio) is hidden. "arch" never existed as a group,
+        // which made this assertion pass vacuously before the fix.
         const timerGroupVisible = await page.locator('.faq-group[data-group="timer"]').isVisible();
-        const archGroupHidden = await page.locator('.faq-group[data-group="arch"]').isVisible();
-        assert(timerGroupVisible && !archGroupHidden, 'FAQ Category pill filtering isolates selected category');
+        const audioGroupHidden = await page.locator('.faq-group[data-group="audio"]').isVisible();
+        assert(timerGroupVisible && !audioGroupHidden, 'FAQ Category pill filtering isolates selected category');
       }
 
       // 2. Search filtering

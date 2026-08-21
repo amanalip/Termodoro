@@ -8,9 +8,9 @@
 
 [![CI](https://github.com/amanalip/Termodoro/actions/workflows/rust.yml/badge.svg)](https://github.com/amanalip/Termodoro/actions)
 [![Website](https://img.shields.io/badge/website-live%20showcase-blue.svg)](https://amanalip.github.io/Termodoro/)
-[![Tests](https://img.shields.io/badge/tests-192%20passed%20(100%25)-brightgreen.svg)](test_report.md)
+[![Tests](https://img.shields.io/badge/tests-199%20passed%20(100%25)-brightgreen.svg)](test_report.md)
 [![Rust](https://img.shields.io/badge/rust-1.74%2B%20(Edition%202021)-orange.svg)](https://www.rust-lang.org)
-[![License: GPL-3.0](https://img.shields.io/badge/license-GPL--3.0-blue.svg)](LICENSE)
+[![License: GPL-3.0](https://img.shields.io/badge/license-GPL--3.0--or--later-blue.svg)](LICENSE)
 [![Safety](https://img.shields.io/badge/unsafe%20code-0%25%20(Safe%20Rust)-brightgreen.svg)](audit_log.md)
 [![Privacy](https://img.shields.io/badge/telemetry-0%25%20(100%25%20Offline)-blueviolet.svg)](audit_log.md)
 
@@ -109,13 +109,13 @@ Modern productivity apps are frequently bloated with heavy web-view containers (
 ## 3. Key Features Overview
 
 - **Aesthetic Terminal Interface**: Built with [Ratatui](https://ratatui.rs) and [Crossterm](https://github.com/crossterm-rs/crossterm) supporting ANSI TrueColor (24-bit RGB) and responsive terminal resizing.
-- **5x3 Block Clock Display**: Large ASCII digital numerals rendered dynamically using Unicode block elements (`█`).
+- **5x4 Block Clock Display**: Large ASCII digital numerals rendered dynamically using Unicode block elements (`█`).
 - **Configurable Interval FSM**: 3-state Pomodoro engine (Work, Short Break, Long Break) with custom interval lengths (1 to 24 cycles).
 - **Full Task Lifecycle Management**: Create tasks, set estimated Pomodoro counts, mark items complete, and bind a target task to log effort automatically.
 - **Analytics Dashboard & Streak Tracker**: Daily focus summaries, consecutive active calendar day streaks, 7-day visual bar charts, and a historical session log.
 - **18 Built-in Color Themes**: Modern dark and light palettes including Catppuccin Mocha, Macchiato, Frappé, Latte (Light), Nord, Gruvbox Dark, Tokyo Night, Dracula, Solarized Dark & Light, Rose Pine, One Dark, Kanagawa, Everforest Dark & Light, Synthwave '84, Monokai Pro, and OLED Phosphor.
 - **Acoustic Chimes & Native Notifications**: Pure in-memory synthesized audio chimes (Zen Tibetan singing bowl, two-tone alert, and major triad chord) paired with native desktop notifications and ASCII terminal bell fallback.
-- **Automatic State Persistence**: Automatically saves your tasks, preferences, and session history according to standard XDG data directory guidelines.
+- **Automatic State Persistence**: Automatically saves your tasks, preferences, and session history according to standard XDG data directory guidelines. Writes are atomic (staged in a temporary file, flushed to disk, then renamed) and unreadable state files are quarantined instead of destroyed.
 
 ---
 
@@ -131,7 +131,7 @@ Termodoro/
 ├── System_design.md            # Comprehensive system design, architecture & technical rationale
 ├── IMPLEMENTATION.md           # In-depth engineering specification and algorithms
 ├── WALKTHROUGH.md              # Operational workflows, code tour, and test benchmarks
-├── test_report.md              # Comprehensive 192-test QA audit & test suite report
+├── test_report.md              # Comprehensive 199-test QA audit & test suite report
 ├── audit_log.md                # Permanent audit log & verification history (AUD-001 to AUD-018)
 ├── new_features_tracker.md     # Feature tracking roadmap and specifications
 ├── scripts/                    # Automation helper scripts (test_and_clean.sh)
@@ -581,6 +581,8 @@ These shortcuts function across every screen in Termodoro:
 | `?` | Help Modal | Open or close the interactive keybinding reference dialog |
 | `q` | Quit | Save state atomically and exit the application |
 
+> **Tip**: Navigation and adjustment keys (`j`/`k`/`h`/`l` and the arrow keys) auto-repeat when held, so you can scroll long task lists or sweep through all 18 themes without tapping repeatedly.
+
 ---
 
 ### Tab 1: Pomodoro Countdown Timer
@@ -696,8 +698,10 @@ Termodoro features built-in, offline-first local persistence. **No information i
 ### How Data Persistence Works
 
 1. **Automatic Loading on Launch**: When `termodoro` boots up, it automatically locates and loads your `data.json` database. If launching for the first time, it initializes the database with clean default settings.
-2. **Real-Time & Exit Synchronization**: Whenever you create or complete a task, adjust preferences, change a theme, finish a focus interval, or quit (`q`), the application automatically serializes and writes the state to disk using atomic file writing.
-3. **What is Persisted**:
+2. **Real-Time & Exit Synchronization**: Whenever you create or complete a task, adjust preferences, change a theme, finish a focus interval, or quit (`q`), the application automatically serializes and writes the state to disk using atomic file writing: content is staged in a sibling `data.json.tmp` file, flushed to stable storage, and then atomically renamed over `data.json`. A crash mid-write can therefore never leave a truncated database behind.
+3. **Self-Healing Recovery**: If the state file exists but cannot be read or parsed (corrupted bytes, partial write from an older version, permission error), Termodoro quarantines it by renaming it to `data.json.corrupt-<unix-timestamp>` and starts fresh with defaults, so the original bytes survive for manual recovery instead of being silently overwritten.
+4. **Visible Failure Warnings**: Save errors (for example a full disk or a read-only mount) are never swallowed; they are logged to stderr and surfaced as a visible "Save failed" warning banner in the footer.
+5. **What is Persisted**:
    - **Interactive Tasks**: Task titles, completion marks (`[x]` / `[ ]`), spent Pomodoro counts, estimated Pomodoro counts, creation timestamps, and designated active target IDs.
    - **User Configuration**: Focus durations, break durations, long break intervals (1 to 24 cycles), automation toggles, alert preferences, and active color themes.
    - **Productivity Statistics and Streaks**: Complete chronological history of focus sessions, used to calculate daily focus minutes, current daily streaks, personal best streaks, and weekly activity distribution charts.
@@ -755,7 +759,7 @@ Termodoro follows the standard XDG base directory conventions on Unix and platfo
 ```
 
 ### Backing Up & Transferring Your Data
-Because the database is standard JSON, you can easily back up, version-control, or migrate your Pomodoro history between computers simply by copying the `data.json` file.
+Because the database is standard JSON, you can easily back up, version-control, or migrate your Pomodoro history between computers simply by copying the `data.json` file. Loaded values are also sanitized on every launch: durations are clamped to their UI ranges (focus 1 to 120, short break 1 to 60, long break 1 to 90, interval 1 to 24), so a hand-edited file can never trigger instant-completion loops, and an unrecognized theme name falls back to the default palette instead of failing the whole load.
 
 ---
 
@@ -776,7 +780,7 @@ Because the database is standard JSON, you can easily back up, version-control, 
 - **Answer**: Termodoro is **100% offline, private, and local-first**. It contains zero telemetry, zero analytics tracking, zero cloud dependencies, and zero internet requests during runtime. All data resides exclusively on your local machine in plain JSON format.
 
 #### Q4: How does Termodoro calculate daily streaks and personal bests?
-- **Answer**: A streak increments when you complete at least one focus Pomodoro interval on consecutive calendar days according to your local machine timezone (`chrono::Local`). If you completed focus work yesterday, your streak remains active today. If you skip a full calendar day, the streak resets gracefully while your **Personal Best** record remains permanently saved.
+- **Answer**: A streak increments when you complete at least one focus Pomodoro interval on consecutive calendar days according to your local machine timezone (`chrono::Local`). If you completed focus work yesterday, your streak remains active today. If you skip a full calendar day, the streak resets gracefully while your **Personal Best** record remains permanently saved. Future-dated sessions (from clock skew or timezone travel) are ignored by the current-streak calculation, so a live streak is never zeroed by a session stamped ahead of today.
 
 ---
 
@@ -845,12 +849,12 @@ Because the database is standard JSON, you can easily back up, version-control, 
 
 ## 10. Development, Testing & Contribution
 
-### Automated Testing & Cache Cleanup (192 Rust Tests + 41 Playwright E2E Tests)
+### Automated Testing & Cache Cleanup (199 Rust Tests + 41 Playwright E2E Tests)
 
 To run the complete Rust test suite and **automatically clean compiler build cache** (preventing `target/` directory bloat and reclaiming ~1.8 GB of disk space):
 
 ```bash
-# Option A: Run 192 Rust tests using Makefile (Recommended)
+# Option A: Run 199 Rust tests using Makefile (Recommended)
 make test
 
 # Option B: Run full Playwright cross-device E2E test suite (Desktop + Mobile)
@@ -865,7 +869,7 @@ cargo test
 
 ### Static Analysis, Lints & Hygiene
 ```bash
-# Run full verification (fmt + clippy + 192 tests + auto-clean)
+# Run full verification (fmt + clippy + 199 tests + auto-clean)
 make check
 
 # Check code formatting compliance
@@ -902,12 +906,12 @@ node scripts/e2e-website-test.mjs
 
 | Command | Action |
 | :--- | :--- |
-| `make test` | Run 192-test Rust suite and automatically clean `target/` cache |
+| `make test` | Run 199-test Rust suite and automatically clean `target/` cache |
 | `make test-clean` | Run tests and auto-clean (reclaims ~1.8GB disk space) |
 | `make test-e2e` | Run full Playwright cross-device E2E test suite (41/41 tests across 6 viewports) |
-| `make check-facts` | Run full 81-assertion sanity, fact-checking & Markdown link audit |
+| `make check-facts` | Run full 84-assertion sanity, fact-checking & Markdown link audit |
 | `make check-links` | Verify 100% of all Markdown internal links, cross-file references & anchor slugs |
-| `make check` | Execute `fmt`, `clippy`, full 192-test suite, and clean up |
+| `make check` | Execute `fmt`, `clippy`, full 199-test suite, and clean up |
 | `make build` | Compile optimized release binary in `target/release/termodoro` |
 | `make run` | Launch Termodoro in release mode |
 | `make clean` | Reclaim local disk space immediately via `cargo clean` |
@@ -924,11 +928,11 @@ To provide full confidence to developers, contributors, and users, all claims, m
 
 | Verified Claim / Metric | Documented Value | Audited Source Code Reference | Verification Method & Benchmark | Status |
 | :--- | :--- | :--- | :--- | :---: |
-| **Test Suite Pass Rate** | 192 / 192 Passed (100%) | `src/` (All 9 test modules) | `cargo test` execution (1.16s total runtime) | **VERIFIED** |
+| **Test Suite Pass Rate** | 199 / 199 Passed (100%) | `src/` (All 9 test modules) | `cargo test` execution | **VERIFIED** |
 | **Playwright E2E Pass Rate** | 41 / 41 Passed (100%) | [`scripts/e2e-website-test.mjs`](scripts/e2e-website-test.mjs) | Playwright Chromium across 6 responsive viewports | **VERIFIED** |
-| **Sanity & Fact-Check Audit** | 81 / 81 Verified (100%) | [`scripts/sanity_and_fact_check.mjs`](scripts/sanity_and_fact_check.mjs) | Automated AST, HTML, CSS & audio frequency audit (`make check-facts`) | **VERIFIED** |
+| **Sanity & Fact-Check Audit** | 84 / 84 Verified (100%) | [`scripts/sanity_and_fact_check.mjs`](scripts/sanity_and_fact_check.mjs) | Automated AST, HTML, CSS & audio frequency audit (`make check-facts`) | **VERIFIED** |
 | **Privacy & Zero Telemetry** | 100% Offline & Private (0 Network Calls) | `src/storage.rs` & `Cargo.lock` | Unit tests `test_privacy_zero_telemetry_guarantees` & CI check | **VERIFIED** |
-| **Rust Safety Guarantee** | 100% Safe Rust (`0` unsafe blocks) | Full codebase grep (`grep -rn "unsafe" src/`) | Static code analysis via compiler frontend | **VERIFIED** |
+| **Rust Safety Guarantee** | 100% Safe Rust (`unsafe_code = "forbid"` at compile time) | [`Cargo.toml`](Cargo.toml) `[lints.rust]` | Compiler-enforced lint (replaces fragile grep scans) | **VERIFIED** |
 | **Static Analysis Compliance** | 0 Warnings, 0 Errors | Entire workspace | `cargo clippy -- -D warnings` | **VERIFIED** |
 | **Code Formatting Standard** | 100% Rustfmt Compliant | Code formatting rules | `cargo fmt -- --check` | **VERIFIED** |
 | **Memory Footprint** | $< 15\text{ MB}$ Resident RAM | Runtime metrics via `/proc/[pid]/statm` | Ratatui zero-copy immediate mode rendering | **VERIFIED** |
@@ -942,14 +946,14 @@ To provide full confidence to developers, contributors, and users, all claims, m
 Any user can independently reproduce and verify this entire audit report on their local machine by executing:
 
 ```bash
-# 1. Run full 192-test automated suite
+# 1. Run full 199-test automated suite
 cargo test -- --nocapture
 
 # 2. Verify zero compiler warnings or lint issues
 cargo clippy -- -D warnings
 
-# 3. Verify zero unsafe code blocks across all source files
-! grep -rn "unsafe" src/
+# 3. Verify zero unsafe code (compiler-enforced via Cargo.toml lints)
+grep -q 'unsafe_code = "forbid"' Cargo.toml && echo "unsafe code forbidden"
 
 # 4. Verify zero network/telemetry crates in Cargo.lock
 ! grep -E "^name = \"(reqwest|ureq|hyper|curl|tungstenite|tokio-tungstenite|sentry|datadog|posthog)\"" Cargo.lock
@@ -975,7 +979,7 @@ cargo clippy -- -D warnings
 
 ## 13. References and Further Reading
 
-1. **Cirillo, Francesco (2006)**. *The Pomodoro Technique*. FC Garage GmbH. [https://francescocirillo.com/products/the-pomodoro-technique](https://francescocirillo.com/products/the-pomodoro-technique)
+1. **Cirillo, Francesco (2006)**. *The Pomodoro Technique*. FC Garage GmbH. [https://francescocirillo.com](https://francescocirillo.com)
 2. **Ratatui Documentation & Guide**. *Official Ratatui Book*. [https://ratatui.rs/](https://ratatui.rs/)
 3. **Crossterm Documentation**. *Crossterm Crates.io Reference*. [https://docs.rs/crossterm/](https://docs.rs/crossterm/)
 4. **Klabnik, Steve & Nichols, Carol (2023)**. *The Rust Programming Language*. No Starch Press. [https://doc.rust-lang.org/book/](https://doc.rust-lang.org/book/)
@@ -988,4 +992,4 @@ cargo clippy -- -D warnings
 
 ## 14. License
 
-This project is licensed under the terms of the GNU General Public License v3.0 ([GPL-3.0](LICENSE)).
+This project is licensed under the terms of the GNU General Public License v3.0 or later ([GPL-3.0-or-later](LICENSE)), as also declared in [`Cargo.toml`](Cargo.toml).

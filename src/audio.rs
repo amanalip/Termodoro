@@ -2,13 +2,150 @@
 use crate::timer::PomodoroPhase;
 use std::io::Cursor;
 use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::mpsc::{self, Sender};
+use std::sync::{Mutex, OnceLock};
 
 // Flag to disable audio hardware playback in unit testing environments
 static AUDIO_MUTED_FOR_TESTS: AtomicBool = AtomicBool::new(false);
 
+// Serializes every test that touches the global mute flag. The flag is
+// process wide while cargo runs tests on parallel threads, so unsynchronized
+// toggling would let one test mute audio underneath an unrelated test.
+// Lives at module level so both the scoped helper and the test module share
+// exactly one lock.
+#[cfg(test)]
+static AUDIO_TEST_FLAG_LOCK: Mutex<()> = Mutex::new(());
+
+// Commands accepted by the dedicated audio worker thread
+enum AudioCommand {
+    // Play the given in-memory RIFF WAV payload
+    PlayWav(Vec<u8>),
+}
+
+// Lazily initialized handle to the single audio worker thread.
+//
+// WHY a worker instead of one detached thread per chime: opening an
+// OutputStream is expensive (tens of milliseconds) and previously happened on
+// every chime, adding audible latency and leaking threads when initialization
+// failed silently. One long-lived thread owns exactly one stream for the whole
+// process lifetime and receives play requests over this channel.
+//
+// The Mutex<Option<Sender>> wrapper lets us drop and respawn the worker if its
+// thread ever dies (for example when the audio device disappears), instead of
+// caching a sender whose sends can never succeed again.
+static AUDIO_WORKER: OnceLock<Mutex<Option<Sender<AudioCommand>>>> = OnceLock::new();
+
+// Spawns the audio worker thread and returns its request channel.
+fn spawn_audio_worker() -> Sender<AudioCommand> {
+    let (tx, rx) = mpsc::channel::<AudioCommand>();
+    let builder = std::thread::Builder::new().name("termodoro-audio".to_string());
+    if let Err(err) = builder.spawn(move || audio_worker_loop(rx)) {
+        // Non-fatal: report it. Sends on the returned channel will then fail
+        // loudly on every chime rather than vanishing into a dead queue.
+        eprintln!("audio: failed to spawn worker thread: {}", err);
+    }
+    tx
+}
+
+// Worker main loop: owns the only OutputStream and serializes chime playback.
+fn audio_worker_loop(rx: mpsc::Receiver<AudioCommand>) {
+    // The stream binding must stay alive for the handle to remain usable,
+    // hence the named `_stream` rather than dropping it immediately.
+    let (_stream, handle) = match rodio::OutputStream::try_default() {
+        Ok(pair) => pair,
+        Err(err) => {
+            eprintln!(
+                "audio: could not open output stream, chimes disabled: {}",
+                err
+            );
+            // Drain the queue so callers never block on a dead channel.
+            for _ in rx {
+                eprintln!("audio: dropped chime because no output stream is available");
+            }
+            return;
+        }
+    };
+
+    for cmd in rx {
+        match cmd {
+            AudioCommand::PlayWav(wav_data) => {
+                if let Err(err) = play_wav_blocking(&handle, wav_data) {
+                    eprintln!("audio: failed to play chime: {}", err);
+                }
+            }
+        }
+    }
+}
+
+// Decodes and plays one WAV payload, blocking until playback finishes so that
+// rapid phase transitions cannot pile up into an unbounded backlog of sinks.
+fn play_wav_blocking(
+    handle: &rodio::OutputStreamHandle,
+    wav_data: Vec<u8>,
+) -> Result<(), Box<dyn std::error::Error>> {
+    let cursor = Cursor::new(wav_data);
+    let source = rodio::Decoder::new(cursor)?;
+    let sink = rodio::Sink::try_new(handle)?;
+    sink.append(source);
+    sink.sleep_until_end();
+    Ok(())
+}
+
+// Returns a clone of the cached worker sender, spawning the worker on first
+// use. Lazy init matters because merely launching the app should never open
+// an audio device until the first phase actually completes.
+fn worker_sender() -> Sender<AudioCommand> {
+    let cell = AUDIO_WORKER.get_or_init(|| Mutex::new(None));
+    let mut slot = cell
+        .lock()
+        .unwrap_or_else(std::sync::PoisonError::into_inner);
+    if let Some(tx) = slot.as_ref() {
+        return tx.clone();
+    }
+    let tx = spawn_audio_worker();
+    *slot = Some(tx.clone());
+    tx
+}
+
 #[allow(dead_code)]
 pub fn set_audio_muted_for_tests(muted: bool) {
     AUDIO_MUTED_FOR_TESTS.store(muted, Ordering::SeqCst);
+}
+
+// Scoped, lock-protected muting for tests. The flag is process-global while
+// the test harness runs tests on parallel threads, so every mutation AND
+// observation must share one mutex to be race-free.
+//
+// Returns a guard that holds the shared flag lock for the caller's whole
+// body and restores the previous flag value when dropped. Prefer this over
+// raw set_audio_muted_for_tests in test code: it cannot interleave with the
+// audio module's own flag assertions and never leaks muted state on panic.
+#[cfg(test)]
+pub fn audio_mute_guard_for_tests(muted: bool) -> AudioMuteGuard {
+    let lock = AUDIO_TEST_FLAG_LOCK
+        .lock()
+        .unwrap_or_else(std::sync::PoisonError::into_inner);
+    let previous = AUDIO_MUTED_FOR_TESTS.load(Ordering::SeqCst);
+    AUDIO_MUTED_FOR_TESTS.store(muted, Ordering::SeqCst);
+    AudioMuteGuard {
+        _lock: lock,
+        previous,
+    }
+}
+
+// RAII counterpart of audio_mute_guard_for_tests: restores the prior flag
+// value and releases the shared lock on drop, covering panics too.
+#[cfg(test)]
+pub struct AudioMuteGuard {
+    _lock: std::sync::MutexGuard<'static, ()>,
+    previous: bool,
+}
+
+#[cfg(test)]
+impl Drop for AudioMuteGuard {
+    fn drop(&mut self) {
+        AUDIO_MUTED_FOR_TESTS.store(self.previous, Ordering::SeqCst);
+    }
 }
 
 // Generates a standard 44.1 kHz, 16-bit mono RIFF WAV byte vector in-memory
@@ -71,6 +208,24 @@ pub fn generate_work_complete_chime() -> Vec<u8> {
     create_riff_wav_pcm16(&samples, sample_rate)
 }
 
+// Length of the linear fade-out applied to the tail of every synthesized note.
+// Hard-truncating a note while its exponential envelope is still audible (up to
+// ~0.4 full scale at the old note boundaries) produces an audible click; a few
+// milliseconds of ramp-down lands every note near zero amplitude instead.
+const NOTE_FADE_OUT_SECS: f32 = 0.008;
+
+// Linear gain ramp for the final NOTE_FADE_OUT_SECS of a note that lasts
+// `note_len_secs`, evaluated at local note time `note_t_secs`. Returns 1.0
+// everywhere except the closing fade window, where it ramps 1.0 down to 0.0.
+fn note_tail_fade(note_t_secs: f32, note_len_secs: f32) -> f32 {
+    let remaining = note_len_secs - note_t_secs;
+    if remaining >= NOTE_FADE_OUT_SECS {
+        1.0
+    } else {
+        (remaining / NOTE_FADE_OUT_SECS).clamp(0.0, 1.0)
+    }
+}
+
 // Generates an uplifting double-chime (D5 587.33 Hz -> A5 880.0 Hz) signaling break completion
 pub fn generate_break_complete_chime() -> Vec<u8> {
     let sample_rate = 44100;
@@ -78,21 +233,25 @@ pub fn generate_break_complete_chime() -> Vec<u8> {
     let total_samples = (sample_rate as f32 * duration_secs) as usize;
     let mut samples = Vec::with_capacity(total_samples);
 
+    // Each note occupies [start, start + len); both tails get the anti-click fade
+    const NOTE1_END: f32 = 0.22;
+
     for i in 0..total_samples {
         let t = i as f32 / sample_rate as f32;
-        let sample_val = if t < 0.22 {
+        let sample_val = if t < NOTE1_END {
             // Note 1: 587.33 Hz
             let note_t = t;
             let env = (-4.0 * note_t).exp();
             let s = (2.0 * std::f32::consts::PI * 587.33 * note_t).sin() * 0.8;
-            s * env
+            s * env * note_tail_fade(note_t, NOTE1_END)
         } else {
             // Note 2: 880.0 Hz
-            let note_t = t - 0.22;
+            let note_t = t - NOTE1_END;
+            let note_len = duration_secs - NOTE1_END;
             let env = (-2.5 * note_t).exp();
             let s1 = (2.0 * std::f32::consts::PI * 880.0 * note_t).sin() * 0.75;
             let s2 = (2.0 * std::f32::consts::PI * 1760.0 * note_t).sin() * 0.25;
-            (s1 + s2) * env
+            (s1 + s2) * env * note_tail_fade(note_t, note_len)
         };
 
         let sample_i16 = (sample_val * 28000.0).clamp(i16::MIN as f32, i16::MAX as f32) as i16;
@@ -109,25 +268,38 @@ pub fn generate_long_break_chime() -> Vec<u8> {
     let total_samples = (sample_rate as f32 * duration_secs) as usize;
     let mut samples = Vec::with_capacity(total_samples);
 
+    // Note windows; every boundary previously hard-cut an audible envelope,
+    // so all three notes end with the short anti-click fade instead.
+    const NOTE1_END: f32 = 0.20;
+    const NOTE2_END: f32 = 0.40;
+
     for i in 0..total_samples {
         let t = i as f32 / sample_rate as f32;
-        let sample_val = if t < 0.20 {
+        let sample_val = if t < NOTE1_END {
             // Note 1: C5 (523.25 Hz)
             let note_t = t;
             let env = (-3.5 * note_t).exp();
-            (2.0 * std::f32::consts::PI * 523.25 * note_t).sin() * 0.8 * env
-        } else if t < 0.40 {
+            (2.0 * std::f32::consts::PI * 523.25 * note_t).sin()
+                * 0.8
+                * env
+                * note_tail_fade(note_t, NOTE1_END)
+        } else if t < NOTE2_END {
             // Note 2: E5 (659.25 Hz)
-            let note_t = t - 0.20;
+            let note_t = t - NOTE1_END;
+            let note_len = NOTE2_END - NOTE1_END;
             let env = (-3.5 * note_t).exp();
-            (2.0 * std::f32::consts::PI * 659.25 * note_t).sin() * 0.8 * env
+            (2.0 * std::f32::consts::PI * 659.25 * note_t).sin()
+                * 0.8
+                * env
+                * note_tail_fade(note_t, note_len)
         } else {
             // Note 3: G5 (783.99 Hz) with harmonics ringing out
-            let note_t = t - 0.40;
+            let note_t = t - NOTE2_END;
+            let note_len = duration_secs - NOTE2_END;
             let env = (-2.0 * note_t).exp();
             let s1 = (2.0 * std::f32::consts::PI * 783.99 * note_t).sin() * 0.75;
             let s2 = (2.0 * std::f32::consts::PI * 1567.98 * note_t).sin() * 0.25;
-            (s1 + s2) * env
+            (s1 + s2) * env * note_tail_fade(note_t, note_len)
         };
 
         let sample_i16 = (sample_val * 28000.0).clamp(i16::MIN as f32, i16::MAX as f32) as i16;
@@ -137,36 +309,52 @@ pub fn generate_long_break_chime() -> Vec<u8> {
     create_riff_wav_pcm16(&samples, sample_rate)
 }
 
-// Plays acoustic chime corresponding to the finished Pomodoro phase in a background thread
+// Plays the acoustic chime corresponding to the finished Pomodoro phase by
+// handing the synthesized WAV to the shared audio worker thread. Never blocks
+// the caller: synthesis is cheap and playback happens on the worker.
 pub fn play_phase_sound(finished_phase: PomodoroPhase) {
     if AUDIO_MUTED_FOR_TESTS.load(Ordering::SeqCst) {
         return;
     }
 
-    // Spawn detached audio playback thread
-    std::thread::spawn(move || {
-        let wav_data = match finished_phase {
-            PomodoroPhase::Work => generate_work_complete_chime(),
-            PomodoroPhase::ShortBreak => generate_break_complete_chime(),
-            PomodoroPhase::LongBreak => generate_long_break_chime(),
-        };
+    let wav_data = match finished_phase {
+        PomodoroPhase::Work => generate_work_complete_chime(),
+        PomodoroPhase::ShortBreak => generate_break_complete_chime(),
+        PomodoroPhase::LongBreak => generate_long_break_chime(),
+    };
 
-        // Initialize output stream with rodio
-        if let Ok((_stream, stream_handle)) = rodio::OutputStream::try_default() {
-            let cursor = Cursor::new(wav_data);
-            if let Ok(source) = rodio::Decoder::new(cursor) {
-                if let Ok(sink) = rodio::Sink::try_new(&stream_handle) {
-                    sink.append(source);
-                    sink.sleep_until_end();
-                }
+    let sender = worker_sender();
+    if let Err(err) = sender.send(AudioCommand::PlayWav(wav_data)) {
+        // The worker thread is gone (device lost or spawn failure). Report it
+        // and drop the cached sender so the next chime can respawn a worker.
+        eprintln!("audio: failed to queue chime playback: {}", err);
+        if let Some(cell) = AUDIO_WORKER.get() {
+            if let Ok(mut slot) = cell.lock() {
+                *slot = None;
             }
         }
-    });
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    // Runs `body` under the mute-flag lock with the flag forced to `muted`,
+    // then invokes `verify` AFTER restoration while STILL holding the lock.
+    // Assertions about the resting flag state belong in `verify`: checking it
+    // without the lock races with parallel tests (app.rs tests mute globally)
+    // and can observe their temporary muted state.
+    fn with_audio_muted_then_verify(muted: bool, body: impl FnOnce(), verify: impl FnOnce()) {
+        let _guard = AUDIO_TEST_FLAG_LOCK
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner);
+        let previous = AUDIO_MUTED_FOR_TESTS.load(Ordering::SeqCst);
+        AUDIO_MUTED_FOR_TESTS.store(muted, Ordering::SeqCst);
+        body();
+        AUDIO_MUTED_FOR_TESTS.store(previous, Ordering::SeqCst);
+        verify();
+    }
 
     #[test]
     fn test_create_riff_wav_pcm16_header() {
@@ -212,12 +400,20 @@ mod tests {
 
     #[test]
     fn test_play_phase_sound_does_not_panic() {
-        // Mute to avoid opening hardware device in headless test runner
-        set_audio_muted_for_tests(true);
-        play_phase_sound(PomodoroPhase::Work);
-        play_phase_sound(PomodoroPhase::ShortBreak);
-        play_phase_sound(PomodoroPhase::LongBreak);
-        set_audio_muted_for_tests(false);
+        // Mute to avoid opening hardware device in headless test runner.
+        // The restore assertion runs in `verify`, after restoration but still
+        // under the lock, so parallel tests cannot skew the observation.
+        with_audio_muted_then_verify(
+            true,
+            || {
+                play_phase_sound(PomodoroPhase::Work);
+                play_phase_sound(PomodoroPhase::ShortBreak);
+                play_phase_sound(PomodoroPhase::LongBreak);
+            },
+            || {
+                assert!(!AUDIO_MUTED_FOR_TESTS.load(Ordering::SeqCst));
+            },
+        );
     }
 
     #[test]
@@ -286,10 +482,27 @@ mod tests {
 
     #[test]
     fn test_audio_mute_flag_concurrency() {
-        set_audio_muted_for_tests(true);
-        assert!(AUDIO_MUTED_FOR_TESTS.load(Ordering::SeqCst));
-        set_audio_muted_for_tests(false);
-        assert!(!AUDIO_MUTED_FOR_TESTS.load(Ordering::SeqCst));
+        // Both toggles run under the shared guard and restore the prior value,
+        // and every observation of the resting flag state happens inside the
+        // locked `verify` phase, so this test cannot race or leak state.
+        with_audio_muted_then_verify(
+            true,
+            || {
+                assert!(AUDIO_MUTED_FOR_TESTS.load(Ordering::SeqCst));
+            },
+            || {
+                assert!(!AUDIO_MUTED_FOR_TESTS.load(Ordering::SeqCst));
+            },
+        );
+        with_audio_muted_then_verify(
+            false,
+            || {
+                assert!(!AUDIO_MUTED_FOR_TESTS.load(Ordering::SeqCst));
+            },
+            || {
+                assert!(!AUDIO_MUTED_FOR_TESTS.load(Ordering::SeqCst));
+            },
+        );
     }
 
     #[test]
@@ -385,12 +598,56 @@ mod tests {
 
     #[test]
     fn test_audio_mute_for_tests_flag() {
-        AUDIO_MUTED_FOR_TESTS.store(true, Ordering::SeqCst);
-        assert!(AUDIO_MUTED_FOR_TESTS.load(Ordering::SeqCst));
-        // Calling play_phase_sound while muted must return immediately without spawning threads
-        play_phase_sound(crate::timer::PomodoroPhase::Work);
-        play_phase_sound(crate::timer::PomodoroPhase::ShortBreak);
-        play_phase_sound(crate::timer::PomodoroPhase::LongBreak);
+        with_audio_muted_then_verify(
+            true,
+            || {
+                assert!(AUDIO_MUTED_FOR_TESTS.load(Ordering::SeqCst));
+                // Calling play_phase_sound while muted must return immediately without spawning threads
+                play_phase_sound(crate::timer::PomodoroPhase::Work);
+                play_phase_sound(crate::timer::PomodoroPhase::ShortBreak);
+                play_phase_sound(crate::timer::PomodoroPhase::LongBreak);
+            },
+            // Regression guard: the flag must be restored after the test, it
+            // used to stay muted forever and race with parallel tests. The
+            // check runs under the lock so it cannot observe a concurrent
+            // test's temporary mute.
+            || {
+                assert!(!AUDIO_MUTED_FOR_TESTS.load(Ordering::SeqCst));
+            },
+        );
+    }
+
+    #[test]
+    fn test_note_boundaries_are_click_free() {
+        // Every note boundary used to hard-truncate an audible envelope (~0.33
+        // to ~0.40 full scale), producing a click. With the tail fade applied,
+        // the last sample before each boundary must be near zero amplitude.
+        let sample_rate = 44100.0f32;
+
+        let break_wav = generate_break_complete_chime();
+        let break_pcm = &break_wav[44..];
+        let read =
+            |pcm: &[u8], i: usize| -> i16 { i16::from_le_bytes([pcm[i * 2], pcm[i * 2 + 1]]) };
+        // Last sample of note 1 in the break chime (boundary at t = 0.22 s)
+        let idx = ((0.22 * sample_rate).floor() as usize).saturating_sub(1);
+        assert!(
+            read(break_pcm, idx).abs() < 1500,
+            "break chime note 1 ends audibly: {}",
+            read(break_pcm, idx)
+        );
+
+        let long_wav = generate_long_break_chime();
+        let long_pcm = &long_wav[44..];
+        // Boundaries at t = 0.20 s and t = 0.40 s
+        for boundary in [0.20f32, 0.40] {
+            let idx = ((boundary * sample_rate).floor() as usize).saturating_sub(1);
+            assert!(
+                read(long_pcm, idx).abs() < 1500,
+                "long break chime note at t={} ends audibly: {}",
+                boundary,
+                read(long_pcm, idx)
+            );
+        }
     }
 
     #[test]

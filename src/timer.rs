@@ -85,8 +85,12 @@ pub struct PomodoroTimer {
 impl PomodoroTimer {
     // Constructs a new PomodoroTimer configured according to user settings
     pub fn new(config: &Config) -> Self {
-        // Calculate initial total seconds for work phase
-        let total = config.work_duration_mins * 60;
+        // Calculate initial total seconds for work phase.
+        // saturating_mul defends against absurd config values (a u32 minute
+        // count above ~35.7 million would otherwise overflow and wrap to a
+        // garbage duration); config sanitization already clamps inputs, this
+        // is defense in depth.
+        let total = config.work_duration_mins.saturating_mul(60);
         // Build and return new instance
         Self {
             // Initial phase is Work
@@ -106,14 +110,14 @@ impl PomodoroTimer {
 
     // Computes target duration in seconds for a specific phase based on config
     pub fn target_duration_secs(&self, phase: PomodoroPhase, config: &Config) -> u32 {
-        // Match on the requested phase
+        // Match on the requested phase; saturating_mul prevents overflow wrap
         match phase {
             // Work duration in minutes converted to seconds
-            PomodoroPhase::Work => config.work_duration_mins * 60,
+            PomodoroPhase::Work => config.work_duration_mins.saturating_mul(60),
             // Short break duration in minutes converted to seconds
-            PomodoroPhase::ShortBreak => config.short_break_mins * 60,
+            PomodoroPhase::ShortBreak => config.short_break_mins.saturating_mul(60),
             // Long break duration in minutes converted to seconds
-            PomodoroPhase::LongBreak => config.long_break_mins * 60,
+            PomodoroPhase::LongBreak => config.long_break_mins.saturating_mul(60),
         }
     }
 
@@ -250,8 +254,13 @@ impl PomodoroTimer {
             PomodoroPhase::ShortBreak | PomodoroPhase::LongBreak => config.auto_start_breaks,
         };
 
-        // Update timer running status according to auto-start setting
-        self.status = if should_auto_start {
+        // Update timer running status according to auto-start setting.
+        // A zero-length phase must never auto-start: doing so previously
+        // produced a per-second completion churn (each tick instantly
+        // "finished" the phase again, flooding stats, notifications, and disk
+        // writes). Config sanitization makes this unreachable via data.json,
+        // but direct struct construction can still produce it.
+        self.status = if should_auto_start && total > 0 {
             // Start countdown immediately
             TimerStatus::Running
         } else {

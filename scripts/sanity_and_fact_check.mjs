@@ -53,21 +53,54 @@ themeVariants.forEach(variant => {
 });
 
 // B. Audio Frequencies
-check('Focus chime frequency 528.0 Hz in src/audio.rs', audioRs.includes('528.0'));
-check('Focus chime 2nd harmonic 1056.0 Hz in src/audio.rs', audioRs.includes('1056.0'));
-check('Focus chime 3rd harmonic 1584.0 Hz in src/audio.rs', audioRs.includes('1584.0'));
-check('Short break chime D5 587.33 Hz in src/audio.rs', audioRs.includes('587.33'));
-check('Short break chime A5 880.0 Hz in src/audio.rs', audioRs.includes('880.0'));
-check('Long break chime C5 523.25 Hz in src/audio.rs', audioRs.includes('523.25'));
-check('Long break chime E5 659.25 Hz in src/audio.rs', audioRs.includes('659.25'));
-check('Long break chime G5 783.99 Hz in src/audio.rs', audioRs.includes('783.99'));
+// Each frequency is checked with a word-boundary regex so that, for example,
+// '528.0' cannot be satisfied by an unrelated literal like '1528.0' or
+// '528.05'. These are the exact constants used by the chime synthesizers.
+const AUDIO_FREQUENCIES = [
+  { label: 'Focus chime fundamental 528.0 Hz', pattern: /\b528\.0\b/ },
+  { label: 'Focus chime 2nd harmonic 1056.0 Hz', pattern: /\b1056\.0\b/ },
+  { label: 'Focus chime 3rd harmonic 1584.0 Hz', pattern: /\b1584\.0\b/ },
+  { label: 'Short break chime D5 587.33 Hz', pattern: /\b587\.33\b/ },
+  { label: 'Short break chime A5 880.0 Hz', pattern: /\b880\.0\b/ },
+  { label: 'Long break chime C5 523.25 Hz', pattern: /\b523\.25\b/ },
+  { label: 'Long break chime E5 659.25 Hz', pattern: /\b659\.25\b/ },
+  { label: 'Long break chime G5 783.99 Hz', pattern: /\b783\.99\b/ }
+];
+
+AUDIO_FREQUENCIES.forEach(({ label, pattern }) => {
+  check(`${label} in src/audio.rs`, pattern.test(audioRs));
+});
 
 // C. Settings Defaults & Boundaries
-check('Default work duration 25 mins in src/config.rs', configRs.includes('25'));
-check('Default short break 5 mins in src/config.rs', configRs.includes('5'));
-check('Default long break 15 mins in src/config.rs', configRs.includes('15'));
-check('Default long break interval 4 in src/config.rs', configRs.includes('4'));
-check('Max long break interval is 24 in src/config.rs / src/app.rs', configRs.includes('24') || appRs.includes('24'));
+// Defaults must be attached to their actual field names in the Default impl of
+// Config (src/config.rs), not matched as bare substrings anywhere in the file.
+const CONFIG_DEFAULTS = [
+  { label: 'Default work duration 25 mins', field: 'work_duration_mins', value: 25 },
+  { label: 'Default short break 5 mins', field: 'short_break_mins', value: 5 },
+  { label: 'Default long break 15 mins', field: 'long_break_mins', value: 15 },
+  { label: 'Default long break interval 4', field: 'long_break_interval', value: 4 }
+];
+
+CONFIG_DEFAULTS.forEach(({ label, field, value }) => {
+  // Matches e.g. `work_duration_mins: 25` inside the Default impl
+  const re = new RegExp(`${field}:\\s*${value}\\b`);
+  check(`${label} in src/config.rs`, re.test(configRs));
+});
+
+// Bounds must mirror the exact clamps applied by the settings UI in src/app.rs
+// (row order: work 1..=120, short break 1..=60, long break 1..=90, interval 1..=24).
+const CONFIG_BOUNDS = [
+  { label: 'Work duration clamp is 1..=120', field: 'work_duration_mins', min: 1, max: 120 },
+  { label: 'Short break clamp is 1..=60', field: 'short_break_mins', min: 1, max: 60 },
+  { label: 'Long break clamp is 1..=90', field: 'long_break_mins', min: 1, max: 90 },
+  { label: 'Max long break interval is 24 (clamp 1..=24)', field: 'long_break_interval', min: 1, max: 24 }
+];
+
+CONFIG_BOUNDS.forEach(({ label, field, min, max }) => {
+  // Matches e.g. `(self.config.work_duration_mins as i32 + delta).clamp(1, 120)`
+  const re = new RegExp(`${field} as i32 \\+ delta\\)\\.clamp\\(${min}, ${max}\\)`);
+  check(`${label} in src/app.rs`, re.test(appRs));
+});
 
 // --------------------------------------------------------------------------
 // 2. HTML Files & Assets Integrity
@@ -137,9 +170,12 @@ THEME_KEYS.forEach(key => {
 // --------------------------------------------------------------------------
 console.log('\n🔊 4. Auditing Web Audio Engine in app.js');
 
-check('app.js synthesizes 528 Hz Work Zen Bowl tone', appJs.includes('528'));
-check('app.js synthesizes 587.33 Hz & 880 Hz Short Break tones', appJs.includes('587.33') && appJs.includes('880'));
-check('app.js synthesizes C5-E5-G5 (523.25, 659.25, 783.99) Long Break triad', appJs.includes('523.25') && appJs.includes('659.25') && appJs.includes('783.99'));
+// The web audio engine must mirror the exact frequencies synthesized by the
+// Rust chime engine in src/audio.rs. Reuse the same anchored patterns from
+// section 1 so a change on either side (Rust or JS) breaks this parity check.
+check('app.js synthesizes 528 Hz Work Zen Bowl tone', /\b528\b/.test(appJs) && /\b528\.0\b/.test(audioRs));
+check('app.js synthesizes 587.33 Hz & 880 Hz Short Break tones', /\b587\.33\b/.test(appJs) && /\b880\b/.test(appJs) && /\b587\.33\b/.test(audioRs) && /\b880\.0\b/.test(audioRs));
+check('app.js synthesizes C5-E5-G5 (523.25, 659.25, 783.99) Long Break triad', /\b523\.25\b/.test(appJs) && /\b659\.25\b/.test(appJs) && /\b783\.99\b/.test(appJs) && /\b523\.25\b/.test(audioRs) && /\b659\.25\b/.test(audioRs) && /\b783\.99\b/.test(audioRs));
 
 // --------------------------------------------------------------------------
 // 5. Code Cards & Copy Buttons Architecture

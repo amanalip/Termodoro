@@ -55,19 +55,46 @@ impl Storage {
     }
 
     // Resolves standard XDG/system data directory for termodoro (e.g. ~/.local/share/termodoro)
+    //
+    // Resolution order when ProjectDirs is unavailable (for example HOME unset
+    // under cron/systemd/containers): XDG_DATA_HOME, then the user home
+    // directory, and only as a last resort the current working directory.
+    // A silent CWD fallback previously scattered data files across whatever
+    // directory the binary happened to be launched from.
     fn get_data_dir() -> PathBuf {
-        // Attempt to resolve ProjectDirs for termodoro
+        // Resolve the location first (pure computation), then create it.
+        // Keeping resolution side-effect-free lets tests exercise the real
+        // path logic without touching the developer's actual user profile.
+        let data_dir = Self::resolve_data_dir();
+        let _ = create_dir_all(&data_dir);
+        data_dir
+    }
+
+    // Pure path resolution used by get_data_dir; performs no filesystem writes
+    fn resolve_data_dir() -> PathBuf {
+        // Preferred: platform-standard project data directory
         if let Some(proj_dirs) = ProjectDirs::from("com", "termodoro", "termodoro") {
-            // Get data directory path
-            let data_dir = proj_dirs.data_dir();
-            // Create data directory if it doesn't already exist
-            let _ = create_dir_all(data_dir);
-            // Return owned PathBuf
-            data_dir.to_path_buf()
-        } else {
-            // Fallback to current working directory if system dirs unavailable
-            PathBuf::from(".")
+            return proj_dirs.data_dir().to_path_buf();
         }
+
+        // Fallback 1: XDG_DATA_HOME (Linux/BSD convention)
+        if let Ok(xdg_data) = std::env::var("XDG_DATA_HOME") {
+            if !xdg_data.trim().is_empty() {
+                return PathBuf::from(xdg_data).join("termodoro");
+            }
+        }
+
+        // Fallback 2: the user home directory
+        if let Some(home) = std::env::var_os("HOME").filter(|h| !h.is_empty()) {
+            return PathBuf::from(home).join(".local/share/termodoro");
+        }
+
+        // Last resort: current working directory, announced loudly so the
+        // surprise of finding data.json here is at least explainable
+        eprintln!(
+            "warning: could not resolve a home data directory; falling back to ./termodoro-data"
+        );
+        PathBuf::from("./termodoro-data")
     }
 
     // Returns absolute or relative path to data.json storage file
@@ -83,27 +110,42 @@ impl Storage {
     }
 
     // Loads AppData from disk or constructs a new default state if file doesn't exist
+    //
+    // A file that exists but cannot be parsed is QUARANTINED (renamed with a
+    // timestamp suffix) instead of being left in place. Without this, the
+    // defaults returned below would eventually be saved over the original
+    // bytes, permanently destroying potentially recoverable user data.
     pub fn load(&self) -> AppData {
         // Get storage file path
         let path = self.data_file_path();
         // Check if file exists on disk
         if path.exists() {
             // Attempt to open file
-            if let Ok(mut file) = File::open(&path) {
+            match File::open(&path).and_then(|mut file| {
                 // Buffer to hold file string contents
                 let mut content = String::new();
-                // Read entire file to string
-                if file.read_to_string(&mut content).is_ok() {
-                    // Attempt to parse JSON into AppData struct
-                    if let Ok(data) = serde_json::from_str::<AppData>(&content) {
-                        // Return loaded data
+                // Read entire file to string (propagate read errors)
+                file.read_to_string(&mut content)?;
+                Ok(content)
+            }) {
+                // Attempt to parse JSON into AppData struct
+                Ok(content) => match serde_json::from_str::<AppData>(&content) {
+                    // Success: sanitize any out-of-range values loaded from a
+                    // hand-edited or partially corrupted file before use
+                    Ok(mut data) => {
+                        data.config.sanitize();
                         return data;
                     }
-                }
+                    // Parse failure: quarantine the unreadable bytes
+                    Err(parse_err) => self.quarantine_corrupt_file(&path, &parse_err.to_string()),
+                },
+                // Open/read failure (permissions, I/O error): quarantine too,
+                // because continuing would treat the file as absent
+                Err(io_err) => self.quarantine_corrupt_file(&path, &io_err.to_string()),
             }
         }
 
-        // Return fresh default state if file does not exist or parsing fails
+        // Return fresh default state if file does not exist or was quarantined
         AppData {
             // Default configuration
             config: Config::default(),
@@ -114,8 +156,43 @@ impl Storage {
         }
     }
 
+    // Renames an unreadable state file aside so its bytes survive for manual
+    // recovery, and warns the user on stderr where the copy lives.
+    fn quarantine_corrupt_file(&self, path: &std::path::Path, reason: &str) {
+        // Build a deterministic, sortable quarantine name: data.json.corrupt-<unix_ts>
+        let backup_path =
+            path.with_extension(format!("json.corrupt-{}", chrono::Utc::now().timestamp()));
+        match std::fs::rename(path, &backup_path) {
+            Ok(()) => eprintln!(
+                "warning: state file {} was unreadable ({}); original moved to {}",
+                path.display(),
+                reason,
+                backup_path.display()
+            ),
+            // If even the rename fails, at least explain why defaults are loading
+            Err(rename_err) => eprintln!(
+                "warning: state file {} was unreadable ({}) and could not be backed up ({}); starting with defaults",
+                path.display(),
+                reason,
+                rename_err
+            ),
+        }
+    }
+
     // Saves current application state (config, tasks, stats) into JSON file on disk
-    pub fn save(&self, config: &Config, tasks: &TaskManager, stats: &StatsHistory) {
+    //
+    // The write is ATOMIC: content goes to a sibling temporary file which is
+    // flushed to disk and then renamed over the real file. Rename is atomic on
+    // POSIX and same-volume Windows, so a crash mid-write can never leave a
+    // truncated data.json behind (the old code truncated the live file first).
+    // Errors are returned rather than swallowed so callers can warn the user
+    // when persistence silently stops working (full disk, read-only mount).
+    pub fn save(
+        &self,
+        config: &Config,
+        tasks: &TaskManager,
+        stats: &StatsHistory,
+    ) -> std::io::Result<()> {
         // Resolve storage file path
         let path = self.data_file_path();
         // Assemble AppData payload
@@ -129,18 +206,32 @@ impl Storage {
         };
 
         // Serialize state to pretty formatted JSON string
-        if let Ok(json) = serde_json::to_string_pretty(&data) {
-            // Ensure parent directory exists before writing
-            if let Some(parent) = path.parent() {
-                // Create parent directories if missing
-                let _ = create_dir_all(parent);
-            }
-            // Create or truncate file
-            if let Ok(mut file) = File::create(&path) {
-                // Write JSON bytes to file
-                let _ = file.write_all(json.as_bytes());
-            }
+        let json = serde_json::to_string_pretty(&data).map_err(|e| {
+            std::io::Error::new(
+                std::io::ErrorKind::InvalidData,
+                format!("serialize failed: {e}"),
+            )
+        })?;
+
+        // Ensure parent directory exists before writing
+        if let Some(parent) = path.parent() {
+            create_dir_all(parent)?;
         }
+
+        // Stage the new content in a temporary sibling file
+        let tmp_path = path.with_extension("json.tmp");
+        {
+            let mut tmp = File::create(&tmp_path)?;
+            // Write JSON bytes to the staging file
+            tmp.write_all(json.as_bytes())?;
+            // Flush userspace buffers AND force the OS to commit to stable
+            // storage so a power cut right after rename cannot lose the data
+            tmp.sync_all()?;
+        }
+
+        // Atomically replace the live file with the fully-written staging file
+        std::fs::rename(&tmp_path, &path)?;
+        Ok(())
     }
 }
 
@@ -177,7 +268,9 @@ mod tests {
         let mut stats = StatsHistory::new();
         stats.record(crate::timer::PomodoroPhase::Work, 25, None, None);
 
-        storage.save(&config, &tasks, &stats);
+        storage
+            .save(&config, &tasks, &stats)
+            .expect("save should succeed");
         assert!(file_path.exists());
 
         let loaded = storage.load();
@@ -225,7 +318,9 @@ mod tests {
         let stats = StatsHistory::new();
 
         // Saving to non-existent nested directory creates parent dirs
-        storage.save(&config, &tasks, &stats);
+        storage
+            .save(&config, &tasks, &stats)
+            .expect("save should succeed");
         assert!(deep_file_path.exists());
 
         let loaded = storage.load();
@@ -267,7 +362,9 @@ mod tests {
             );
         }
 
-        storage.save(&config, &tasks, &stats);
+        storage
+            .save(&config, &tasks, &stats)
+            .expect("save should succeed");
         assert!(file_path.exists());
 
         let loaded = storage.load();
@@ -375,9 +472,10 @@ mod tests {
 
     #[test]
     fn test_storage_data_isolation_local_only() {
-        // Verify database paths resolve exclusively to local user filesystem directories
-        let storage = Storage::new();
-        let default_path = storage.data_file_path();
+        // Verify database paths resolve exclusively to local user filesystem
+        // directories. Uses the pure resolver so the test never creates (or
+        // depends on) the developer's actual user data directory.
+        let default_path = Storage::resolve_data_dir().join("data.json");
         let path_str = default_path.to_string_lossy();
 
         // Must never target cloud storage, external network shares, or global shared tmp
@@ -430,21 +528,143 @@ mod tests {
     }
 
     #[test]
-    fn test_storage_atomic_tmp_file_cleaned_after_save() {
+    fn test_storage_atomic_tmp_file_renamed_after_save() {
         let temp_dir =
             std::env::temp_dir().join(format!("termodoro_tmpclean_{}", uuid::Uuid::new_v4()));
         let file_path = temp_dir.join("data.json");
         let tmp_file_path = temp_dir.join("data.json.tmp");
         let storage = Storage::with_path(file_path.clone());
 
-        storage.save(
+        storage
+            .save(
+                &Config::default(),
+                &TaskManager::new(),
+                &StatsHistory::new(),
+            )
+            .expect("save should succeed");
+        assert!(file_path.exists());
+        // The staging file must have been atomically renamed onto data.json,
+        // leaving no .tmp litter behind
+        assert!(!tmp_file_path.exists());
+
+        // The live file must contain complete, parseable JSON proving the
+        // rename carried the full write rather than a partial buffer
+        let raw = fs::read_to_string(&file_path).expect("saved file must be readable");
+        let parsed: AppData =
+            serde_json::from_str(&raw).expect("renamed file must contain valid JSON");
+        assert_eq!(parsed.config, Config::default());
+
+        let _ = fs::remove_dir_all(temp_dir);
+    }
+
+    #[test]
+    fn test_storage_failed_save_leaves_previous_data_intact() {
+        // Simulates a crash mid-save: if the staging write fails, the previous
+        // good data.json must remain untouched and parseable
+        let temp_dir =
+            std::env::temp_dir().join(format!("termodoro_atomic_{}", uuid::Uuid::new_v4()));
+        let file_path = temp_dir.join("data.json");
+        let storage = Storage::with_path(file_path.clone());
+
+        // First save succeeds and writes a known task
+        let mut tasks = TaskManager::new();
+        tasks.add("Original Task".to_string(), 1);
+        storage
+            .save(&Config::default(), &tasks, &StatsHistory::new())
+            .expect("initial save should succeed");
+
+        // Corrupt the staging path into a directory: File::create on it fails,
+        // which is exactly the failure window the atomic strategy protects
+        let tmp_as_dir = temp_dir.join("data.json.tmp");
+        let _ = fs::create_dir(&tmp_as_dir);
+        let result = storage.save(
             &Config::default(),
             &TaskManager::new(),
             &StatsHistory::new(),
         );
-        assert!(file_path.exists());
-        // The .tmp file must be atomically renamed and must NOT linger around
-        assert!(!tmp_file_path.exists());
+        assert!(
+            result.is_err(),
+            "save must report failure instead of swallowing it"
+        );
+
+        // The original data.json survives byte-intact with the original task
+        let recovered = storage.load();
+        assert_eq!(recovered.tasks.tasks.len(), 1);
+        assert_eq!(recovered.tasks.tasks[0].title, "Original Task");
+
+        let _ = fs::remove_dir_all(temp_dir);
+    }
+
+    #[test]
+    fn test_storage_corrupt_file_is_quarantined_not_overwritten() {
+        let temp_dir =
+            std::env::temp_dir().join(format!("termodoro_quarantine_{}", uuid::Uuid::new_v4()));
+        let file_path = temp_dir.join("data.json");
+        let storage = Storage::with_path(file_path.clone());
+        let _ = create_dir_all(&temp_dir);
+
+        // Write unrecoverable garbage
+        let _ = fs::write(&file_path, "{ broken json content");
+        let loaded = storage.load();
+
+        // Defaults are returned...
+        assert_eq!(loaded.config, Config::default());
+        assert_eq!(loaded.tasks.tasks.len(), 0);
+
+        // ...but the corrupt bytes were moved aside, not destroyed
+        let quarantine_names: Vec<_> = fs::read_dir(&temp_dir)
+            .expect("temp dir readable")
+            .filter_map(|e| e.ok())
+            .map(|e| e.file_name().to_string_lossy().to_string())
+            .collect();
+        assert!(
+            quarantine_names
+                .iter()
+                .any(|n| n.starts_with("data.json.corrupt-")),
+            "corrupt file must be quarantined with a timestamped name, found: {:?}",
+            quarantine_names
+        );
+        assert!(
+            !file_path.exists(),
+            "original corrupt file must be renamed away"
+        );
+
+        let _ = fs::remove_dir_all(temp_dir);
+    }
+
+    #[test]
+    fn test_storage_load_sanitizes_out_of_range_config() {
+        let temp_dir =
+            std::env::temp_dir().join(format!("termodoro_sanitize_{}", uuid::Uuid::new_v4()));
+        let file_path = temp_dir.join("data.json");
+        let storage = Storage::with_path(file_path.clone());
+        let _ = create_dir_all(&temp_dir);
+
+        // Hand-edited file with absurd values: zero durations would otherwise
+        // cause instant phase completion loops, and a huge value overflows
+        // minutes-to-seconds math downstream
+        let _ = fs::write(
+            &file_path,
+            r#"{"config":{"theme":"Dracula","work_duration_mins":0,"short_break_mins":999999,"long_break_mins":0,"long_break_interval":0,"auto_start_breaks":true,"auto_start_work":true,"desktop_notifications":false,"sound_enabled":true},"tasks":{"tasks":[],"active_task_id":null},"stats":{"sessions":[]}}"#,
+        );
+
+        let loaded = storage.load();
+        assert_eq!(
+            loaded.config.work_duration_mins, 1,
+            "zero work duration clamps to minimum"
+        );
+        assert_eq!(
+            loaded.config.short_break_mins, 60,
+            "absurd short break clamps to max"
+        );
+        assert_eq!(
+            loaded.config.long_break_mins, 1,
+            "zero long break clamps to minimum"
+        );
+        assert_eq!(
+            loaded.config.long_break_interval, 1,
+            "zero interval clamps to minimum"
+        );
 
         let _ = fs::remove_dir_all(temp_dir);
     }
@@ -471,7 +691,9 @@ mod tests {
 
         let mut tasks = TaskManager::new();
         tasks.add("Idempotent Task".to_string(), 4);
-        storage.save(&Config::default(), &tasks, &StatsHistory::new());
+        storage
+            .save(&Config::default(), &tasks, &StatsHistory::new())
+            .expect("save should succeed");
 
         let load_1 = storage.load();
         let load_2 = storage.load();
@@ -486,8 +708,9 @@ mod tests {
 
     #[test]
     fn test_storage_constructor_new_default_path_exists() {
-        let storage = Storage::new();
-        let path = storage.data_file_path();
+        // Pure resolution check: no directory creation side effects on the
+        // real user profile during tests
+        let path = Storage::resolve_data_dir().join("data.json");
         assert!(path.to_string_lossy().contains("termodoro"));
     }
 }
