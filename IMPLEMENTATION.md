@@ -374,7 +374,7 @@ In addition, a `TerminalGuard` RAII struct acquires raw mode and the alternate s
 
 ## 11. Automated Testing Strategy & Benchmarks
 
-Termodoro includes **199 automated Rust tests** and **41 automated Playwright web E2E tests**:
+Termodoro includes **257 automated Rust tests** and **41 automated Playwright web E2E tests**:
 
 - **Audio Engine (`src/audio.rs`, 20 tests)**: Tests 16-bit PCM RIFF headers, signal clipping bounds ($>10000$, $<32000$), smooth exponential decay envelopes, pop/click prevention on audio DAC including click-free note boundaries, custom sample rates ($8\text{kHz}$ to $96\text{kHz}$), byte-level RIFF alignment, two-tone/three-tone duration timing, and atomic muting flags.
 - **Timer Engine (`src/timer.rs`, 27 tests)**: Tests 24-cycle state machine progression, underflow safety on sub-second ticks, tuple time formatting, large duration formatting (up to 120 mins), 50 rapid skips, zero-duration progress calculations, pause, toggle, reset transitions, and phase title/emoji parity.
@@ -385,11 +385,12 @@ Termodoro includes **199 automated Rust tests** and **41 automated Playwright we
 - **Themes & Palettes (`src/theme.rs`, 11 tests)**: Tests all 18 palettes, WCAG relative luminance contrast formulas, forward/backward index cycling, phase color distinctness (no long-break color collides with an accent), byte-level RGB constraints, tolerant deserialization of unknown theme names, and serde roundtrips.
 - **Configuration & Preferences (`src/config.rs`, 8 tests)**: Tests default parameters, field mutations, struct equality, extreme value serde serialization, boolean flag permutations, and serde serialization across all 18 theme variants.
 - **UI Terminal Frame Rendering (`src/ui/mod.rs` & `src/ui/digits.rs`, 23 tests)**: Uses Ratatui `TestBackend` to verify pixel buffer contents across all tabs, active target badges, modal dialogs, status toast banners, 24-dot cycle views, all 18 color themes, and extreme terminal geometries from $20\times 10$ to $350\times 120$.
+- **Rigorous Integration E2E ([`tests/e2e_rigorous.rs`](tests/e2e_rigorous.rs), 39 tests)**: Full-stack persistence and workflow tests exercising real temp-dir storage roundtrips, app relaunch state restoration, multi-cycle phase completion with wall-clock advancement, task-to-timer target crediting across restarts, theme/config persistence, and UI buffer assertions under Ratatui `TestBackend`.
 - **Web Showcase & Documentation Portal ([`scripts/e2e-website-test.mjs`](scripts/e2e-website-test.mjs), 41 tests)**: Playwright automated test suite executing cross-device checks across 6 responsive viewports (Desktop $1920\times 1080$, $1280\times 800$, Tablet $768\times 1024$, Mobile $390\times 844$, $375\times 667$, $320\times 568$), validating zero horizontal overflow (`scrollWidth <= clientWidth`), mobile drawer transitions, code-card header copy button anchors, and theme switches.
 
 Run the test suites with:
 ```bash
-# Run 199 Rust tests
+# Run 257 Rust tests
 make test
 # or cargo test
 

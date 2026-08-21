@@ -332,20 +332,21 @@ std::panic::set_hook(Box::new(move |info| {
 
 ## 10. Automated Quality Assurance & Verification Matrix
 
-Termodoro's architecture is continuously certified by a comprehensive **199-test Rust QA harness** and a **41-test Playwright cross-device web E2E suite** running across Linux, macOS, and Windows:
+Termodoro's architecture is continuously certified by a comprehensive **257-test Rust QA harness** and a **41-test Playwright cross-device web E2E suite** running across Linux, macOS, and Windows:
 
 ```mermaid
-pie title Automated Test Distribution (199 Tests)
-    "App and E2E Workflows" : 37
+pie title Automated Test Distribution (257 Tests)
+    "App and E2E Workflows" : 41
     "Productivity Analytics" : 29
     "Timer Finite State Machine" : 27
-    "Task Management Engine" : 27
+    "Task Management Engine" : 32
     "Audio Synthesis and WAV" : 20
-    "TUI Rendering and Buffer" : 23
-    "Storage and Zero-Telemetry" : 17
-    "Theme Palettes and Contrast" : 11
+    "TUI Rendering and Buffer" : 18
+    "Storage and Zero-Telemetry" : 22
+    "Theme Palettes and Contrast" : 16
     "Configuration and Serde" : 8
     "ASCII Block Typography" : 5
+    "Rigorous Integration E2E" : 39
 ```
 
 | Verification Dimension | Verified Standard | Verification Tool | Status |
@@ -353,7 +354,7 @@ pie title Automated Test Distribution (199 Tests)
 | **Compiler Compliance** | Rust 1.74+ (Edition 2021) | `cargo check` | **PASS** |
 | **Code Formatting** | 100% Rustfmt canonical style | `cargo fmt -- --check` | **PASS** |
 | **Static Analysis** | Zero warnings with fatal pedantic flags | `cargo clippy -- -D warnings` | **PASS** |
-| **Unit & Integration Tests**| 199 / 199 passing across all 9 modules | `cargo test` / `make test` | **PASS** |
+| **Unit & Integration Tests**| 257 / 257 passing across all modules | `cargo test` / `make test` | **PASS** |
 | **Playwright Web E2E** | 41 / 41 passing across 6 responsive viewports | `make test-e2e` (`scripts/e2e-website-test.mjs`) | **PASS** |
 | **Memory Safety** | Zero `unsafe` blocks crate-wide | Compile-time `[lints.rust] unsafe_code = "forbid"` in `Cargo.toml` | **PASS** |
 | **Network Isolation** | Zero HTTP/network client libraries in lockfile | Dependency audit | **PASS** |
