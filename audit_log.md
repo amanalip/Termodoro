@@ -172,8 +172,8 @@ This document maintains a transparent, permanent, and structured audit log of re
 - **Severity:** Information / Security Certification
 - **Description:**
   - Conducted a repository-wide security analysis across memory safety, subprocess execution, file I/O, audio decoding, network privacy, arithmetic bounds, and panic safety.
-  - **Memory Safety**: 100% Safe Rust with `0` `unsafe` blocks across all library and binary targets (`grep -rn "unsafe" src/` confirmed 0 occurrences).
-  - **Subprocess & Command Injection**: Verified `0` shell invocations or `std::process::Command` calls in the application runtime. Desktop alerts communicate via native D-Bus / Desktop Portal protocol bindings.
+  - **Memory Safety**: 100% Safe Rust with `0` `unsafe` blocks across all library and binary targets, enforced at compile time by `unsafe_code = "forbid"` in the `[lints.rust]` section of `Cargo.toml`.
+  - **Subprocess & Command Injection**: Verified `0` shell invocations or `std::process::Command` calls in the application runtime. Desktop alerts communicate via native D-Bus / Desktop Portal protocol bindings. The sole exception is the auxiliary screenshot-generator utility (`src/bin/generate_screenshots.rs`), which invokes `std::process::Command` and is not part of the shipped application binary.
   - **Filesystem & Path Traversal**: Scoped exclusively to XDG Base Directory specification paths (`~/.local/share/termodoro/`) using `directories::ProjectDirs`. Atomic file writes prevent race conditions and partial file writes.
   - **Codec & Buffer Exploit Prevention**: In-memory mathematical PCM synthesis ($f = 44.1\text{ kHz}$, 16-bit signed) decoded through standard in-memory `Cursor`. No arbitrary external sound files loaded from disk.
   - **Network & Privacy**: 100% offline-first. Zero telemetry, zero analytics tracking, zero network requests, zero credential storage.
@@ -354,7 +354,7 @@ This document maintains a transparent, permanent, and structured audit log of re
   2. **Un-Commented Executable Code Snippets**: Formatted commands across Ubuntu/Debian, Arch Linux, Fedora/RHEL, macOS, and Windows with un-commented, copy-ready commands.
   3. **Segmented Desktop Tab Layout**: Optimized `.install-nav` into a sleek single-line segmented control on desktop screens, transitioning into an adaptive 2-column touch grid on mobile viewports.
   4. **Automated Sanity & Fact-Checking Engine**: Developed [`scripts/sanity_and_fact_check.mjs`](scripts/sanity_and_fact_check.mjs) (`make check-facts`) executing 81 programmatic assertions cross-referencing all 18 theme enum variants, exact audio chime frequencies (528Hz, 587.33Hz, 880.0Hz, 523.25Hz, 659.25Hz, 783.99Hz), default configuration bounds, HTML structural elements, and screenshot assets on disk.
-- **Resolution Status:** **VERIFIED & CERTIFIED (81/81 Sanity Checks + 41/41 Playwright Tests + 257 Rust Tests Passing)**
+- **Resolution Status:** **VERIFIED & CERTIFIED (84/84 Sanity Checks + 41/41 Playwright Tests + 257 Rust Tests Passing)**
 
 ---
 
@@ -363,15 +363,15 @@ This document maintains a transparent, permanent, and structured audit log of re
 | Audit Target | Documented Metric | Verified Fact | Verification Evidence |
 | :--- | :--- | :--- | :--- |
 | **Compiler Toolchain** | Rust 1.89+ (MSRV, enforced in `Cargo.toml`) | Edition 2021 | Tested on `rustc 1.97+` / CI stable |
-| **Dependencies** | 9 direct crates | Clean resolution | Verified in `Cargo.lock` |
+| **Dependencies** | 10 direct crates (+1 dev-dependency: `proptest`) | Clean resolution | Verified in `Cargo.lock` |
 | **Automated Tests** | 311 Unit, Integration & Property | 311 Passed, 0 Failed | `cargo test` (~1s runtime) |
 | **Playwright Web E2E** | 41 Cross-Device Tests | 41 Passed, 0 Failed | `make test-e2e` across 6 viewports |
 | **Source Sanity Audit** | 81 Fact-Checked Invariants | 81 Passed, 0 Failed | `make check-facts` (`scripts/sanity_and_fact_check.mjs`) |
 | **Privacy & Telemetry** | 0 Network Calls / Trackers | 100% Local-First | Unit tests & CI lockfile audit |
-| **Unsafe Blocks** | 0 Unsafe blocks | 100% Safe Rust | AST scan (`! grep -rn "unsafe" src/`) |
+| **Unsafe Blocks** | 0 Unsafe blocks | 100% Safe Rust | Compile-time lint (`unsafe_code = "forbid"` in `Cargo.toml`) |
 | **Linter Warnings** | 0 Warnings | Clean Clippy output | `cargo clippy -- -D warnings` |
 | **Security Rating** | Grade A+ (0 CVEs) | Zero Vulnerabilities | Full threat model audit [AUD-007] |
-| **Command Execution** | 0 Subprocess Calls | Native D-Bus Alerts | AST scan for `std::process::Command` |
+| **Command Execution** | 0 Subprocess Calls in the application runtime (screenshot generator utility excepted) | Native D-Bus Alerts | AST scan for `std::process::Command` (`src/bin/generate_screenshots.rs` only) |
 | **Audio Spec** | 16-bit PCM RIFF | 44.1kHz sample rate | RFC 2361 chunk verification |
 | **Storage Standard** | XDG Directory Spec | Clean JSON storage | XDG Base Directory v0.8 |
 | **Installed Binary** | ~5.1 MB Standalone | Zero Dependencies | `ls -lh ~/.cargo/bin/termodoro` |

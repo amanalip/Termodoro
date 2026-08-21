@@ -260,7 +260,7 @@ pub struct Theme {
 - **Design Philosophy**: Mathematically tuned CIELAB light color space palette engineered by Ethan Schoonover.
 - **Palette Mapping**:
   - `bg`: `#fdf6e3` `Color::Rgb(253, 246, 227)` (Base3)
-  - `fg`: `#657b83` `Color::Rgb(101, 123, 131)` (Base00)
+  - `fg`: `#586e75` `Color::Rgb(88, 110, 117)` (Base01)
   - `primary`: `#268bd2` `Color::Rgb(38, 139, 210)` (Blue)
   - `secondary`: `#6c71c4` `Color::Rgb(108, 113, 196)` (Violet)
   - `work`: `#dc322f` `Color::Rgb(220, 50, 47)` (Red)

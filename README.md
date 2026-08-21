@@ -715,7 +715,7 @@ Termodoro follows the standard XDG base directory conventions on Unix and platfo
 | Platform | Database File Path |
 | :--- | :--- |
 | **Linux / BSD** | `~/.local/share/termodoro/data.json` |
-| **macOS** | `~/Library/Application Support/com.termodoro.termodoro/data.json` |
+| **macOS** | `~/Library/Application Support/com.termodoro.termodoro/data/data.json` |
 | **Windows** | `%APPDATA%\termodoro\termodoro\data\data.json` |
 
 ### Annotated `data.json` Schema
@@ -843,7 +843,7 @@ Because the database is standard JSON, you can easily back up, version-control, 
 #### Q12: How do I backup or transfer my tasks and history to another computer?
 - **Answer**: Simply copy your `data.json` file to the new machine:
   - **Linux / BSD**: `~/.local/share/termodoro/data.json`
-  - **macOS**: `~/Library/Application Support/com.termodoro.termodoro/data.json`
+  - **macOS**: `~/Library/Application Support/com.termodoro.termodoro/data/data.json`
   - **Windows**: `%APPDATA%\termodoro\termodoro\data\data.json`
   Because the schema is standard JSON, you can also inspect, edit, or version-control your productivity data with Git.
 

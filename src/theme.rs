@@ -351,7 +351,7 @@ impl Theme {
             ThemeChoice::SolarizedLight => Theme {
                 choice,
                 bg: Color::Rgb(253, 246, 227),        // #fdf6e3
-                fg: Color::Rgb(101, 123, 131),        // #657b83
+                fg: Color::Rgb(88, 110, 117),         // #586e75
                 primary: Color::Rgb(38, 139, 210),    // #268bd2
                 secondary: Color::Rgb(108, 113, 196), // #6c71c4
                 work: Color::Rgb(220, 50, 47),        // #dc322f
@@ -609,29 +609,34 @@ mod tests {
         assert_eq!(parsed, ThemeChoice::Synthwave84);
     }
 
+    fn wcag_relative_luminance(rgb: Color) -> f64 {
+        fn channel(c: u8) -> f64 {
+            let c = c as f64 / 255.0;
+            if c <= 0.04045 {
+                c / 12.92
+            } else {
+                ((c + 0.055) / 1.055).powf(2.4)
+            }
+        }
+        match rgb {
+            Color::Rgb(r, g, b) => 0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b),
+            _ => panic!("Themes must define 24-bit RGB colors"),
+        }
+    }
+
     #[test]
     fn test_theme_luminance_contrast_across_all_18_palettes() {
         for choice in ThemeChoice::all() {
             let theme = Theme::from_choice(*choice);
-            let (bg_r, bg_g, bg_b) = match theme.bg {
-                Color::Rgb(r, g, b) => (r as f32, g as f32, b as f32),
-                _ => (0.0, 0.0, 0.0),
-            };
-            let (fg_r, fg_g, fg_b) = match theme.fg {
-                Color::Rgb(r, g, b) => (r as f32, g as f32, b as f32),
-                _ => (255.0, 255.0, 255.0),
-            };
+            let lum_bg = wcag_relative_luminance(theme.bg);
+            let lum_fg = wcag_relative_luminance(theme.fg);
+            let contrast_ratio = (lum_fg.max(lum_bg) + 0.05) / (lum_fg.min(lum_bg) + 0.05);
 
-            let lum_bg = (0.2126 * bg_r + 0.7152 * bg_g + 0.0722 * bg_b) / 255.0;
-            let lum_fg = (0.2126 * fg_r + 0.7152 * fg_g + 0.0722 * fg_b) / 255.0;
-            let contrast_diff = (lum_bg - lum_fg).abs();
-
-            // All 18 palettes must maintain a significant luminance difference between fg and bg
             assert!(
-                contrast_diff > 0.20,
-                "Theme {:?} has insufficient luminance contrast: {}",
+                contrast_ratio >= 4.5,
+                "Theme {:?} fails WCAG 2.1 AA contrast (>= 4.5:1): {:.2}:1",
                 choice,
-                contrast_diff
+                contrast_ratio
             );
         }
     }
