@@ -22,6 +22,11 @@ uuid = { version = "1.10", features = ["v4", "serde"] }
 rodio = { version = "0.19", default-features = false, features = ["wav"] }
 unicode-width = "0.2"
 
+[dev-dependencies]
+# Property-based testing: generates hundreds of randomized inputs per
+# property and shrinks any failure to a minimal reproducing case.
+proptest = "1"
+
 # Workspace-level lint enforcement: forbid any `unsafe` block anywhere in the
 # crate (including the screenshot generator bin). This replaces the old
 # fragile `grep -rn "unsafe" src/` CI check that false-positived on comments

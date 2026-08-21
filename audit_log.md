@@ -364,7 +364,7 @@ This document maintains a transparent, permanent, and structured audit log of re
 | :--- | :--- | :--- | :--- |
 | **Compiler Toolchain** | Rust 1.89+ (MSRV, enforced in `Cargo.toml`) | Edition 2021 | Tested on `rustc 1.97+` / CI stable |
 | **Dependencies** | 9 direct crates | Clean resolution | Verified in `Cargo.lock` |
-| **Automated Tests** | 259 Unit & Integration | 259 Passed, 0 Failed | `cargo test` (~1s runtime) |
+| **Automated Tests** | 311 Unit, Integration & Property | 311 Passed, 0 Failed | `cargo test` (~1s runtime) |
 | **Playwright Web E2E** | 41 Cross-Device Tests | 41 Passed, 0 Failed | `make test-e2e` across 6 viewports |
 | **Source Sanity Audit** | 81 Fact-Checked Invariants | 81 Passed, 0 Failed | `make check-facts` (`scripts/sanity_and_fact_check.mjs`) |
 | **Privacy & Telemetry** | 0 Network Calls / Trackers | 100% Local-First | Unit tests & CI lockfile audit |

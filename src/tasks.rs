@@ -171,7 +171,15 @@ impl TaskManager {
             true
         } else {
             // Nothing matched the selection: report no-op so callers do not
-            // claim success for a deletion that never occurred
+            // claim success for a deletion that never occurred. The cursor
+            // is still healed here — a stale position from before a filter
+            // flip must not survive a structural attempt.
+            let visible_len = self.filtered_indices().len();
+            if visible_len == 0 {
+                self.selected_index = 0;
+            } else if self.selected_index >= visible_len {
+                self.selected_index = visible_len - 1;
+            }
             false
         }
     }
@@ -196,20 +204,20 @@ impl TaskManager {
                         .map(|t| t.id.clone());
                 }
             }
-            // A toggle can SHRINK the currently filtered view: completing a
-            // task under Active, or untoggling one under Completed, removes
-            // that row from the visible list. The cursor must follow the new
-            // length exactly like remove_selected does — clamping only for
-            // the fully-emptied case previously left the selection pointing
-            // past the end whenever the row below the cursor disappeared.
-            let new_visible_len = self.filtered_indices().len();
-            if new_visible_len == 0 {
-                // An emptied view must not keep pointing at a phantom row
-                self.selected_index = 0;
-            } else if self.selected_index >= new_visible_len {
-                // Selection rode off the end of the shrunken view
-                self.selected_index = new_visible_len - 1;
-            }
+        }
+        // A toggle can SHRINK the currently filtered view: completing a
+        // task under Active, or untoggling one under Completed, removes
+        // that row from the visible list. The clamp runs EVEN WHEN the
+        // selection pointed at nothing (stale cursor from before a filter
+        // flip): every structural operation must leave the cursor valid,
+        // never lingering past the end of the view.
+        let new_visible_len = self.filtered_indices().len();
+        if new_visible_len == 0 {
+            // An emptied view must not keep pointing at a phantom row
+            self.selected_index = 0;
+        } else if self.selected_index >= new_visible_len {
+            // Selection rode off the end of the shrunken view
+            self.selected_index = new_visible_len - 1;
         }
     }
 
@@ -267,16 +275,25 @@ impl TaskManager {
     pub fn next(&mut self) {
         // Get count of visible tasks
         let count = self.filtered_indices().len();
-        // Check if list is non-empty
-        if count > 0 {
-            // If not at the end, advance by 1
-            if self.selected_index + 1 < count {
-                // Increment index
-                self.selected_index += 1;
-            } else {
-                // Wrap around to top
-                self.selected_index = 0;
-            }
+        // An emptied or fully-filtered-out view must not keep pointing at a
+        // phantom row: heal the cursor to 0 (matching the invariant enforced
+        // by remove_selected/toggle_selected) instead of silently preserving
+        // a stale position from before the filter change.
+        if count == 0 {
+            self.selected_index = 0;
+            return;
+        }
+        // A stale cursor past the end of the view (left by a bare filter
+        // flip) heals to the top — the same place a forward wrap lands.
+        if self.selected_index >= count {
+            self.selected_index = 0;
+        // If not at the end, advance by 1
+        } else if self.selected_index + 1 < count {
+            // Increment index
+            self.selected_index += 1;
+        } else {
+            // Wrap around to top
+            self.selected_index = 0;
         }
     }
 
@@ -284,16 +301,22 @@ impl TaskManager {
     pub fn previous(&mut self) {
         // Get count of visible tasks
         let count = self.filtered_indices().len();
-        // Check if list is non-empty
-        if count > 0 {
-            // If not at the beginning, decrement by 1
-            if self.selected_index > 0 {
-                // Decrement index
-                self.selected_index -= 1;
-            } else {
-                // Wrap around to bottom
-                self.selected_index = count - 1;
-            }
+        // Heal an empty view exactly like next() does
+        if count == 0 {
+            self.selected_index = 0;
+            return;
+        }
+        // A stale cursor past the end of the view must land ON the last row,
+        // not merely decrement to `count` (which would stay out of bounds).
+        if self.selected_index >= count {
+            self.selected_index = count - 1;
+        // If not at the beginning, decrement by 1
+        } else if self.selected_index > 0 {
+            // Decrement index
+            self.selected_index -= 1;
+        } else {
+            // Wrap around to bottom
+            self.selected_index = count - 1;
         }
     }
 }

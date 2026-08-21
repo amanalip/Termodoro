@@ -24,7 +24,7 @@ jobs:
   # Multi-platform matrix build, lint, and test validation job
   test:
     # Human-readable job name displayed in GitHub UI with OS name
-    name: Test Suite (259 Tests) on ${{ matrix.os }}
+    name: Test Suite (311 Tests) on ${{ matrix.os }}
     # Matrix strategy testing across all 3 major desktop operating systems
     strategy:
       fail-fast: false
@@ -83,8 +83,8 @@ jobs:
         # Build binary with verbose compiler output
         run: cargo build --verbose --all-targets
 
-      # Step 8: Execute the complete 259-test QA suite across all modules
-      - name: Run all 259 unit, integration, and E2E test cases
+      # Step 8: Execute the complete 311-test QA suite across all modules
+      - name: Run all 311 unit, integration, E2E, and property-based test cases
         # Execute cargo test harness with full backtraces
         run: cargo test --verbose -- --nocapture --show-output
 

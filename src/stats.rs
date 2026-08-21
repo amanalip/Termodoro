@@ -873,4 +873,122 @@ mod tests {
         let sum_dist: u64 = dist.iter().map(|(_, count)| *count).sum();
         assert_eq!(sum_dist, 7);
     }
+
+    // Two sessions two minutes apart straddling LOCAL midnight must land on
+    // different calendar days: only the after-midnight one counts as "today".
+    #[test]
+    fn test_sessions_straddling_local_midnight_split_across_days() {
+        let mut stats = StatsHistory::new();
+        let today = Local::now().date_naive();
+        let yesterday = today.pred_opt().expect("yesterday exists");
+
+        // 23:59 yesterday and 00:01 today, in that insertion order.
+        stats.sessions.push(work_session(yesterday, 23, 25));
+        // Override minutes to hit 23:59 exactly via a dedicated timestamp.
+        stats.sessions[0].timestamp = yesterday
+            .and_hms_opt(23, 59, 0)
+            .expect("valid datetime")
+            .and_local_timezone(Local)
+            .single()
+            .expect("23:59 is not a DST boundary")
+            .with_timezone(&Utc);
+        stats.sessions.push(work_session(today, 0, 25));
+        stats.sessions[1].timestamp = today
+            .and_hms_opt(0, 1, 0)
+            .expect("valid datetime")
+            .and_local_timezone(Local)
+            .single()
+            .expect("00:01 is not a DST boundary")
+            .with_timezone(&Utc);
+
+        assert_eq!(
+            stats.today_work_sessions(),
+            1,
+            "only after-midnight session is today"
+        );
+        assert_eq!(stats.today_focus_minutes(), 25);
+        assert_eq!(
+            stats.distinct_work_dates().len(),
+            2,
+            "midnight splits the dates"
+        );
+        // Both days are consecutive: current streak spans the boundary.
+        assert_eq!(stats.current_streak_days(), 2);
+        assert_eq!(stats.longest_streak_days(), 2);
+    }
+
+    // A session logged at 00:00 exactly belongs fully to the new day; the
+    // previous day gets no credit for it.
+    #[test]
+    fn test_midnight_exact_session_belongs_to_new_day_only() {
+        let mut stats = StatsHistory::new();
+        let today = Local::now().date_naive();
+        stats.sessions.push(work_session(today, 0, 25));
+        stats.sessions[0].timestamp = today
+            .and_hms_opt(0, 0, 0)
+            .expect("valid datetime")
+            .and_local_timezone(Local)
+            .single()
+            .expect("midnight exact is not a DST boundary in any supported zone")
+            .with_timezone(&Utc);
+
+        assert_eq!(stats.today_work_sessions(), 1);
+        assert_eq!(stats.distinct_work_dates(), vec![today]);
+    }
+
+    // Calendar-day attribution is unaffected by DST transitions: noon-local
+    // fixtures across the US spring-forward weekend (Mar 7/8/9 2026) must
+    // read as three distinct consecutive days in EVERY timezone, including
+    // zones with no DST at all.
+    #[test]
+    fn test_dst_spring_forward_weekend_attribution_is_continuous() {
+        let mut stats = StatsHistory::new();
+        let days = [
+            NaiveDate::from_ymd_opt(2026, 3, 7).unwrap(),
+            NaiveDate::from_ymd_opt(2026, 3, 8).unwrap(), // US spring forward: 02:00 does not exist
+            NaiveDate::from_ymd_opt(2026, 3, 9).unwrap(),
+        ];
+        for date in days {
+            stats.sessions.push(work_session(date, 12, 25)); // noon: always unambiguous
+        }
+        assert_eq!(stats.distinct_work_dates().len(), 3);
+        assert_eq!(stats.longest_streak_days(), 3);
+    }
+
+    // Same guarantee for the fall-back weekend (Oct 31/Nov 1/Nov 2 2026),
+    // where 01:00-02:00 local occurs TWICE: noon fixtures stay unambiguous
+    // and the streak stays continuous.
+    #[test]
+    fn test_dst_fall_back_weekend_attribution_is_continuous() {
+        let mut stats = StatsHistory::new();
+        let days = [
+            NaiveDate::from_ymd_opt(2026, 10, 31).unwrap(),
+            NaiveDate::from_ymd_opt(2026, 11, 1).unwrap(), // US fall back: 01:00 occurs twice
+            NaiveDate::from_ymd_opt(2026, 11, 2).unwrap(),
+        ];
+        for date in days {
+            stats.sessions.push(work_session(date, 12, 25));
+        }
+        assert_eq!(stats.distinct_work_dates().len(), 3);
+        assert_eq!(stats.longest_streak_days(), 3);
+    }
+
+    // Multiple sessions on one DST-transition day collapse into ONE distinct
+    // date even though their UTC instants span 23 or 25 real hours.
+    #[test]
+    fn test_multiple_sessions_on_transition_day_collapse_to_one_date() {
+        let mut stats = StatsHistory::new();
+        let spring_forward = NaiveDate::from_ymd_opt(2026, 3, 8).unwrap();
+        // Hours chosen to avoid 00:00-02:00, which is missing or duplicated
+        // in some DST zones on transition days.
+        for hour in [1u32, 6, 12, 18, 23] {
+            stats.sessions.push(work_session(spring_forward, hour, 25));
+        }
+        assert_eq!(
+            stats.distinct_work_dates(),
+            vec![spring_forward],
+            "five sessions across the short day are one calendar date"
+        );
+        assert!(stats.current_streak_days() <= 1);
+    }
 }

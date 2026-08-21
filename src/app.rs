@@ -768,6 +768,7 @@ impl App {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::timer::TimerStatus;
     use crossterm::event::{KeyEventKind, KeyEventState};
 
     fn make_key(code: KeyCode) -> KeyEvent {
@@ -2291,6 +2292,351 @@ mod tests {
             Some("Task added: Padded Task"),
             "toast must echo the trimmed title users see in the list"
         );
+
+        let _ = std::fs::remove_dir_all(temp_dir);
+    }
+
+    // Persistence failures must never be silent: save_state translates a
+    // storage error into the "⚠ Save failed" footer banner, and the app must
+    // remain fully operational afterwards (no panic, keys still dispatch).
+    // Failure is injected deterministically on every platform and user id by
+    // pointing Storage at a path whose parent component is a regular FILE
+    // (create_dir_all fails with ENOTDIR).
+    #[test]
+    fn test_save_failure_surfaces_warning_banner_and_app_keeps_running() {
+        let temp_dir =
+            std::env::temp_dir().join(format!("termodoro_savefail_{}", uuid::Uuid::new_v4()));
+        let _ = std::fs::create_dir_all(&temp_dir);
+        let blocker = temp_dir.join("blocker");
+        std::fs::write(&blocker, b"regular file, not a directory").expect("write blocker");
+
+        let storage = Storage::with_path(blocker.join("data.json"));
+        let mut app = App::new_with_storage(storage);
+
+        app.save_state();
+        let msg = app
+            .status_message
+            .as_deref()
+            .expect("failed save must set a status message");
+        assert!(
+            msg.starts_with("⚠ Save failed:"),
+            "banner must warn about the failed save, got: {msg}"
+        );
+
+        // The app keeps working after persistence broke: modal opens, task is
+        // created in memory, and the next save attempt fails gracefully again.
+        app.on_key_event(make_key(KeyCode::Char('a')));
+        assert!(app.show_task_modal);
+        for c in "Offline Task".chars() {
+            app.on_key_event(make_key(KeyCode::Char(c)));
+        }
+        app.on_key_event(make_key(KeyCode::Enter));
+        assert_eq!(app.tasks.tasks.len(), 1, "task lives in memory");
+        assert!(
+            app.status_message
+                .as_deref()
+                .unwrap_or_default()
+                .starts_with("⚠ Save failed:"),
+            "second failed save re-warns instead of silently succeeding"
+        );
+
+        let _ = std::fs::remove_dir_all(temp_dir);
+    }
+
+    // Single-codepoint emoji are popped cleanly by Backspace: one keypress
+    // removes the whole visible glyph.
+    #[test]
+    fn test_backspace_pops_single_codepoint_emoji_cleanly() {
+        let (mut app, temp_dir) = create_test_app();
+        app.open_task_modal();
+
+        for c in "Fix 🦀".chars() {
+            app.on_key_event(make_key(KeyCode::Char(c)));
+        }
+        app.on_key_event(make_key(KeyCode::Backspace));
+        assert_eq!(app.task_input_title, "Fix ");
+
+        app.on_key_event(make_key(KeyCode::Backspace));
+        app.on_key_event(make_key(KeyCode::Backspace));
+        app.on_key_event(make_key(KeyCode::Backspace));
+        app.on_key_event(make_key(KeyCode::Backspace));
+        assert_eq!(app.task_input_title, "");
+        // Backspacing an empty buffer must be a safe no-op.
+        app.on_key_event(make_key(KeyCode::Backspace));
+        assert_eq!(app.task_input_title, "");
+
+        let _ = std::fs::remove_dir_all(temp_dir);
+    }
+
+    // KNOWN LIMITATION, pinned deliberately: Backspace pops ONE char, not a
+    // grapheme cluster. A ZWJ sequence like the family emoji 👨‍👩‍👧 is five
+    // chars (👨 ZWJ 👩 ZWJ 👧), so one Backspace leaves dangling joiners that
+    // render as broken glyphs until enough backspaces fire. Fixing this
+    // properly requires grapheme segmentation (unicode-segmentation crate);
+    // this test documents today's behavior so any future fix is conscious.
+    #[test]
+    fn test_backspace_on_zwj_sequence_pops_one_char_documented_limitation() {
+        let (mut app, temp_dir) = create_test_app();
+        app.open_task_modal();
+
+        let family = "👨‍👩‍👧";
+        for c in family.chars() {
+            app.on_key_event(make_key(KeyCode::Char(c)));
+        }
+        assert_eq!(app.task_input_title.chars().count(), 5);
+
+        app.on_key_event(make_key(KeyCode::Backspace));
+        // The girl emoji char is gone; the trailing ZWJ remains as a dangling
+        // joiner — exactly one char was removed.
+        assert_eq!(app.task_input_title.chars().count(), 4);
+        assert!(
+            app.task_input_title.ends_with('\u{200D}'),
+            "dangling ZWJ left behind: current documented behavior"
+        );
+        // Repeated backspaces eventually drain the buffer completely.
+        for _ in 0..10 {
+            app.on_key_event(make_key(KeyCode::Backspace));
+        }
+        assert_eq!(app.task_input_title, "");
+
+        let _ = std::fs::remove_dir_all(temp_dir);
+    }
+
+    // Sub-minute phases log a session with duration_mins = 0 because the
+    // minutes computation truncates (30s / 60 = 0). Unreachable through
+    // sanitized config (minimum duration is 1 minute) but reachable via
+    // direct struct construction or corrupt state; pin the accounting so it
+    // changes only consciously.
+    #[test]
+    fn test_sub_minute_phase_logs_zero_minute_session_truncation() {
+        let (mut app, temp_dir) = create_test_app();
+        app.timer.phase = PomodoroPhase::Work;
+        app.timer.total_duration_secs = 30;
+        app.timer.time_remaining_secs = 30;
+        app.timer.status = TimerStatus::Running;
+
+        while app.timer.status == TimerStatus::Running && app.timer.phase == PomodoroPhase::Work {
+            app.tick_second();
+        }
+
+        assert_eq!(app.stats.sessions.len(), 1, "session still recorded");
+        assert_eq!(
+            app.stats.sessions[0].duration_mins, 0,
+            "truncation: 30s logs 0 minutes (documented behavior)"
+        );
+        assert_eq!(app.stats.total_work_sessions(), 1);
+
+        let _ = std::fs::remove_dir_all(temp_dir);
+    }
+
+    // Digits 1-3 double as filter keys on the Tasks tab and must NOT navigate;
+    // '4' has no such guard and DOES navigate away. Pin both sides of that
+    // inconsistency so unifying the behavior later is a conscious choice.
+    #[test]
+    fn test_digit_keys_filter_guard_inconsistency_is_pinned() {
+        let (mut app, temp_dir) = create_test_app();
+        app.active_tab = ActiveTab::Tasks;
+
+        app.on_key_event(make_key(KeyCode::Char('1')));
+        assert_eq!(app.active_tab, ActiveTab::Tasks, "'1' filters on Tasks tab");
+        assert_eq!(app.tasks.filter, TaskFilter::All);
+
+        app.on_key_event(make_key(KeyCode::Char('2')));
+        assert_eq!(app.active_tab, ActiveTab::Tasks, "'2' filters on Tasks tab");
+        assert_eq!(app.tasks.filter, TaskFilter::Active);
+
+        app.on_key_event(make_key(KeyCode::Char('3')));
+        assert_eq!(app.active_tab, ActiveTab::Tasks, "'3' filters on Tasks tab");
+        assert_eq!(app.tasks.filter, TaskFilter::Completed);
+
+        app.on_key_event(make_key(KeyCode::Char('4')));
+        assert_eq!(
+            app.active_tab,
+            ActiveTab::Settings,
+            "'4' navigates even from Tasks tab (unguarded, unlike 1-3)"
+        );
+
+        let _ = std::fs::remove_dir_all(temp_dir);
+    }
+
+    // 'q' quits under ANY modifier combination (Ctrl+Q, Alt+Q...) because
+    // modifiers are never checked, while Ctrl+C is not bound at all and does
+    // nothing. Pin both behaviors: terminal veterans expect Ctrl+C to quit,
+    // so changing either direction should be deliberate.
+    #[test]
+    fn test_quit_modifier_semantics_are_pinned() {
+        // Ctrl+Q quits.
+        let (mut app, temp_dir) = create_test_app();
+        app.on_key_event(make_key_with_mod(KeyCode::Char('q'), KeyModifiers::CONTROL));
+        assert!(
+            app.should_quit,
+            "Ctrl+Q currently quits (modifiers ignored)"
+        );
+        let _ = std::fs::remove_dir_all(temp_dir);
+
+        // Alt+Q also quits.
+        let (mut app, temp_dir) = create_test_app();
+        app.on_key_event(make_key_with_mod(KeyCode::Char('q'), KeyModifiers::ALT));
+        assert!(app.should_quit, "Alt+Q currently quits (modifiers ignored)");
+        let _ = std::fs::remove_dir_all(temp_dir);
+
+        // Ctrl+C is NOT handled anywhere and falls through harmlessly.
+        let (mut app, temp_dir) = create_test_app();
+        app.on_key_event(make_key_with_mod(KeyCode::Char('c'), KeyModifiers::CONTROL));
+        assert!(
+            !app.should_quit,
+            "Ctrl+C is currently unbound (documented gap)"
+        );
+        let _ = std::fs::remove_dir_all(temp_dir);
+    }
+
+    // Actions on an empty task list must be safe no-ops with no phantom
+    // state changes.
+    #[test]
+    fn test_empty_task_list_actions_are_safe_noops() {
+        let (mut app, temp_dir) = create_test_app();
+        app.active_tab = ActiveTab::Tasks;
+
+        app.on_key_event(make_key(KeyCode::Char(' ')));
+        app.on_key_event(make_key(KeyCode::Enter));
+        assert_eq!(
+            app.tasks.tasks.len(),
+            0,
+            "toggle on empty list adds nothing"
+        );
+        assert_eq!(app.tasks.selected_index, 0);
+
+        app.on_key_event(make_key(KeyCode::Char('t')));
+        assert_eq!(app.tasks.active_task_id, None);
+        assert_eq!(
+            app.status_message.as_deref(),
+            Some("No task to target."),
+            "targeting on empty list explains itself"
+        );
+
+        app.on_key_event(make_key(KeyCode::Down));
+        app.on_key_event(make_key(KeyCode::Up));
+        assert_eq!(app.tasks.selected_index, 0);
+
+        let _ = std::fs::remove_dir_all(temp_dir);
+    }
+
+    // Digit characters typed while the modal title field has focus must be
+    // inserted as TEXT, never hijacked as tab-jump or estimate commands.
+    #[test]
+    fn test_digits_type_into_modal_title_as_text() {
+        let (mut app, temp_dir) = create_test_app();
+        app.open_task_modal();
+        assert_eq!(app.task_modal_focus, 0);
+
+        for c in "Sprint 42 v3".chars() {
+            app.on_key_event(make_key(KeyCode::Char(c)));
+        }
+        assert_eq!(app.task_input_title, "Sprint 42 v3");
+        assert!(
+            app.show_task_modal,
+            "modal stays open while typing digits into the title"
+        );
+        assert_eq!(app.active_tab, ActiveTab::Timer, "no tab jump occurred");
+
+        app.on_key_event(make_key(KeyCode::Enter));
+        assert_eq!(
+            app.tasks.tasks[0].title, "Sprint 42 v3",
+            "digits survive into the stored title"
+        );
+
+        let _ = std::fs::remove_dir_all(temp_dir);
+    }
+
+    // Esc outside any modal is inert: no crash, no tab change, no quit.
+    #[test]
+    fn test_esc_outside_modals_is_inert() {
+        let (mut app, temp_dir) = create_test_app();
+        app.on_key_event(make_key(KeyCode::Esc));
+        assert!(!app.should_quit);
+        assert_eq!(app.active_tab, ActiveTab::Timer);
+        assert!(!app.show_help);
+        assert!(!app.show_task_modal);
+        let _ = std::fs::remove_dir_all(temp_dir);
+    }
+
+    // The Settings UI clamps must exactly match the single-source-of-truth
+    // range constants in config.rs. Hammering Right/Left far past the bounds
+    // must land precisely on the constant endpoints — no softer, no harder.
+    #[test]
+    fn test_settings_clamps_match_config_range_constants() {
+        use crate::config::{
+            LONG_BREAK_INTERVAL_RANGE, LONG_BREAK_MINS_RANGE, SHORT_BREAK_MINS_RANGE,
+            WORK_MINS_RANGE,
+        };
+
+        let (mut app, temp_dir) = create_test_app();
+        app.active_tab = ActiveTab::Settings;
+
+        let rows = [
+            (0usize, WORK_MINS_RANGE),
+            (1, SHORT_BREAK_MINS_RANGE),
+            (2, LONG_BREAK_MINS_RANGE),
+            (3, LONG_BREAK_INTERVAL_RANGE),
+        ];
+        for (row, range) in rows {
+            app.settings_index = row;
+            // Hammer Right 500 times: value must stop exactly at the max.
+            for _ in 0..500 {
+                app.on_key_event(make_key(KeyCode::Right));
+            }
+            let actual = match row {
+                0 => app.config.work_duration_mins,
+                1 => app.config.short_break_mins,
+                2 => app.config.long_break_mins,
+                _ => app.config.long_break_interval,
+            };
+            assert_eq!(
+                actual, range.1,
+                "row {row} max clamp drifted from config constant"
+            );
+            // Hammer Left 500 times: value must stop exactly at the min.
+            for _ in 0..500 {
+                app.on_key_event(make_key(KeyCode::Left));
+            }
+            let actual = match row {
+                0 => app.config.work_duration_mins,
+                1 => app.config.short_break_mins,
+                2 => app.config.long_break_mins,
+                _ => app.config.long_break_interval,
+            };
+            assert_eq!(
+                actual, range.0,
+                "row {row} min clamp drifted from config constant"
+            );
+        }
+
+        let _ = std::fs::remove_dir_all(temp_dir);
+    }
+
+    // The Settings navigation bound (hardcoded `8` in the key handlers) must
+    // stay in sync with the number of rows the settings view renders. With
+    // 9 rows: Down pressed 8 times walks 0→8, the 9th press wraps to 0.
+    #[test]
+    fn test_settings_row_navigation_bound_matches_ui_row_count() {
+        let (mut app, temp_dir) = create_test_app();
+        app.active_tab = ActiveTab::Settings;
+        assert_eq!(app.settings_index, 0);
+
+        for expected in 1..=8 {
+            app.on_key_event(make_key(KeyCode::Down));
+            assert_eq!(app.settings_index, expected, "Down walk diverged");
+        }
+        // The 9th press wraps back to the first row.
+        app.on_key_event(make_key(KeyCode::Down));
+        assert_eq!(
+            app.settings_index, 0,
+            "wrap-around fired at the wrong row count; settings row bound drifted from UI"
+        );
+
+        // Up from row 0 wraps to the last row (8).
+        app.on_key_event(make_key(KeyCode::Up));
+        assert_eq!(app.settings_index, 8);
 
         let _ = std::fs::remove_dir_all(temp_dir);
     }

@@ -16,7 +16,15 @@ use ratatui::{
 use crate::theme::Theme;
 
 // Helper function to calculate a centered rectangular area for modal popups
+//
+// Percentages above 100 are clamped to 100: the raw arithmetic
+// `(100 - percent)` would underflow u16 and panic in debug builds for
+// out-of-range inputs from future callers or refactors.
 pub fn centered_rect(percent_x: u16, percent_y: u16, r: Rect) -> Rect {
+    // Clamp both axes into the legal percentage domain
+    let percent_x = percent_x.min(100);
+    let percent_y = percent_y.min(100);
+
     // Split vertical space to center content vertically
     let popup_layout = Layout::default()
         // Top-to-bottom layout
@@ -134,4 +142,97 @@ pub fn render(f: &mut Frame, theme: &Theme, area: Rect) {
 
     // Render the help modal into the popup area
     f.render_widget(help_paragraph, popup_area);
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // The popup must always sit strictly inside its parent area for a matrix
+    // of sane percentages and terminal geometries, including degenerate ones.
+    #[test]
+    fn centered_rect_stays_inside_parent_across_matrix() {
+        let geometries = [(80u16, 24u16), (40, 12), (25, 8), (200, 60), (1, 1)];
+        let percents = [(84u16, 94u16), (60, 35), (100, 100), (10, 10), (99, 1)];
+        for (w, h) in geometries {
+            let parent = Rect::new(0, 0, w, h);
+            for (px, py) in percents {
+                let popup = centered_rect(px, py, parent);
+                assert!(
+                    popup.x >= parent.x
+                        && popup.y >= parent.y
+                        && popup.right() <= parent.right()
+                        && popup.bottom() <= parent.bottom(),
+                    "popup {px}%x{py}% escaped parent {}x{}: {popup:?}",
+                    w,
+                    h
+                );
+            }
+        }
+    }
+
+    // 100% x 100% must cover the whole parent (integer layout rounding may
+    // leave it one row/column short at odd sizes; it may never exceed it).
+    #[test]
+    fn centered_rect_full_percent_covers_parent() {
+        let parent = Rect::new(0, 0, 80, 24);
+        let popup = centered_rect(100, 100, parent);
+        assert!(popup.width >= parent.width.saturating_sub(1));
+        assert!(popup.height >= parent.height.saturating_sub(1));
+    }
+
+    // Percentages above 100 previously underflowed `(100 - p)` and panicked
+    // in debug builds. They now clamp to the full-area behavior of 100%.
+    #[test]
+    fn centered_rect_clamps_percentages_over_100_without_panicking() {
+        let parent = Rect::new(0, 0, 80, 24);
+        let clamped = centered_rect(100, 100, parent);
+        let over = centered_rect(u16::MAX, u16::MAX, parent);
+        assert_eq!(clamped, over, "values above 100 clamp to 100");
+
+        // Mixed over/under inputs are equally safe.
+        let _ = centered_rect(u16::MAX, 50, parent);
+        let _ = centered_rect(50, u16::MAX, parent);
+    }
+
+    // A zero-sized parent must yield a zero-sized popup, not a panic.
+    #[test]
+    fn centered_rect_zero_sized_parent_is_safe() {
+        let parent = Rect::new(5, 5, 0, 0);
+        let popup = centered_rect(84, 94, parent);
+        assert_eq!(popup.width, 0);
+        assert_eq!(popup.height, 0);
+    }
+
+    // Horizontal centering: left and right margins must match within one
+    // column (integer percentage rounding can differ by exactly one).
+    #[test]
+    fn centered_rect_horizontal_margins_symmetric_within_one_column() {
+        for w in [20u16, 33, 47, 80, 101, 120] {
+            let parent = Rect::new(0, 0, w, 24);
+            let popup = centered_rect(60, 35, parent);
+            let left = popup.x - parent.x;
+            let right = parent.right() - popup.right();
+            assert!(
+                left.abs_diff(right) <= 1,
+                "width {w}: margins l={left} r={right} diverge by more than rounding"
+            );
+        }
+    }
+
+    // Larger percentages must never produce a smaller popup.
+    #[test]
+    fn centered_rect_monotonic_in_percentage() {
+        let parent = Rect::new(0, 0, 100, 40);
+        let mut prev_area = 0u32;
+        for p in [20u16, 40, 60, 80, 100] {
+            let popup = centered_rect(p, p, parent);
+            let area = popup.width as u32 * popup.height as u32;
+            assert!(
+                area >= prev_area,
+                "popup area shrank when percentage grew to {p}"
+            );
+            prev_area = area;
+        }
+    }
 }

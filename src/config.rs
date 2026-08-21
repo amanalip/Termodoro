@@ -35,13 +35,15 @@ pub struct Config {
     pub theme: ThemeChoice,
 }
 
-// Inclusive bounds for every numeric setting. These mirror the clamps in the
-// Settings UI handlers exactly so a hand-edited data.json cannot smuggle in
-// values the interface itself would never produce.
-const WORK_MINS_RANGE: (u32, u32) = (1, 120);
-const SHORT_BREAK_MINS_RANGE: (u32, u32) = (1, 60);
-const LONG_BREAK_MINS_RANGE: (u32, u32) = (1, 90);
-const LONG_BREAK_INTERVAL_RANGE: (u32, u32) = (1, 24);
+// Inclusive bounds for every numeric setting. These are the SINGLE SOURCE OF
+// TRUTH for the legal value domains; the Settings UI handlers (app.rs) clamp
+// with the same numbers and the Settings view (settings_view.rs) prints them
+// as human-readable hints. A consistency test pins all three together, so
+// widening a range requires touching only these constants plus that test.
+pub const WORK_MINS_RANGE: (u32, u32) = (1, 120);
+pub const SHORT_BREAK_MINS_RANGE: (u32, u32) = (1, 60);
+pub const LONG_BREAK_MINS_RANGE: (u32, u32) = (1, 90);
+pub const LONG_BREAK_INTERVAL_RANGE: (u32, u32) = (1, 24);
 
 impl Config {
     // Clamps every numeric field into its valid range in place.

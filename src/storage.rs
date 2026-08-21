@@ -8,6 +8,16 @@ use std::fs::{create_dir_all, File};
 use std::io::{Read, Write};
 // Import PathBuf for manipulating filesystem paths
 use std::path::PathBuf;
+// Import atomic counter for unique staging-file names
+use std::sync::atomic::{AtomicU64, Ordering};
+
+// Monotonic sequence number making every save's staging file unique within
+// this process. Combined with the process id it is unique across processes
+// too, which matters because two termodoro instances (or the app and a test)
+// writing the same data.json previously shared ONE deterministic
+// `data.json.tmp` name: overlapping writers truncated each other's staging
+// file mid-write and could rename garbled bytes onto the live state file.
+static SAVE_SEQUENCE: AtomicU64 = AtomicU64::new(0);
 
 // Import Config struct from our config module
 use crate::config::Config;
@@ -227,8 +237,16 @@ impl Storage {
             create_dir_all(parent)?;
         }
 
-        // Stage the new content in a temporary sibling file
-        let tmp_path = path.with_extension("json.tmp");
+        // Stage the new content in a temporary sibling file. The name is
+        // unique per save (pid + monotonic sequence) so concurrent writers
+        // to the same data.json can never truncate each other's staging
+        // bytes; the ".tmp" suffix stays last so litter-detection heuristics
+        // (and humans) still recognize staging files at a glance.
+        let tmp_path = path.with_extension(format!(
+            "json.{}-{}.tmp",
+            std::process::id(),
+            SAVE_SEQUENCE.fetch_add(1, Ordering::Relaxed)
+        ));
         {
             let mut tmp = File::create(&tmp_path)?;
             // Write JSON bytes to the staging file
@@ -583,10 +601,14 @@ mod tests {
             .expect("initial save should succeed");
 
         // Corrupt the staging path into a directory: File::create on it fails,
-        // which is exactly the failure window the atomic strategy protects
-        let tmp_as_dir = temp_dir.join("data.json.tmp");
-        let _ = fs::create_dir(&tmp_as_dir);
-        let result = storage.save(
+        // which is exactly the failure window the atomic strategy protects.
+        // Staging names are now unique per save, so failure is injected via a
+        // path whose parent component is a regular FILE: create_dir_all fails
+        // with ENOTDIR deterministically on every platform and user id.
+        let blocker = temp_dir.join("blocker");
+        fs::write(&blocker, b"regular file, not a directory").expect("write blocker");
+        let blocked_storage = Storage::with_path(blocker.join("data.json"));
+        let result = blocked_storage.save(
             &Config::default(),
             &TaskManager::new(),
             &StatsHistory::new(),
@@ -721,6 +743,262 @@ mod tests {
         // real user profile during tests
         let path = Storage::resolve_data_dir().join("data.json");
         assert!(path.to_string_lossy().contains("termodoro"));
+    }
+
+    // Concurrent writers to the SAME data.json must never corrupt it.
+    // Previously every save staged through ONE deterministic `data.json.tmp`
+    // name, so overlapping writers truncated each other's staging bytes and
+    // could rename garbled content onto the live file. Staging names are now
+    // unique per save; after all writers finish, the live file must be a
+    // byte-complete save from exactly one writer and no litter may remain.
+    #[test]
+    fn test_storage_concurrent_savers_never_corrupt_state_file() {
+        let temp_dir =
+            std::env::temp_dir().join(format!("termodoro_concurrent_{}", uuid::Uuid::new_v4()));
+        let _ = create_dir_all(&temp_dir);
+        let file_path = temp_dir.join("data.json");
+
+        const WRITERS: usize = 8;
+        const SAVES_PER_WRITER: usize = 25;
+
+        let handles: Vec<_> = (0..WRITERS)
+            .map(|writer| {
+                let path = file_path.clone();
+                std::thread::spawn(move || {
+                    let storage = Storage::with_path(path);
+                    for i in 0..SAVES_PER_WRITER {
+                        let mut tasks = TaskManager::new();
+                        for t in 0..=i {
+                            tasks.add(format!("writer-{writer}-{t}"), 1);
+                        }
+                        storage
+                            .save(&Config::default(), &tasks, &StatsHistory::new())
+                            .expect("concurrent save must succeed");
+                    }
+                })
+            })
+            .collect();
+        for handle in handles {
+            handle.join().expect("writer thread must not panic");
+        }
+
+        // Every staging file must have been renamed away: exactly one file
+        // remains in the directory.
+        let remaining: Vec<String> = fs::read_dir(&temp_dir)
+            .expect("temp dir readable")
+            .filter_map(|e| e.ok())
+            .map(|e| e.file_name().to_string_lossy().to_string())
+            .collect();
+        assert_eq!(
+            remaining,
+            vec!["data.json".to_string()],
+            "staging files leaked: {remaining:?}"
+        );
+
+        // The surviving file must be a COMPLETE save from ONE writer: it
+        // parses, and every task belongs to the same writer prefix (a torn
+        // interleave of two writers would mix prefixes or fail to parse).
+        let raw = fs::read_to_string(&file_path).expect("live file readable");
+        let parsed: AppData = serde_json::from_str(&raw).expect("no torn writes may survive");
+        assert!(!parsed.tasks.tasks.is_empty(), "final save had tasks");
+        let prefixes: std::collections::HashSet<String> = parsed
+            .tasks
+            .tasks
+            .iter()
+            .map(|t| t.title.split('-').take(2).collect::<Vec<_>>().join("-"))
+            .collect();
+        assert_eq!(
+            prefixes.len(),
+            1,
+            "state file mixes tasks from different writers: {:?}",
+            parsed
+                .tasks
+                .tasks
+                .iter()
+                .map(|t| &t.title)
+                .collect::<Vec<_>>()
+        );
+
+        let _ = fs::remove_dir_all(temp_dir);
+    }
+
+    // A data.json containing invalid UTF-8 bytes cannot even be read as a
+    // String; the load path must quarantine those raw bytes (not delete or
+    // overwrite them) and fall back to defaults.
+    #[test]
+    fn test_storage_invalid_utf8_file_is_quarantined_with_bytes_intact() {
+        let temp_dir =
+            std::env::temp_dir().join(format!("termodoro_utf8_{}", uuid::Uuid::new_v4()));
+        let file_path = temp_dir.join("data.json");
+        let storage = Storage::with_path(file_path.clone());
+        let _ = create_dir_all(&temp_dir);
+
+        let garbage: &[u8] = &[0xFF, 0xFE, b'{', b'"', b'}', 0x80];
+        fs::write(&file_path, garbage).expect("write raw bytes");
+
+        let loaded = storage.load();
+        assert_eq!(loaded.config, Config::default());
+        assert_eq!(loaded.tasks.tasks.len(), 0);
+
+        let quarantined = fs::read_dir(&temp_dir)
+            .expect("temp dir readable")
+            .filter_map(|e| e.ok())
+            .find(|e| {
+                e.file_name()
+                    .to_string_lossy()
+                    .starts_with("data.json.corrupt-")
+            })
+            .expect("invalid UTF-8 file must be quarantined");
+        assert_eq!(
+            fs::read(quarantined.path()).expect("quarantined bytes readable"),
+            garbage,
+            "raw bytes must survive verbatim"
+        );
+        assert!(!file_path.exists());
+
+        let _ = fs::remove_dir_all(temp_dir);
+    }
+
+    // A UTF-8 BOM before otherwise-valid JSON is rejected by serde_json;
+    // the file must be quarantined rather than silently overwritten.
+    #[test]
+    fn test_storage_bom_prefixed_json_is_quarantined() {
+        let temp_dir = std::env::temp_dir().join(format!("termodoro_bom_{}", uuid::Uuid::new_v4()));
+        let file_path = temp_dir.join("data.json");
+        let storage = Storage::with_path(file_path.clone());
+        let _ = create_dir_all(&temp_dir);
+
+        let mut content = vec![0xEF, 0xBB, 0xBF];
+        content.extend_from_slice(br#"{"config":{"work_duration_mins":50}}"#);
+        fs::write(&file_path, &content).expect("write BOM file");
+
+        let loaded = storage.load();
+        assert_eq!(
+            loaded.config.work_duration_mins, 25,
+            "BOM-prefixed file must not parse; defaults are served"
+        );
+        assert!(loaded.tasks.tasks.is_empty());
+        assert!(
+            fs::read_dir(&temp_dir)
+                .expect("temp dir readable")
+                .filter_map(|e| e.ok())
+                .any(|e| e
+                    .file_name()
+                    .to_string_lossy()
+                    .starts_with("data.json.corrupt-")),
+            "BOM file must be quarantined"
+        );
+
+        let _ = fs::remove_dir_all(temp_dir);
+    }
+
+    // A field with the wrong JSON type (string where u32 is expected) fails
+    // the whole parse; the file must be quarantined and defaults served.
+    #[test]
+    fn test_storage_wrong_typed_field_is_quarantined() {
+        let temp_dir =
+            std::env::temp_dir().join(format!("termodoro_wrongtype_{}", uuid::Uuid::new_v4()));
+        let file_path = temp_dir.join("data.json");
+        let storage = Storage::with_path(file_path.clone());
+        let _ = create_dir_all(&temp_dir);
+
+        fs::write(
+            &file_path,
+            r#"{"config":{"work_duration_mins":"fifty"},"tasks":{"tasks":[],"active_task_id":null},"stats":{"sessions":[]}}"#,
+        )
+        .expect("write wrong-typed file");
+
+        let loaded = storage.load();
+        assert_eq!(loaded.config, Config::default());
+        assert!(
+            fs::read_dir(&temp_dir)
+                .expect("temp dir readable")
+                .filter_map(|e| e.ok())
+                .any(|e| e
+                    .file_name()
+                    .to_string_lossy()
+                    .starts_with("data.json.corrupt-")),
+            "wrong-typed file must be quarantined"
+        );
+
+        let _ = fs::remove_dir_all(temp_dir);
+    }
+
+    // Duplicate JSON keys: serde's derived Deserialize REJECTS duplicate
+    // fields outright (it does NOT silently keep the last occurrence), so a
+    // hand-edited file containing duplicates is treated as corruption:
+    // quarantined with defaults served. Pin that contract so a serde upgrade
+    // cannot change it unnoticed.
+    #[test]
+    fn test_storage_duplicate_keys_rejected_and_quarantined() {
+        let temp_dir =
+            std::env::temp_dir().join(format!("termodoro_dupkeys_{}", uuid::Uuid::new_v4()));
+        let file_path = temp_dir.join("data.json");
+        let storage = Storage::with_path(file_path.clone());
+        let _ = create_dir_all(&temp_dir);
+
+        fs::write(
+            &file_path,
+            r#"{"config":{"work_duration_mins":50,"work_duration_mins":90},"tasks":{"tasks":[],"active_task_id":null},"stats":{"sessions":[]}}"#,
+        )
+        .expect("write duplicate-key file");
+
+        let loaded = storage.load();
+        assert_eq!(
+            loaded.config,
+            Config::default(),
+            "duplicate fields fail the parse; defaults are served"
+        );
+        assert!(
+            fs::read_dir(&temp_dir)
+                .expect("temp dir readable")
+                .filter_map(|e| e.ok())
+                .any(|e| e
+                    .file_name()
+                    .to_string_lossy()
+                    .starts_with("data.json.corrupt-")),
+            "duplicate-key file must be quarantined"
+        );
+
+        let _ = fs::remove_dir_all(temp_dir);
+    }
+
+    // JSON nesting deeper than serde_json's recursion limit must fail the
+    // parse cleanly: quarantine plus defaults, never a stack overflow.
+    #[test]
+    fn test_storage_deeply_nested_json_is_quarantined_not_crashing() {
+        let temp_dir =
+            std::env::temp_dir().join(format!("termodoro_deepjson_{}", uuid::Uuid::new_v4()));
+        let file_path = temp_dir.join("data.json");
+        let storage = Storage::with_path(file_path.clone());
+        let _ = create_dir_all(&temp_dir);
+
+        // Depth 500 far exceeds serde_json's default 128 recursion limit.
+        let mut content = String::new();
+        content.push_str(r#"{"config":"#);
+        for _ in 0..500 {
+            content.push('[');
+        }
+        for _ in 0..500 {
+            content.push(']');
+        }
+        content.push('}');
+        fs::write(&file_path, content.as_bytes()).expect("write deep json");
+
+        let loaded = storage.load();
+        assert_eq!(loaded.config, Config::default());
+        assert!(
+            fs::read_dir(&temp_dir)
+                .expect("temp dir readable")
+                .filter_map(|e| e.ok())
+                .any(|e| e
+                    .file_name()
+                    .to_string_lossy()
+                    .starts_with("data.json.corrupt-")),
+            "over-deep JSON must be quarantined"
+        );
+
+        let _ = fs::remove_dir_all(temp_dir);
     }
 
     // A data.json written by an older/newer build may lack whole sections

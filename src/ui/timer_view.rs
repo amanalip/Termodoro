@@ -21,6 +21,44 @@ use crate::timer::{PomodoroPhase, TimerStatus};
 // Import the render_big_time helper for drawing large digits
 use crate::ui::digits::render_big_time;
 
+// Builds the visual cycle dot indicator, e.g. "● ● ◉ ○".
+//
+// Extracted from render() as a pure function so the dot-state machine is
+// directly unit-testable. The interval is clamped to the same 1..=24 range
+// the Settings UI enforces: rendering trusts config values, and a corrupt
+// data.json with a huge interval previously looped billions of times per
+// frame and froze the UI before storage sanitization could help.
+//
+// KNOWN EDGE CASE (pinned by tests): when `current_cycle` exceeds
+// `interval` — possible if the user shrinks the long-break interval below
+// their live cycle position mid-session — every dot renders filled until the
+// next natural completion recovers via advance_phase's >= check.
+fn build_cycle_dots(current_cycle: u32, interval: u32, phase: PomodoroPhase) -> String {
+    // Clamp to the display maximum
+    let cycle_display_max = interval.clamp(1, 24);
+    let mut cycle_dots = String::new();
+    // Iterate from 1 to the clamped cycle count
+    for i in 1..=cycle_display_max {
+        // Check if cycle is completed, in progress, or upcoming
+        if i < current_cycle {
+            // Completed cycle dot
+            cycle_dots.push('●');
+        } else if i == current_cycle && phase == PomodoroPhase::Work {
+            // Active focus session dot
+            cycle_dots.push('◉');
+        } else {
+            // Upcoming cycle dot
+            cycle_dots.push('○');
+        }
+        // Add space separator between dots
+        if i < cycle_display_max {
+            // Append space
+            cycle_dots.push(' ');
+        }
+    }
+    cycle_dots
+}
+
 // Renders the main Pomodoro Timer tab UI inside the given bounding area
 pub fn render(f: &mut Frame, app: &App, theme: &Theme, area: Rect) {
     // Split area vertically into 5 sections: Header, Big Digits, Progress Gauge, Target Box, Controls
@@ -80,32 +118,11 @@ pub fn render(f: &mut Frame, app: &App, theme: &Theme, area: Rect) {
     };
 
     // Construct visual cycle dot indicator e.g. "● ● ◉ ○"
-    //
-    // The interval is clamped to the same 1..=24 range the Settings UI
-    // enforces. Rendering trusts config values, so a corrupt data.json with a
-    // huge interval would previously loop billions of times per frame and
-    // freeze the UI before storage sanitization could help.
-    let cycle_display_max = app.config.long_break_interval.clamp(1, 24);
-    let mut cycle_dots = String::new();
-    // Iterate from 1 to the clamped cycle count
-    for i in 1..=cycle_display_max {
-        // Check if cycle is completed, in progress, or upcoming
-        if i < app.timer.current_cycle {
-            // Completed cycle dot
-            cycle_dots.push('●');
-        } else if i == app.timer.current_cycle && app.timer.phase == PomodoroPhase::Work {
-            // Active focus session dot
-            cycle_dots.push('◉');
-        } else {
-            // Upcoming cycle dot
-            cycle_dots.push('○');
-        }
-        // Add space separator between dots
-        if i < cycle_display_max {
-            // Append space
-            cycle_dots.push(' ');
-        }
-    }
+    let cycle_dots = build_cycle_dots(
+        app.timer.current_cycle,
+        app.config.long_break_interval,
+        app.timer.phase,
+    );
 
     // Build the centered header paragraph
     let phase_header = Paragraph::new(vec![
@@ -308,4 +325,76 @@ pub fn render(f: &mut Frame, app: &App, theme: &Theme, area: Rect) {
     let controls_widget = Paragraph::new(controls_text);
     // Render controls widget into bottom chunk
     f.render_widget(controls_widget, chunks[4]);
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // Mid-cycle during a Work phase: completed dots, one active dot, rest
+    // upcoming.
+    #[test]
+    fn cycle_dots_mid_cycle_during_work() {
+        assert_eq!(build_cycle_dots(3, 4, PomodoroPhase::Work), "● ● ◉ ○");
+        assert_eq!(build_cycle_dots(1, 4, PomodoroPhase::Work), "◉ ○ ○ ○");
+    }
+
+    // During any break there is no active focus dot: the current position
+    // renders as upcoming, not in-progress.
+    #[test]
+    fn cycle_dots_show_no_active_dot_during_breaks() {
+        assert_eq!(build_cycle_dots(2, 4, PomodoroPhase::ShortBreak), "● ○ ○ ○");
+        assert_eq!(build_cycle_dots(1, 4, PomodoroPhase::LongBreak), "○ ○ ○ ○");
+    }
+
+    // Final cycle slot fully completed: every dot filled.
+    #[test]
+    fn cycle_dots_all_completed_at_interval_boundary() {
+        assert_eq!(build_cycle_dots(5, 4, PomodoroPhase::Work), "● ● ● ●");
+    }
+
+    // KNOWN DISPLAY DESYNC (pinned): shrinking long_break_interval below the
+    // live cycle position mid-session shows e.g. "Cycle 5/2" with all dots
+    // filled. No panic occurs and advance_phase's >= check recovers on the
+    // next completion; this test documents the rendering so a future fix
+    // (clamping the displayed numerator) is a conscious choice.
+    #[test]
+    fn cycle_dots_desync_when_interval_shrinks_below_current_cycle() {
+        let dots = build_cycle_dots(5, 2, PomodoroPhase::Work);
+        assert_eq!(dots, "● ●", "all visible dots render filled during desync");
+
+        let dots = build_cycle_dots(25, 24, PomodoroPhase::Work);
+        assert_eq!(dots.split(' ').count(), 24);
+        assert!(!dots.contains('○'), "no upcoming dots remain at max desync");
+    }
+
+    // The interval is clamped to 1..=24 for display: corrupt huge values
+    // render exactly 24 dots instead of freezing the frame loop.
+    #[test]
+    fn cycle_dots_clamp_huge_and_zero_intervals() {
+        let huge = build_cycle_dots(1, u32::MAX, PomodoroPhase::Work);
+        assert_eq!(
+            huge.split(' ').count(),
+            24,
+            "huge interval clamps to 24 dots"
+        );
+        assert!(huge.starts_with("◉ "));
+
+        let zero = build_cycle_dots(1, 0, PomodoroPhase::Work);
+        assert_eq!(zero, "◉", "zero interval clamps to a single dot");
+    }
+
+    // Dot count always equals clamped interval, whatever the inputs.
+    #[test]
+    fn cycle_dots_count_always_matches_clamped_interval() {
+        for interval in [0u32, 1, 2, 7, 23, 24, 25, 1000] {
+            let dots = build_cycle_dots(3, interval, PomodoroPhase::Work);
+            let expected = interval.clamp(1, 24) as usize;
+            assert_eq!(
+                dots.split(' ').count(),
+                expected,
+                "interval {interval} must render {expected} dots"
+            );
+        }
+    }
 }
